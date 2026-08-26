@@ -1,0 +1,17 @@
+CREATE TABLE roles (id uuid PRIMARY KEY, organization_id uuid NOT NULL REFERENCES organizations(id), name varchar(80) NOT NULL, UNIQUE(organization_id,name));
+CREATE TABLE permissions (id uuid PRIMARY KEY, code varchar(120) NOT NULL UNIQUE);
+CREATE TABLE organization_members (id uuid PRIMARY KEY, organization_id uuid NOT NULL REFERENCES organizations(id), user_id uuid NOT NULL REFERENCES users(id), role_id uuid NOT NULL REFERENCES roles(id), UNIQUE(organization_id,user_id));
+CREATE TABLE role_permissions (id uuid PRIMARY KEY, role_id uuid NOT NULL REFERENCES roles(id), permission_id uuid NOT NULL REFERENCES permissions(id), UNIQUE(role_id,permission_id));
+CREATE TABLE service_categories (id uuid PRIMARY KEY, organization_id uuid NOT NULL REFERENCES organizations(id), name varchar(160) NOT NULL, UNIQUE(organization_id,name));
+CREATE TABLE course_categories (id uuid PRIMARY KEY, organization_id uuid NOT NULL REFERENCES organizations(id), name varchar(160) NOT NULL, UNIQUE(organization_id,name));
+CREATE TABLE space_layouts (id uuid PRIMARY KEY, space_id uuid NOT NULL REFERENCES spaces(id), name varchar(120) NOT NULL, UNIQUE(space_id,name));
+CREATE TABLE amenities (id uuid PRIMARY KEY, organization_id uuid NOT NULL REFERENCES organizations(id), name varchar(160) NOT NULL, UNIQUE(organization_id,name));
+CREATE TABLE space_amenities (id uuid PRIMARY KEY, space_id uuid NOT NULL REFERENCES spaces(id), amenity_id uuid NOT NULL REFERENCES amenities(id), UNIQUE(space_id,amenity_id));
+CREATE TABLE space_configurations (id uuid PRIMARY KEY, space_id uuid NOT NULL REFERENCES spaces(id), name varchar(160) NOT NULL);
+CREATE TABLE outbox_events (id uuid PRIMARY KEY, event_type varchar(100) NOT NULL, aggregate_id uuid NOT NULL, organization_id uuid REFERENCES organizations(id), occurred_at timestamptz NOT NULL, payload text NOT NULL, published boolean NOT NULL DEFAULT false);
+CREATE INDEX idx_outbox_unpublished ON outbox_events(published,occurred_at);
+CREATE TABLE audit_records (id uuid PRIMARY KEY, organization_id uuid REFERENCES organizations(id), actor_id uuid REFERENCES users(id), entity_type varchar(100) NOT NULL, entity_id uuid NOT NULL, action varchar(100) NOT NULL, metadata text, created_at timestamptz NOT NULL);
+CREATE INDEX idx_audit_org_created ON audit_records(organization_id,created_at);
+CREATE TABLE content_entries (id uuid PRIMARY KEY, organization_id uuid NOT NULL REFERENCES organizations(id), content_key varchar(160) NOT NULL, value text NOT NULL, active boolean NOT NULL DEFAULT true, UNIQUE(organization_id,content_key));
+CREATE TABLE media_assets (id uuid PRIMARY KEY, organization_id uuid NOT NULL REFERENCES organizations(id), media_type varchar(30) NOT NULL, storage_key varchar(500) NOT NULL UNIQUE, mime_type varchar(150), size_bytes bigint, public_visible boolean NOT NULL DEFAULT false);
+CREATE TABLE space_media (id uuid PRIMARY KEY, space_id uuid NOT NULL REFERENCES spaces(id), media_id uuid NOT NULL REFERENCES media_assets(id), UNIQUE(space_id,media_id));
