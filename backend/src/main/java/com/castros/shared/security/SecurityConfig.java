@@ -17,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 
 @Configuration
@@ -31,11 +32,11 @@ public class SecurityConfig {
     @Bean SecurityFilterChain filterChain(HttpSecurity http, UserDetailsService details, PasswordEncoder encoder) throws Exception {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(details); provider.setPasswordEncoder(encoder);
         http.authenticationProvider(provider)
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/v1/public/**", "/api/v1/auth/login"))
+            .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
             .cors(cors -> { })
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/public/**", "/api/v1/auth/login", "/api/v1/auth/logout", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/health", "/actuator/readiness").permitAll()
+                .requestMatchers("/api/v1/public/**", "/api/v1/auth/login", "/api/v1/auth/logout", "/api/v1/auth/csrf", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/health", "/actuator/readiness").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/services/**", "/api/v1/courses/**", "/api/v1/spaces/**", "/api/v1/availability").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/bookings/*").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/bookings", "/api/v1/requests").permitAll()

@@ -3,6 +3,7 @@ package com.castros.availability;
 import com.castros.booking.Booking;
 import com.castros.booking.BookingRepository;
 import com.castros.booking.BookingStatus;
+import com.castros.booking.BookableType;
 import com.castros.shared.config.AppProperties;
 import com.castros.shared.exception.ApiException;
 import org.springframework.http.HttpStatus;
@@ -22,22 +23,29 @@ public class AvailabilityService {
         this.rules = rules; this.exceptions = exceptions; this.blocked = blocked; this.bookings = bookings; this.properties = properties;
     }
 
-    public AvailabilityResult slots(String type, UUID id, LocalDate date, int durationMinutes) {
+    public AvailabilityResult slots(BookableType type, UUID id, LocalDate date, int durationMinutes) {
         if (durationMinutes <= 0) throw new ApiException("BOOKING_INVALID_TIME", "Duration must be positive.", HttpStatus.BAD_REQUEST);
         ZoneId zone = ZoneId.of(properties.getBusinessTimezone());
         List<AvailabilityRule> configured = rules.findByBookableTypeAndBookableIdAndDayOfWeekAndActiveTrue(type, id, date.getDayOfWeek());
-        LocalTime open = LocalTime.of(8, 0), close = LocalTime.of(17, 0);
+        List<AvailabilityExceptionEntity> exceptionsForDate = exceptions.findByBookableTypeAndBookableIdAndDate(type, id, date);
+        if (configured.isEmpty() && exceptionsForDate.isEmpty() && !properties.isAvailabilityDevelopmentFallback()) {
+            return new AvailabilityResult(date, zone.getId(), List.of());
+        }
+        LocalTime open = null, close = null;
         int interval = 30, before = 0, after = 0, minNotice = 0, maxAdvance = 90;
         if (!configured.isEmpty()) {
             AvailabilityRule rule = configured.get(0); open = rule.opensAt; close = rule.closesAt; interval = rule.slotIntervalMinutes;
             before = rule.bufferBeforeMinutes; after = rule.bufferAfterMinutes; minNotice = rule.minimumNoticeMinutes; maxAdvance = rule.maximumAdvanceDays;
+        } else if (properties.isAvailabilityDevelopmentFallback()) {
+            open = LocalTime.of(8, 0); close = LocalTime.of(17, 0);
         }
-        List<AvailabilityExceptionEntity> exceptionsForDate = exceptions.findByBookableTypeAndBookableIdAndDate(type, id, date);
         if (!exceptionsForDate.isEmpty()) {
             AvailabilityExceptionEntity exception = exceptionsForDate.get(0);
             if (exception.closed) return new AvailabilityResult(date, zone.getId(), List.of());
+            if (exception.opensAt == null || exception.closesAt == null) return new AvailabilityResult(date, zone.getId(), List.of());
             open = exception.opensAt; close = exception.closesAt;
         }
+        if (open == null || close == null) return new AvailabilityResult(date, zone.getId(), List.of());
         OffsetDateTime dayStart = ZonedDateTime.of(date, open, zone).toOffsetDateTime();
         OffsetDateTime dayEnd = ZonedDateTime.of(date, close, zone).toOffsetDateTime();
         OffsetDateTime now = OffsetDateTime.now();
@@ -59,7 +67,7 @@ public class AvailabilityService {
         return new AvailabilityResult(date, zone.getId(), result);
     }
 
-    public void assertAvailable(String type, UUID id, OffsetDateTime start, OffsetDateTime end) {
+    public void assertAvailable(BookableType type, UUID id, OffsetDateTime start, OffsetDateTime end) {
         if (!start.isBefore(end)) throw new ApiException("BOOKING_INVALID_TIME", "Start time must be before end time.", HttpStatus.BAD_REQUEST);
         if (!bookings.findOverlaps(type, id, activeStatuses(), start, end).isEmpty()) throw new ApiException("BOOKING_SLOT_UNAVAILABLE", "The selected time slot is no longer available.", HttpStatus.CONFLICT);
         if (!blocked.findByBookableTypeAndBookableIdAndStartAtLessThanAndEndAtGreaterThan(type, id, end, start).isEmpty()) throw new ApiException("BOOKING_SLOT_UNAVAILABLE", "The selected time slot is blocked.", HttpStatus.CONFLICT);
