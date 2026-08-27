@@ -1,6 +1,6 @@
 import type { ProblemDetailResponse } from '../contracts'
 
-export type ApiErrorCode = 'VALIDATION_FAILED' | 'BOOKING_SLOT_UNAVAILABLE' | 'DUPLICATE_RESOURCE' | 'INTERNAL_ERROR' | 'UNKNOWN_ERROR'
+export type ApiErrorCode = 'VALIDATION_FAILED' | 'BOOKING_SLOT_UNAVAILABLE' | 'DUPLICATE_RESOURCE' | 'IDEMPOTENCY_KEY_REUSED' | 'INTERNAL_ERROR' | 'UNKNOWN_ERROR'
 
 export class ApiError extends Error {
   readonly code: ApiErrorCode
@@ -34,7 +34,8 @@ function isProblemDetail(value: unknown): value is ProblemDetailResponse {
 }
 
 function normalizeErrorCode(code: ProblemDetailResponse['code'], status?: number): ApiErrorCode {
-  if (code === 'VALIDATION_FAILED' || code === 'BOOKING_SLOT_UNAVAILABLE' || code === 'DUPLICATE_RESOURCE' || code === 'INTERNAL_ERROR') return code
+  if (code === 'VALIDATION_FAILED' || code === 'BOOKING_SLOT_UNAVAILABLE' || code === 'DUPLICATE_RESOURCE' || code === 'IDEMPOTENCY_KEY_REUSED' || code === 'INTERNAL_ERROR') return code
+  if (status === 409) return 'IDEMPOTENCY_KEY_REUSED'
   if (status && status >= 500) return 'INTERNAL_ERROR'
   return 'UNKNOWN_ERROR'
 }

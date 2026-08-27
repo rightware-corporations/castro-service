@@ -1,17 +1,15 @@
-import type { ApiPort, AvailabilityQueryDto, AvailabilitySlotDto, BookingRequestDto, BookingResponseDto, CourseDto, CourseSessionDto, PublicConfigDto, RequestRequestDto, ServiceDto, SpaceDto } from '../contracts'
+import type { ApiPort, AvailabilityQueryDto, AvailabilitySlotDto, BookingRequestDto, BookingResponseDto, CourseDto, CourseSessionDto, CsrfTokenResponse, IdempotencyOptions, PublicConfigDto, RequestInput, ServiceDto, SpaceDto } from '../contracts'
 import type { AuthSession, Collection } from '../../domain'
-import { HttpApiClient } from './HttpApiClient'
+import { HttpApiClient, createIdempotencyKey } from './HttpApiClient'
 import { apiRoutes } from './routes'
 import { serializeAvailabilityQuery } from './serialization'
 
-export interface ApiAdapter extends ApiPort {
-  readonly kind: 'mock' | 'http'
-}
-
+export interface ApiAdapter extends ApiPort { readonly kind: 'mock' | 'http' }
 const emptyCollection = <T>(): Collection<T> => ({ items: [], total: 0 })
 
 export class MockApiAdapter implements ApiAdapter {
   readonly kind = 'mock' as const
+  async getCsrf(): Promise<CsrfTokenResponse> { return { token: 'mock-csrf-token' } }
   async getSession(): Promise<AuthSession | null> { return null }
   async login(email: string, password: string): Promise<AuthSession> { void email; void password; return { authenticated: true } }
   async logout(): Promise<void> { return undefined }
@@ -24,14 +22,14 @@ export class MockApiAdapter implements ApiAdapter {
   async listSpaces(): Promise<Collection<SpaceDto>> { return emptyCollection() }
   async getSpace(slug: string): Promise<SpaceDto> { return { slug, name: '[CONTENT TBD]' } }
   async listAvailability(query: AvailabilityQueryDto): Promise<Collection<AvailabilitySlotDto>> { void query; return emptyCollection() }
-  async createBooking(request: BookingRequestDto): Promise<BookingResponseDto> { void request; return { reference: 'REFERENCE TBD', status: 'not-configured' } }
+  async createBooking(request: BookingRequestDto, options?: IdempotencyOptions): Promise<BookingResponseDto> { void request; void options; return { reference: 'REFERENCE TBD', status: 'not-configured' } }
   async getBooking(reference: string): Promise<BookingResponseDto> { return { reference, status: 'not-configured' } }
-  async createRequest(request: RequestRequestDto): Promise<{ id: string }> { void request; return { id: 'REQUEST TBD' } }
-  get auth(): ApiPort['auth'] { return { getSession: () => this.getSession(), login: (email, password) => this.login(email, password), logout: () => this.logout() } }
+  async createRequest(request: RequestInput, options?: IdempotencyOptions): Promise<{ id: string }> { void request; void options; return { id: 'REQUEST TBD' } }
+  get auth(): ApiPort['auth'] { return { getCsrf: () => this.getCsrf(), getSession: () => this.getSession(), login: (email, password) => this.login(email, password), logout: () => this.logout() } }
   get public(): ApiPort['public'] { return { getConfig: () => this.getConfig(), listServices: () => this.listServices(), getService: (slug) => this.getService(slug), listCourses: () => this.listCourses(), getCourse: (slug) => this.getCourse(slug), listCourseSessions: (id) => this.listCourseSessions(id), listSpaces: () => this.listSpaces(), getSpace: (slug) => this.getSpace(slug) } }
   get availability(): ApiPort['availability'] { return { list: (query) => this.listAvailability(query) } }
-  get bookings(): ApiPort['bookings'] { return { create: (request) => this.createBooking(request), getByReference: (reference) => this.getBooking(reference) } }
-  get requests(): ApiPort['requests'] { return { create: (request) => this.createRequest(request) } }
+  get bookings(): ApiPort['bookings'] { return { create: (request, options) => this.createBooking(request, options), getByReference: (reference) => this.getBooking(reference) } }
+  get requests(): ApiPort['requests'] { return { create: (request, options) => this.createRequest(request, options) } }
 }
 
 export class HttpApiAdapter implements ApiAdapter {
@@ -39,6 +37,7 @@ export class HttpApiAdapter implements ApiAdapter {
   constructor(private readonly client: HttpApiClient) {}
   get auth(): ApiPort['auth'] {
     return {
+      getCsrf: () => this.client.requestOrThrow<CsrfTokenResponse>(apiRoutes.csrf),
       getSession: () => this.client.requestOrThrow<AuthSession | null>(apiRoutes.me),
       login: (email, password) => this.client.requestOrThrow<AuthSession>(apiRoutes.login, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) }),
       logout: () => this.client.requestOrThrow<void>(apiRoutes.logout, { method: 'POST' }),
@@ -56,17 +55,15 @@ export class HttpApiAdapter implements ApiAdapter {
       getSpace: (slug) => this.client.requestOrThrow<SpaceDto>(apiRoutes.space(slug)),
     }
   }
-  get availability(): ApiPort['availability'] {
-    return { list: (query) => this.client.requestOrThrow<Collection<AvailabilitySlotDto>>(`${apiRoutes.availability}?${serializeAvailabilityQuery(query)}`) }
-  }
+  get availability(): ApiPort['availability'] { return { list: (query) => this.client.requestOrThrow<Collection<AvailabilitySlotDto>>(`${apiRoutes.availability}?${serializeAvailabilityQuery(query)}`) } }
   get bookings(): ApiPort['bookings'] {
     return {
-      create: (request) => this.client.requestOrThrow<BookingResponseDto>(apiRoutes.bookings, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request) }),
+      create: (request, options) => this.client.requestOrThrow<BookingResponseDto>(apiRoutes.bookings, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request) }, { idempotencyKey: options?.idempotencyKey ?? createIdempotencyKey() }),
       getByReference: (reference) => this.client.requestOrThrow<BookingResponseDto>(apiRoutes.booking(reference)),
     }
   }
   get requests(): ApiPort['requests'] {
-    return { create: (request) => this.client.requestOrThrow<{ id: string }>(apiRoutes.requests, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request) }) }
+    return { create: (request, options) => this.client.requestOrThrow<{ id: string }>(apiRoutes.requests, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request) }, { idempotencyKey: options?.idempotencyKey ?? createIdempotencyKey() }) }
   }
 }
 

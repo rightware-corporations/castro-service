@@ -1,4 +1,9 @@
-export type BookingTarget = 'SPACE' | 'SERVICE' | 'COURSE_SESSION'
+export const publicBookableTypes = ['SERVICE', 'SPACE', 'COURSE_SESSION'] as const
+export type BookingTarget = typeof publicBookableTypes[number]
+
+export function isPublicBookableType(value: string): value is BookingTarget {
+  return publicBookableTypes.includes(value as BookingTarget)
+}
 
 export type Permission =
   | 'dashboard.read'

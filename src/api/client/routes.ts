@@ -14,4 +14,5 @@ export const apiRoutes = {
   login: '/api/v1/auth/login',
   logout: '/api/v1/auth/logout',
   me: '/api/v1/auth/me',
+  csrf: '/api/v1/auth/csrf',
 } as const

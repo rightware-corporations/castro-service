@@ -1,6 +1,6 @@
 export { createApiAdapter, HttpApiAdapter, MockApiAdapter } from './adapters'
 export type { ApiAdapter } from './adapters'
-export { HttpApiClient } from './HttpApiClient'
+export { HttpApiClient, createIdempotencyKey, readXsrfTokenCookie } from './HttpApiClient'
 export { ApiError, parseProblemDetail } from './errors'
 export { serializeAvailabilityQuery } from './serialization'
 export { apiRoutes } from './routes'

@@ -90,3 +90,31 @@ Catalog and detail states include loading, empty, error, success and not-found b
 The homepage uses a restrained editorial composition with a three-experience selector, API/mock previews, an explicit media placeholder while approved photography is absent, institutional content structure and a contact CTA. The implementation deliberately avoids a generic SaaS card farm, decorative blobs, unverified marketing claims and fabricated business facts.
 
 The responsive composition recomposes at mobile widths: hero actions become full-width, previews become linear, catalog rows become vertical, contact fields become one column and submit actions become sticky mobile actions. The visual QA matrix includes 390x844, 820x1180 and 1440x900 captures, with CSS foundations covering the full required width range.
+
+## Phase 3A.1 — Public Backend Integration
+
+The public HTTP boundary now uses the hardened Spring Boot contract while keeping `MockApiAdapter` as the default when `VITE_API_BASE_URL` is empty. Public GET support is centralized through `src/api/client/routes.ts` and covers public config, services, courses, course sessions, spaces and availability. The typed adapter also represents the bookings endpoint without exposing booking UI in this milestone.
+
+State-changing HTTP requests obtain CSRF from `GET /api/v1/auth/csrf` when no `XSRF-TOKEN` cookie or cached token is available. The client always sends `credentials: 'include'` and injects `X-XSRF-TOKEN` from the cookie/token response before state-changing calls. No CSRF bypass or client-side CSRF disablement is present.
+
+Requests and bookings accept an optional caller-supplied `Idempotency-Key`. The same key must be passed again by the caller for a retry of the same logical submission. When omitted, the adapter generates a UUID for that individual call. Backend `409` responses and `ProblemDetail` code `IDEMPOTENCY_KEY_REUSED` become typed `ApiError` instances.
+
+The only public bookable types are `SERVICE`, `SPACE` and `COURSE_SESSION`. `CONSULTATION` is a contact request type only and is rejected by `isPublicBookableType`. A successful availability response containing zero slots remains `{ items: [], total: 0 }` and is not converted into an error.
+
+### Running against mocks
+
+```bash
+cp .env.example .env.local
+# keep VITE_API_BASE_URL empty
+npm run dev
+```
+
+### Running against local Spring Boot
+
+```bash
+cp .env.example .env.local
+# set VITE_API_BASE_URL=http://localhost:8080 in .env.local
+npm run dev
+```
+
+The real backend probe was attempted against `http://127.0.0.1:8080`. No Castro’s Spring Boot listener was available in this environment, so the real GET and POST integration calls were not executed. No fake production data was created to force those checks to pass.
