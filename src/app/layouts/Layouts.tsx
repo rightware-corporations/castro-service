@@ -6,7 +6,7 @@ import { useCan } from '../providers/AppProviders'
 const publicLinks = [
   { to: '/servicos', label: 'Serviços' },
   { to: '/formacao', label: 'Formação' },
-  { to: '/espacos', label: 'Espaço' },
+  { to: '/espacos', label: 'Espaços' },
   { to: '/contacto', label: 'Contacto' },
 ]
 

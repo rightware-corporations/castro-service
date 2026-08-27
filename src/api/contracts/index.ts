@@ -9,19 +9,24 @@ export type ServiceDto = {
   slug: string
   name: string
   summary?: string
+  description?: string
+  durationMinutes?: number
+  bookingEnabled?: boolean
 }
 
 export type CourseDto = {
+  id?: string
   slug: string
   name: string
   summary?: string
+  description?: string
 }
 
 export type CourseSessionDto = {
   id: string
   courseSlug: string
-  startsAt: string
-  endsAt: string
+  startAt: string
+  endAt: string
 }
 
 export type SpaceDto = {
@@ -57,10 +62,15 @@ export type BookingResponseDto = {
   status: string
 }
 
+export type RequestType = 'CONSULTATION' | 'CORPORATE_PROPOSAL' | 'TRAINING_INFO' | 'SPACE_INFO' | 'GENERAL'
+
 export type RequestRequestDto = {
-  name: string
+  firstName: string
+  lastName: string
   email: string
-  message: string
+  phone?: string
+  type: RequestType
+  message?: string
 }
 
 export type ProblemDetailResponse = {

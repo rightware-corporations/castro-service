@@ -68,3 +68,25 @@ Phase 2 provides reusable production UI infrastructure without implementing fina
 The same data columns can render as `DataTable` on desktop/tablet and `EntityCard`/`ResponsiveEntityList` on mobile. The booking primitives expose presentation states only; backend availability remains authoritative. Form primitives accept native props and remain independent of React Hook Form, allowing registration to be composed at feature level.
 
 The dev-only route `/__dev/components` is included only when `import.meta.env.DEV` is true. It is a QA harness, not a production public page, and uses only `[CONTENT TBD]` / `[A confirmar]` neutral values.
+
+## Phase 3A — Public Core Experience
+
+Phase 3A implements the public core for `/`, `/servicos`, `/servicos/:slug`, `/formacao`, `/formacao/:slug` and `/contacto`. Spaces, the 360 explorer, room configuration, booking business flows, operations and administration remain deferred and are represented only by explicit foundation placeholders.
+
+Public feature ownership is separated by domain:
+
+```text
+src/features/home/
+src/features/services/
+src/features/courses/
+src/features/spaces/
+src/features/contact/
+```
+
+TanStack Query owns all public GET requests through feature hooks. Pages remain thin containers and pass typed query resources into reusable public views. The contact mutation uses React Hook Form, Zod, the verified `RequestRequestDto` shape and the existing `ApiError` boundary while retaining the mock adapter.
+
+Catalog and detail states include loading, empty, error, success and not-found behavior where applicable. Course sessions use only backend-supported `startAt` and `endAt` values; no instructor, venue, capacity, format, price or date is invented. Service detail uses duration and booking indication only when supplied by the backend.
+
+The homepage uses a restrained editorial composition with a three-experience selector, API/mock previews, an explicit media placeholder while approved photography is absent, institutional content structure and a contact CTA. The implementation deliberately avoids a generic SaaS card farm, decorative blobs, unverified marketing claims and fabricated business facts.
+
+The responsive composition recomposes at mobile widths: hero actions become full-width, previews become linear, catalog rows become vertical, contact fields become one column and submit actions become sticky mobile actions. The visual QA matrix includes 390x844, 820x1180 and 1440x900 captures, with CSS foundations covering the full required width range.

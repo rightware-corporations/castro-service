@@ -9,19 +9,24 @@ export type Service = {
   slug: string
   name: string
   summary?: string
+  description?: string
+  durationMinutes?: number
+  bookingEnabled?: boolean
 }
 
 export type Course = {
+  id?: string
   slug: string
   name: string
   summary?: string
+  description?: string
 }
 
 export type CourseSession = {
   id: string
   courseSlug: string
-  startsAt: string
-  endsAt: string
+  startAt: string
+  endAt: string
 }
 
 export type Space = {

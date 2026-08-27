@@ -2,9 +2,9 @@ import type { AvailabilitySlotDto, CourseDto, CourseSessionDto, PublicConfigDto,
 import type { AvailabilitySlot, Course, CourseSession, PublicConfig, Service, Space } from '../../domain/models'
 
 export const mapPublicConfigDto = (dto: PublicConfigDto): PublicConfig => ({ brandName: dto.brandName, locale: dto.locale })
-export const mapServiceDto = (dto: ServiceDto): Service => ({ slug: dto.slug, name: dto.name, summary: dto.summary })
-export const mapCourseDto = (dto: CourseDto): Course => ({ slug: dto.slug, name: dto.name, summary: dto.summary })
-export const mapCourseSessionDto = (dto: CourseSessionDto): CourseSession => ({ id: dto.id, courseSlug: dto.courseSlug, startsAt: dto.startsAt, endsAt: dto.endsAt })
+export const mapServiceDto = (dto: ServiceDto): Service => ({ slug: dto.slug, name: dto.name, summary: dto.summary, description: dto.description, durationMinutes: dto.durationMinutes, bookingEnabled: dto.bookingEnabled })
+export const mapCourseDto = (dto: CourseDto): Course => ({ id: dto.id, slug: dto.slug, name: dto.name, summary: dto.summary, description: dto.description })
+export const mapCourseSessionDto = (dto: CourseSessionDto): CourseSession => ({ id: dto.id, courseSlug: dto.courseSlug, startAt: dto.startAt, endAt: dto.endAt })
 export const mapSpaceDto = (dto: SpaceDto): Space => ({ slug: dto.slug, name: dto.name, summary: dto.summary })
 
 export function mapAvailabilitySlotDto(dto: AvailabilitySlotDto): AvailabilitySlot {

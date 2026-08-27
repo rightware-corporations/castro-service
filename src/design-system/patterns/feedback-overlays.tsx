@@ -10,7 +10,7 @@ export function Alert({ tone = 'info', title, children }: { tone?: 'info' | 'suc
 export function InlineError({ children }: { children: ReactNode }) { return <p className="ds-inline-error" role="alert"><AlertCircle size={16} aria-hidden="true" />{children}</p> }
 export function EmptyState({ title, children, action }: { title: string; children: ReactNode; action?: ReactNode }) { return <div className="ds-state"><Info size={24} aria-hidden="true" /><h3>{title}</h3><p>{children}</p>{action}</div> }
 export function ErrorState({ title = 'Não foi possível carregar esta área.', action }: { title?: string; action?: ReactNode }) { return <div className="ds-state ds-state--error"><AlertCircle size={24} aria-hidden="true" /><h3>{title}</h3>{action}</div> }
-export function LoadingState({ label = 'A carregar conteúdo.' }: { label?: string }) { return <div className="ds-state"><LoaderCircle className="ds-spinner" size={24} aria-hidden="true" /><p>{label}</p></div> }
+export function LoadingState({ label = 'A carregar conteúdo.' }: { label?: string }) { return <div className="ds-state" role="status" aria-live="polite"><LoaderCircle className="ds-spinner" size={24} aria-hidden="true" /><p>{label}</p></div> }
 
 function useEscape(onClose: () => void, enabled: boolean) {
   useEffect(() => {
