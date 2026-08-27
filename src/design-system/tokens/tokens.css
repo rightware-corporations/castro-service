@@ -16,6 +16,10 @@
   --color-info: #1d5e82;
   --font-ui: 'Manrope', system-ui, sans-serif;
   --font-editorial: 'Instrument Serif', Georgia, serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-md: 1rem;
@@ -23,6 +27,9 @@
   --text-xl: 1.5rem;
   --text-2xl: 2.75rem;
   --text-display: clamp(2.5rem, 5.5vw, 4.25rem);
+  --line-tight: 1.1;
+  --line-normal: 1.6;
+  --line-relaxed: 1.75;
   --space-1: 0.5rem;
   --space-2: 1rem;
   --space-3: 1.5rem;
@@ -31,16 +38,39 @@
   --space-6: 4rem;
   --space-7: 5rem;
   --space-8: 8rem;
-  --radius-control: 0.625rem;
-  --radius-card: 0.75rem;
-  --radius-image: 1rem;
-  --focus-ring: 0 0 0 3px rgb(34 187 174 / 30%);
-  --ease-standard: cubic-bezier(0.23, 1, 0.32, 1);
-  --motion-fast: 160ms;
-  --motion-normal: 200ms;
+  --container-sm: 40rem;
+  --container-md: 64rem;
   --container-max: 1240px;
   --gutter: 1.5rem;
   --page-padding: 2rem;
+  --breakpoint-sm: 480px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --radius-none: 0;
+  --radius-control: 0.625rem;
+  --radius-card: 0.75rem;
+  --radius-image: 1rem;
+  --border-thin: 1px solid var(--color-border);
+  --shadow-sm: 0 2px 8px rgb(16 19 59 / 6%);
+  --shadow-md: 0 12px 32px rgb(16 19 59 / 10%);
+  --shadow-lg: 0 24px 64px rgb(16 19 59 / 16%);
+  --z-header: 20;
+  --z-dropdown: 30;
+  --z-bottom-nav: 40;
+  --z-scrim: 50;
+  --z-drawer: 60;
+  --z-dialog: 70;
+  --focus-ring: 0 0 0 3px rgb(34 187 174 / 30%);
+  --ease-standard: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --motion-fast: 160ms;
+  --motion-normal: 200ms;
+  --motion-slow: 280ms;
+  --control-sm: 2.25rem;
+  --control-md: 3rem;
+  --control-lg: 3.5rem;
+  --touch-target: 2.75rem;
 }
 
 @media (max-width: 767px) {

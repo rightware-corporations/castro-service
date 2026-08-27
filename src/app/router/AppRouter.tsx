@@ -4,6 +4,7 @@ import { AuthPage } from '../../pages/auth/AuthPages'
 import { NotFound } from '../../pages/NotFound'
 import { PublicFoundationPage } from '../../pages/public/PublicFoundationPage'
 import { OperationsFoundationPage } from '../../pages/operations/OperationsFoundationPage'
+import { ComponentLab } from '../../pages/dev/ComponentLab'
 
 const publicPaths = [
   '/servicos', '/servicos/:slug', '/formacao', '/formacao/:slug', '/espacos', '/espacos/:slug',
@@ -42,6 +43,7 @@ export function AppRouter() {
         <Route path="/reservar/:bookableType/:bookableId/dados" element={<BookingStep title="Dados do cliente" />} />
         <Route path="/reservar/:bookableType/:bookableId/rever" element={<BookingStep title="Rever pedido" />} />
         <Route path="/reservar/confirmacao/:reference" element={<BookingConfirmation />} />
+        {import.meta.env.DEV && <Route path="/__dev/components" element={<ComponentLab />} />}
         <Route path="*" element={<NotFound />} />
       </Route>
       <Route element={<AuthLayout />}>

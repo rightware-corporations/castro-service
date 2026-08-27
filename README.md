@@ -54,3 +54,17 @@ The shared booking domain is `src/features/booking/` and supports `SPACE`, `SERV
 Foundation establishes routing, public/auth/operations shells, typography, design tokens, responsive navigation foundations, API/mock boundaries, permission evaluation and quality scripts. Phase 1.1 additionally aligns DTOs, mappings, backend error handling, availability serialization, session credentials and refresh-safe booking routes. Detailed product screens, business content and production integrations remain outside this phase.
 
 All missing business information must remain labelled as `[CONTENT TBD]` or `[A confirmar]`. No prices, policies, metrics, room capacities, equipment, course data, availability or contact facts are fabricated in the Foundation.
+
+## Design System Phase 2
+
+Phase 2 provides reusable production UI infrastructure without implementing final product screens. The public context remains editorial and photography-led; operations and administration remain denser, Manrope-first and permission-aware. No glassmorphism, neon, decorative gradients or business facts are introduced. The only gradient is the functional skeleton shimmer.
+
+### Component inventory
+
+`src/design-system/primitives/` includes `Button`, `IconButton`, `Field`, `TextField`, `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`, `SearchInput`, `Badge`, `Divider`, `Avatar`, `Spinner` and `Skeleton`.
+
+`src/design-system/patterns/` includes `Alert`, `InlineError`, `EmptyState`, `ErrorState`, `LoadingState`, `ConfirmDialog`, `Dialog`, `Drawer`, `BottomSheet`, `Popover`, `Tooltip`, `DropdownMenu`, `Breadcrumbs`, `Tabs`, `Stepper`, `Pagination`, `MobileTopbar`, `MobileBottomNavigation`, `DataTable`, `ResponsiveEntityList`, `EntityCard`, `DefinitionList`, `ActivityList`, `SearchToolbar`, `FilterGroup`, `FilterButton`, `ActiveFilterChips`, `ClearFilters`, `CalendarFoundation`, `DatePicker`, `TimeSlot`, `TimeSlotGroup`, `BookingStepper`, `BookingSummary`, `FormSection`, `FormActions`, `StickyMobileActions` and `FormSummary`.
+
+The same data columns can render as `DataTable` on desktop/tablet and `EntityCard`/`ResponsiveEntityList` on mobile. The booking primitives expose presentation states only; backend availability remains authoritative. Form primitives accept native props and remain independent of React Hook Form, allowing registration to be composed at feature level.
+
+The dev-only route `/__dev/components` is included only when `import.meta.env.DEV` is true. It is a QA harness, not a production public page, and uses only `[CONTENT TBD]` / `[A confirmar]` neutral values.
