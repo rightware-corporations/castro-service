@@ -1,0 +1,53 @@
+:root {
+  color-scheme: light;
+  --color-navy: #17184f;
+  --color-deep-navy: #10133b;
+  --color-teal: #22bbae;
+  --color-green: #64c98a;
+  --color-cream: #f1deae;
+  --color-off-white: #faf9f5;
+  --color-white: #ffffff;
+  --color-charcoal: #20232a;
+  --color-muted: #6b7280;
+  --color-border: #e6e7eb;
+  --color-success: #247a4a;
+  --color-warning: #8a6200;
+  --color-danger: #a12626;
+  --color-info: #1d5e82;
+  --font-ui: 'Manrope', system-ui, sans-serif;
+  --font-editorial: 'Instrument Serif', Georgia, serif;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2.75rem;
+  --text-display: clamp(2.5rem, 5.5vw, 4.25rem);
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-5: 3rem;
+  --space-6: 4rem;
+  --space-7: 5rem;
+  --space-8: 8rem;
+  --radius-control: 0.625rem;
+  --radius-card: 0.75rem;
+  --radius-image: 1rem;
+  --focus-ring: 0 0 0 3px rgb(34 187 174 / 30%);
+  --ease-standard: cubic-bezier(0.23, 1, 0.32, 1);
+  --motion-fast: 160ms;
+  --motion-normal: 200ms;
+  --container-max: 1240px;
+  --gutter: 1.5rem;
+  --page-padding: 2rem;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --page-padding: 1.25rem;
+    --gutter: 1rem;
+    --space-8: 5.5rem;
+    --text-2xl: 2rem;
+  }
+}

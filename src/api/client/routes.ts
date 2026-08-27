@@ -1,0 +1,17 @@
+export const apiRoutes = {
+  publicConfig: '/api/v1/public/config',
+  services: '/api/v1/services',
+  service: (slug: string) => `/api/v1/services/${encodeURIComponent(slug)}`,
+  courses: '/api/v1/courses',
+  course: (slug: string) => `/api/v1/courses/${encodeURIComponent(slug)}`,
+  courseSessions: (id: string) => `/api/v1/courses/${encodeURIComponent(id)}/sessions`,
+  spaces: '/api/v1/spaces',
+  space: (slug: string) => `/api/v1/spaces/${encodeURIComponent(slug)}`,
+  availability: '/api/v1/availability',
+  bookings: '/api/v1/bookings',
+  booking: (reference: string) => `/api/v1/bookings/${encodeURIComponent(reference)}`,
+  requests: '/api/v1/requests',
+  login: '/api/v1/auth/login',
+  logout: '/api/v1/auth/logout',
+  me: '/api/v1/auth/me',
+} as const
