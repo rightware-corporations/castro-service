@@ -8,9 +8,9 @@ import { HomePublic } from '../../features/home/components/HomePublic'
 import { ServicesCatalog, ServiceDetail } from '../../features/services/components/ServicesPublic'
 import { CoursesCatalog, CourseDetail } from '../../features/courses/components/CoursesPublic'
 import { ContactPublic } from '../../features/contact/components/ContactPublic'
+import { SpaceConfigurator, SpaceDetail, SpaceExplorer, SpacesCatalog } from '../../features/spaces/components/SpacesPublic'
 import { DeferredPublicPage } from '../../pages/public/DeferredPublicPage'
 
-const spacesPaths = ['/espacos', '/espacos/:slug', '/espacos/:slug/explorar', '/espacos/:slug/configurar', '/espacos/:slug/disponibilidade']
 const operationPaths = [
   '/app/dashboard', '/app/pedidos', '/app/pedidos/:id', '/app/reservas', '/app/reservas/:id', '/app/clientes', '/app/clientes/:id',
   '/app/calendario', '/app/espacos', '/app/servicos', '/app/formacao', '/app/tarefas', '/app/relatorios', '/app/configuracoes',
@@ -37,8 +37,12 @@ export function AppRouter() {
       <Route path="/servicos/:slug" element={<ServiceDetail />} />
       <Route path="/formacao" element={<CoursesCatalog />} />
       <Route path="/formacao/:slug" element={<CourseDetail />} />
+      <Route path="/espacos" element={<SpacesCatalog />} />
+      <Route path="/espacos/:slug" element={<SpaceDetail />} />
+      <Route path="/espacos/:slug/explorar" element={<SpaceExplorer />} />
+      <Route path="/espacos/:slug/configurar" element={<SpaceConfigurator />} />
+      <Route path="/espacos/:slug/disponibilidade" element={<DeferredPublicPage />} />
       <Route path="/contacto" element={<ContactPublic />} />
-      {spacesPaths.map((path) => <Route key={path} path={path} element={<DeferredPublicPage />} />)}
       <Route path="/reservar" element={<BookingStep title="Escolher o que pretende reservar" />} />
       <Route path="/reservar/:bookableType/:bookableId/data" element={<BookingStep title="Escolher data" />} />
       <Route path="/reservar/:bookableType/:bookableId/horario" element={<BookingStep title="Escolher horário" />} />
