@@ -24,11 +24,18 @@ import org.springframework.security.web.context.SecurityContextRepository;
 @EnableMethodSecurity
 public class SecurityConfig {
     @Bean PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(12); }
+
     @Bean UserDetailsService userDetailsService(UserRepository users) {
-        return username -> users.findByEmailIgnoreCase(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return username -> {
+            UserAccount user = users.findByEmailIgnoreCase(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            return user.withPermissionCodes(users.findPermissionCodes(user.id, user.organizationId));
+        };
     }
+
     @Bean AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception { return configuration.getAuthenticationManager(); }
     @Bean SecurityContextRepository securityContextRepository() { return new HttpSessionSecurityContextRepository(); }
+
     @Bean SecurityFilterChain filterChain(HttpSecurity http, UserDetailsService details, PasswordEncoder encoder) throws Exception {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(details); provider.setPasswordEncoder(encoder);
         http.authenticationProvider(provider)
