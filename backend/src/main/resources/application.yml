@@ -19,7 +19,7 @@ springdoc:
   swagger-ui.path: /swagger-ui.html
 castros:
   business-timezone: ${BUSINESS_TIMEZONE:Africa/Maputo}
-  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000}
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173}
   availability-development-fallback: ${AVAILABILITY_DEVELOPMENT_FALLBACK:false}
 server:
   forward-headers-strategy: framework
