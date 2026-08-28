@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
-import { Menu, X, LayoutDashboard, Inbox, CalendarDays, Settings, ChevronRight, ArrowUpRight } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Inbox, CalendarDays, Settings, ChevronRight, ArrowUpRight, ClipboardList, UsersRound, CheckSquare2 } from 'lucide-react'
 import { useCan } from '../providers/AppProviders'
 
 const publicLinks = [
@@ -13,8 +13,10 @@ const publicLinks = [
 const operationLinks = [
   { to: '/app/dashboard', label: 'Dashboard', icon: LayoutDashboard, permission: 'dashboard.read' as const },
   { to: '/app/pedidos', label: 'Pedidos', icon: Inbox, permission: 'request.read' as const },
-  { to: '/app/reservas', label: 'Reservas', icon: CalendarDays, permission: 'booking.read' as const },
+  { to: '/app/reservas', label: 'Reservas', icon: ClipboardList, permission: 'booking.read' as const },
   { to: '/app/calendario', label: 'Calendário', icon: CalendarDays, permission: 'booking.read' as const },
+  { to: '/app/clientes', label: 'Clientes', icon: UsersRound, permission: 'customer.read' as const },
+  { to: '/app/tarefas', label: 'Tarefas', icon: CheckSquare2, permission: 'request.read' as const },
   { to: '/app/configuracoes', label: 'Configurações', icon: Settings, permission: 'settings.read' as const },
 ]
 
