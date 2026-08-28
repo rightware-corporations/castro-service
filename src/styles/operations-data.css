@@ -10,6 +10,11 @@
 .ops-status--cancelled,.ops-status--closed { color:var(--color-muted); }
 .ops-calendar-event,.ops-calendar-more { display:block; margin-top:.3rem; overflow:hidden; border-left:2px solid var(--color-teal); background:var(--color-cream); padding:.2rem .3rem; color:var(--color-deep-navy); font-size:.62rem; text-overflow:ellipsis; white-space:nowrap; }
 .ops-calendar-more { border-left-color:var(--color-navy); background:transparent; }
+.operations-sidebar__bottom button { display:flex; width:100%; min-height:2.75rem; align-items:center; gap:.65rem; border:0; border-radius:var(--radius-control); background:transparent; padding:.7rem .75rem; color:rgb(255 255 255 / 74%); font-size:var(--text-sm); text-align:left; cursor:pointer; }
+.operations-sidebar__bottom button:hover { background:rgb(34 187 174 / 16%); color:var(--color-white); }
+.operations-sidebar__bottom button:disabled { cursor:wait; opacity:.6; }
+.operations-auth-loading { min-height:100vh; display:grid; place-items:center; background:var(--color-off-white); padding:2rem; }
+@media (max-width:900px) and (min-width:768px) { .operations-sidebar__bottom button { justify-content:center; font-size:0; } }
 @media (max-width:767px) {
   .ops-data-row,.ops-data-row--bookings { grid-template-columns:1fr 1fr; gap:.75rem; align-items:start; padding:1rem; }
   .ops-data-row > span { padding-right:0; }
