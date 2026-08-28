@@ -103,7 +103,7 @@ export function OperationsLayout() {
       <div className="operations-main">
         <header className="operations-topbar"><button className="icon-button operations-menu" type="button" onClick={() => setSidebarOpen(true)} aria-label="Abrir navegação"><Menu size={21} /></button><div><span>Área interna</span><strong>Castro’s Services</strong></div><Link className="topbar-account" to="/app/configuracoes/utilizadores">Conta</Link></header>
         <main className="operations-content"><Outlet /></main>
-        <nav className="mobile-bottom-nav" aria-label="Navegação rápida">{visibleLinks.slice(0, 4).map(({ to, label, icon: Icon }) => <NavLink key={to} to={to}><Icon size={18} /><span>{label}</NavLink>)}</nav>
+        <nav className="mobile-bottom-nav" aria-label="Navegação rápida">{visibleLinks.slice(0, 4).map(({ to, label, icon: Icon }) => <NavLink key={to} to={to}><Icon size={18} /><span>{label}</span></NavLink>)}</nav>
       </div>
     </div>
   )
