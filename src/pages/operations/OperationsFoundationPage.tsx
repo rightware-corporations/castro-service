@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { ArrowRight, CalendarDays, ClipboardList, Filter, Inbox, LayoutDashboard, Plus, Search, Settings, ShieldCheck, SlidersHorizontal, UsersRound } from 'lucide-react'
+import { ArrowRight, CalendarDays, ClipboardList, Filter, Inbox, LayoutDashboard, Plus, Search, Settings, ShieldCheck, SlidersHorizontal } from 'lucide-react'
 import { useApi, useCan } from '../../app/providers/AppProviders'
 
 const modules = [
