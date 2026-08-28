@@ -4,7 +4,7 @@ import { HttpApiClient } from './HttpApiClient'
 
 describe('availability integration boundary', () => {
   it('treats zero slots from HTTP as a valid response', async () => {
-    const client = new HttpApiClient('http://localhost:8080', async () => new Response(JSON.stringify({ items: [], total: 0 }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
+    const client = new HttpApiClient('http://localhost:8080', async () => new Response(JSON.stringify({ date: '2026-08-27', timezone: 'Africa/Maputo', slots: [] }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
     const adapter = new HttpApiAdapter(client)
     const result = await adapter.availability.list({ bookableType: 'SERVICE', bookableId: 'service-id', date: '2026-08-27', durationMinutes: 60 })
     expect(result).toEqual({ items: [], total: 0 })
