@@ -14,12 +14,12 @@ describe('public services', () => {
   it('renders success state with a detail link', () => {
     render(<MemoryRouter><ServiceCollectionView resource={{ isLoading: false, isError: false, data: { items: [service] } }} /></MemoryRouter>)
     expect(screen.getByRole('heading', { name: '[CONTENT TBD]' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Ver serviço/ })).toHaveAttribute('href', '/servicos/service-1')
+    expect(screen.getByRole('link', { name: 'Ver [CONTENT TBD]' })).toHaveAttribute('href', '/servicos/service-1')
   })
 
   it('renders empty and API error states', () => {
     const { rerender } = render(<MemoryRouter><ServiceCollectionView resource={{ isLoading: false, isError: false, data: { items: [] } }} /></MemoryRouter>)
-    expect(screen.getByRole('heading', { name: 'Ainda não existem serviços publicados.' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Catálogo em preparação' })).toBeInTheDocument()
     rerender(<MemoryRouter><ServiceCollectionView resource={{ isLoading: false, isError: true }} /></MemoryRouter>)
     expect(screen.getByRole('heading', { name: 'Não foi possível carregar os serviços.' })).toBeInTheDocument()
   })
