@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, ArrowUpRight, Building2, Compass, Expand, Eye, GraduationCap, MapPin, Maximize2, Minus, Plus, RotateCw, UsersRound } from 'lucide-react'
 import { EmptyState, ErrorState, LoadingState } from '../../../design-system/patterns/feedback-overlays'
 import { Breadcrumbs } from '../../../design-system/patterns/navigation'
 import { Button } from '../../../design-system/primitives'
 import type { Space } from '../../../domain/models'
-import { bookingRoutes } from '../../booking/routes'
+import { bookingRoute } from '../../booking/routes'
 import { useSpace, useSpaces } from '../hooks'
 
 const purposeOptions = [
@@ -84,6 +84,7 @@ export function SpaceExplorer() {
 export function SpaceConfigurator() {
   const { slug } = useParams()
   const query = useSpace(slug)
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [purpose, setPurpose] = useState(searchParams.get('purpose') ?? '')
   const initialPeople = parsePeople(searchParams.get('people'))
@@ -100,8 +101,8 @@ export function SpaceConfigurator() {
   if (query.isError || !query.data) return <section className="public-page container"><ErrorState title="Não foi possível configurar este espaço." /></section>
   const space = query.data
   const peopleTooHigh = typeof people === 'number' && space.capacityMax !== undefined && people > space.capacityMax
-  const summary = useMemo(() => purposeOptions.find((item) => item.value === purpose)?.label, [purpose])
-  const bookingHref = bookingRoutes.date('SPACE', space.id)
+  const purposeLabel = purposeOptions.find((item) => item.value === purpose)?.label
+  const bookingHref = bookingRoute('SPACE', space.id, 'selection')
 
   return <div className="space-config-v2">
     <section className="container space-config-v2__header"><Breadcrumbs items={[{ label: 'Espaços', href: '/espacos' }, { label: space.name, href: `/espacos/${space.slug}` }, { label: 'Configurar' }]} /><div><span className="eyebrow">CONFIGURAR ESPAÇO</span><h1>Prepare o encontro <em>à sua maneira.</em></h1><p>Escolha apenas o que já pode ser definido sem assumir layouts ou equipamentos ainda não publicados.</p></div></section>
@@ -111,7 +112,7 @@ export function SpaceConfigurator() {
         <div className="space-config-v2__section"><div className="space-config-v2__section-title"><span>02</span><div><h2>Quantas pessoas?</h2><p>{space.capacityMax !== undefined ? `O espaço publicado indica capacidade máxima de ${space.capacityMax}.` : 'Indique o número previsto de participantes.'}</p></div></div><label className="space-config-v2__people"><span>Participantes</span><input type="number" min="1" max={space.capacityMax} value={people} onChange={(event) => setPeople(event.target.value === '' ? '' : Number(event.target.value))} aria-invalid={peopleTooHigh} />{peopleTooHigh && <small>O valor ultrapassa a capacidade publicada para este espaço.</small>}</label></div>
         <div className="space-config-v2__section space-config-v2__pending"><div className="space-config-v2__section-title"><span>03</span><div><h2>Layout & recursos</h2><p>Esta etapa será ativada quando layouts e recursos forem publicados pelo backend. Nenhuma opção fictícia é apresentada.</p></div></div></div>
       </div>
-      <aside className="space-config-v2__summary"><div className="space-config-v2__preview" aria-hidden="true"><span /><span /><span /></div><span className="eyebrow">RESUMO</span><h2>{space.name}</h2><dl><div><dt>Finalidade</dt><dd>{summary ?? 'A escolher'}</dd></div><div><dt>Participantes</dt><dd>{people === '' ? 'A indicar' : people}</dd></div><div><dt>Capacidade</dt><dd>{formatCapacity(space)}</dd></div></dl><Button disabled={!purpose || people === '' || peopleTooHigh} onClick={() => { window.location.href = bookingHref }}>Ver disponibilidade <ArrowRight size={16} /></Button><small>A disponibilidade será calculada pelo backend no próximo passo.</small></aside>
+      <aside className="space-config-v2__summary"><div className="space-config-v2__preview" aria-hidden="true"><span /><span /><span /></div><span className="eyebrow">RESUMO</span><h2>{space.name}</h2><dl><div><dt>Finalidade</dt><dd>{purposeLabel ?? 'A escolher'}</dd></div><div><dt>Participantes</dt><dd>{people === '' ? 'A indicar' : people}</dd></div><div><dt>Capacidade</dt><dd>{formatCapacity(space)}</dd></div></dl><Button disabled={!purpose || people === '' || peopleTooHigh} onClick={() => navigate(bookingHref)}>Ver disponibilidade <ArrowRight size={16} /></Button><small>A disponibilidade será calculada pelo backend no próximo passo.</small></aside>
     </section>
   </div>
 }
