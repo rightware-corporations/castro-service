@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
-import { Menu, X, LayoutDashboard, Inbox, CalendarDays, Settings, ChevronRight } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Inbox, CalendarDays, Settings, ChevronRight, ArrowUpRight } from 'lucide-react'
 import { useCan } from '../providers/AppProviders'
 
 const publicLinks = [
@@ -21,8 +21,12 @@ const operationLinks = [
 function Brand({ inverse = false }: { inverse?: boolean }) {
   return (
     <Link className={`brand-mark ${inverse ? 'brand-mark--inverse' : ''}`} to="/" aria-label="Castro’s Services — início">
-      <span className="brand-mark__symbol" aria-hidden="true">◌</span>
-      <span>
+      <span className="brand-mark__symbol" aria-hidden="true">
+        <span className="brand-node brand-node--a" />
+        <span className="brand-node brand-node--b" />
+        <span className="brand-node brand-node--c" />
+      </span>
+      <span className="brand-mark__wordmark">
         <strong>CASTRO’S</strong>
         <small>SERVICES</small>
       </span>
@@ -34,7 +38,7 @@ export function PublicLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <div className="public-layout">
+    <div className="public-layout public-v2-shell">
       <header className="public-header">
         <div className="container public-header__inner">
           <Brand />
@@ -42,7 +46,7 @@ export function PublicLayout() {
             {publicLinks.map((link) => (
               <NavLink key={link.to} to={link.to} onClick={() => setMenuOpen(false)}>{link.label}</NavLink>
             ))}
-            <Link className="button button--nav" to="/contacto" onClick={() => setMenuOpen(false)}>Falar connosco <ChevronRight size={16} /></Link>
+            <Link className="button button--nav public-header__cta" to="/contacto" onClick={() => setMenuOpen(false)}>Falar connosco <ChevronRight size={16} /></Link>
           </nav>
           <button className="icon-button public-menu-toggle" type="button" onClick={() => setMenuOpen((open) => !open)} aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'} aria-expanded={menuOpen}>
             {menuOpen ? <X size={22} /> : <Menu size={22} />}
@@ -50,11 +54,22 @@ export function PublicLayout() {
         </div>
       </header>
       <main><Outlet /></main>
-      <footer className="public-footer">
-        <div className="container public-footer__inner">
-          <Brand inverse />
-          <p>Conteúdo institucional e contactos reais serão ligados após validação de conteúdo.</p>
+      <footer className="public-footer public-footer--v2">
+        <div className="container public-footer__v2-grid">
+          <div className="public-footer__brand-block">
+            <Brand inverse />
+            <p>Consultoria, formação e espaços reunidos numa experiência pensada para pessoas e organizações.</p>
+          </div>
+          <nav className="public-footer__nav" aria-label="Navegação do rodapé">
+            <span className="public-footer__label">Explorar</span>
+            {publicLinks.map((link) => <Link key={link.to} to={link.to}>{link.label}<ArrowUpRight size={14} aria-hidden="true" /></Link>)}
+          </nav>
+          <div className="public-footer__closing">
+            <span className="public-footer__label">Castro’s Services</span>
+            <p>Atendimento ao Cliente · Ética e Liderança Organizacional · Palestras, Workshops e Formação · Treinamento Corporativo Personalizado.</p>
+          </div>
         </div>
+        <div className="container public-footer__baseline"><span>Castro’s Services</span><span>Experiência digital em desenvolvimento.</span></div>
       </footer>
     </div>
   )
@@ -88,7 +103,7 @@ export function OperationsLayout() {
       <div className="operations-main">
         <header className="operations-topbar"><button className="icon-button operations-menu" type="button" onClick={() => setSidebarOpen(true)} aria-label="Abrir navegação"><Menu size={21} /></button><div><span>Área interna</span><strong>Castro’s Services</strong></div><Link className="topbar-account" to="/app/configuracoes/utilizadores">Conta</Link></header>
         <main className="operations-content"><Outlet /></main>
-        <nav className="mobile-bottom-nav" aria-label="Navegação rápida">{visibleLinks.slice(0, 4).map(({ to, label, icon: Icon }) => <NavLink key={to} to={to}><Icon size={18} /><span>{label}</span></NavLink>)}</nav>
+        <nav className="mobile-bottom-nav" aria-label="Navegação rápida">{visibleLinks.slice(0, 4).map(({ to, label, icon: Icon }) => <NavLink key={to} to={to}><Icon size={18} /><span>{label}</NavLink>)}</nav>
       </div>
     </div>
   )
