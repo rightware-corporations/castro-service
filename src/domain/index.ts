@@ -15,6 +15,7 @@ export type Permission =
   | 'request.create'
   | 'request.update'
   | 'request.assign'
+  | 'request.close'
   | 'booking.read'
   | 'booking.create'
   | 'booking.update'
@@ -46,13 +47,9 @@ export type AuthSession = {
   subject?: string
   username?: string
   displayName?: string
+  organizationId?: string
+  permissions?: string[]
 }
 
-export type PermissionContext = {
-  permissions: PermissionSet
-}
-
-export type Collection<T> = {
-  items: T[]
-  total: number
-}
+export type PermissionContext = { permissions: PermissionSet }
+export type Collection<T> = { items: T[]; total: number }
