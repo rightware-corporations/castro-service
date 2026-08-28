@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { ServiceDetailView, ServiceCollectionView } from './ServicesPublic'
 
-const service = { slug: 'service-1', name: '[CONTENT TBD]', summary: '[A confirmar]' }
+const service = { id: 'service-1', slug: 'service-1', name: '[CONTENT TBD]', summary: '[A confirmar]' }
 
 describe('public services', () => {
   it('renders loading state', () => {
