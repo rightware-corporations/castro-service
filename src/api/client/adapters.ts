@@ -27,6 +27,22 @@ const emptyCollection = <T>(): Collection<T> => ({ items: [], total: 0 })
 const toCollection = <T>(items: T[]): Collection<T> => ({ items, total: items.length })
 const mapSession = (dto: AuthSessionDto): AuthSession => ({ authenticated: dto.authenticated, username: dto.email, subject: dto.email })
 
+const confirmedMockServices: ServiceDto[] = [
+  { id: '10000000-0000-0000-0000-000000000001', slug: 'atendimento-ao-cliente', name: 'Atendimento ao Cliente', bookingEnabled: false },
+  { id: '10000000-0000-0000-0000-000000000002', slug: 'etica-lideranca-organizacional', name: 'Consultoria em Ética e Liderança Organizacional', bookingEnabled: false },
+  { id: '10000000-0000-0000-0000-000000000003', slug: 'palestras-workshops-formacao', name: 'Palestras, Workshops e Formação', bookingEnabled: false },
+  { id: '10000000-0000-0000-0000-000000000004', slug: 'treinamento-corporativo-personalizado', name: 'Treinamento Corporativo Personalizado', bookingEnabled: false },
+]
+
+const confirmedMockSpaces: SpaceDto[] = [
+  {
+    id: '20000000-0000-0000-0000-000000000001',
+    slug: 'espaco-castros',
+    name: 'Espaço Castro’s',
+    description: 'Espaço físico preparado para reuniões, formação e workshops. Conteúdo visual real ainda pendente de assets aprovados.',
+  },
+]
+
 export class MockApiAdapter implements ApiAdapter {
   readonly kind = 'mock' as const
   async getCsrf(): Promise<CsrfTokenResponse> { return { token: 'mock-csrf-token' } }
@@ -34,13 +50,13 @@ export class MockApiAdapter implements ApiAdapter {
   async login(email: string, password: string): Promise<AuthSession> { void password; return { authenticated: true, username: email, subject: email } }
   async logout(): Promise<void> { return undefined }
   async getConfig(): Promise<PublicConfigDto> { return { businessTimezone: 'Africa/Maputo' } }
-  async listServices(): Promise<Collection<ServiceDto>> { return emptyCollection() }
-  async getService(slug: string): Promise<ServiceDto> { return { id: '00000000-0000-0000-0000-000000000000', slug, name: '[CONTENT TBD]' } }
+  async listServices(): Promise<Collection<ServiceDto>> { return toCollection(confirmedMockServices) }
+  async getService(slug: string): Promise<ServiceDto> { return confirmedMockServices.find((item) => item.slug === slug) ?? { id: '00000000-0000-0000-0000-000000000000', slug, name: '[CONTENT TBD]' } }
   async listCourses(): Promise<Collection<CourseDto>> { return emptyCollection() }
   async getCourse(slug: string): Promise<CourseDto> { return { id: '00000000-0000-0000-0000-000000000000', slug, name: '[CONTENT TBD]' } }
   async listCourseSessions(id: string): Promise<Collection<CourseSessionDto>> { void id; return emptyCollection() }
-  async listSpaces(): Promise<Collection<SpaceDto>> { return emptyCollection() }
-  async getSpace(slug: string): Promise<SpaceDto> { return { id: '00000000-0000-0000-0000-000000000000', slug, name: '[CONTENT TBD]' } }
+  async listSpaces(): Promise<Collection<SpaceDto>> { return toCollection(confirmedMockSpaces) }
+  async getSpace(slug: string): Promise<SpaceDto> { return confirmedMockSpaces.find((item) => item.slug === slug) ?? { id: '00000000-0000-0000-0000-000000000000', slug, name: '[CONTENT TBD]' } }
   async listAvailability(query: AvailabilityQueryDto): Promise<Collection<AvailabilitySlotDto>> { void query; return emptyCollection() }
   async createBooking(request: BookingRequestDto, options?: IdempotencyOptions): Promise<BookingResponseDto> {
     void request; void options
