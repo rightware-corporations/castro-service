@@ -9,6 +9,37 @@ const ApiContext = createContext<ApiAdapter | null>(null)
 const SessionContext = createContext<AuthSession | null>(null)
 const PermissionContextValue = createContext<PermissionContext | null>(null)
 
+const developmentPermissions: Permission[] = [
+  'dashboard.read',
+  'request.read',
+  'request.create',
+  'request.update',
+  'request.assign',
+  'booking.read',
+  'booking.create',
+  'booking.update',
+  'booking.cancel',
+  'service.read',
+  'service.manage',
+  'course.read',
+  'course.manage',
+  'space.read',
+  'space.manage',
+  'availability.read',
+  'availability.manage',
+  'content.read',
+  'content.manage',
+  'user.read',
+  'user.manage',
+  'role.read',
+  'role.manage',
+  'permission.read',
+  'permission.manage',
+  'settings.read',
+  'settings.manage',
+  'audit.read',
+]
+
 export function useApi(): ApiAdapter {
   const api = useContext(ApiContext)
   if (!api) throw new Error('useApi must be used inside AppProviders')
@@ -31,12 +62,16 @@ export function useCan(): (permission: Permission) => boolean {
 export function AppProviders({ children }: PropsWithChildren) {
   const queryClient = useMemo(() => new QueryClient(), [])
   const api = useMemo(() => createApiAdapter(), [])
+  const developmentPermissionContext = useMemo<PermissionContext | null>(() => {
+    if (!import.meta.env.DEV || api.kind !== 'mock') return null
+    return { permissions: new Set<Permission>(developmentPermissions) }
+  }, [api])
 
   return (
     <QueryClientProvider client={queryClient}>
       <ApiContext.Provider value={api}>
         <SessionContext.Provider value={null}>
-          <PermissionContextValue.Provider value={null}>{children}</PermissionContextValue.Provider>
+          <PermissionContextValue.Provider value={developmentPermissionContext}>{children}</PermissionContextValue.Provider>
         </SessionContext.Provider>
       </ApiContext.Provider>
     </QueryClientProvider>
