@@ -1,4 +1,4 @@
-import { Route, Routes, useParams } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import { AuthLayout, OperationsLayout, PublicLayout } from '../layouts/Layouts'
 import { AuthPage } from '../../pages/auth/AuthPages'
 import { NotFound } from '../../pages/NotFound'
@@ -9,6 +9,7 @@ import { ServicesCatalog, ServiceDetail } from '../../features/services/componen
 import { CoursesCatalog, CourseDetail } from '../../features/courses/components/CoursesPublic'
 import { ContactPublic } from '../../features/contact/components/ContactPublic'
 import { SpaceConfigurator, SpaceDetail, SpaceExplorer, SpacesCatalog } from '../../features/spaces/components/SpacesPublic'
+import { BookingConfirmation, BookingCustomer, BookingDate, BookingReview, BookingTime } from '../../features/booking/components/BookingPublic'
 import { DeferredPublicPage } from '../../pages/public/DeferredPublicPage'
 
 const operationPaths = [
@@ -18,16 +19,6 @@ const operationPaths = [
   '/app/configuracoes/recursos', '/app/configuracoes/disponibilidade', '/app/configuracoes/conteudo', '/app/configuracoes/utilizadores',
   '/app/configuracoes/funcoes', '/app/configuracoes/permissoes', '/app/configuracoes/geral',
 ]
-
-function BookingStep({ title }: { title: string }) {
-  const { bookableType, bookableId } = useParams()
-  return <section className="route-placeholder container"><span className="eyebrow">RESERVAR · FOUNDATION</span><h1>{title}</h1><p>Contexto preservado: {bookableType} / {bookableId}. Booking de negócio será implementado numa fase posterior.</p></section>
-}
-
-function BookingConfirmation() {
-  const { reference } = useParams()
-  return <section className="route-placeholder container"><span className="eyebrow">RESERVAR · FOUNDATION</span><h1>Confirmação</h1><p>Referência: {reference}. O fluxo de booking ainda não está implementado nesta fase.</p></section>
-}
 
 export function AppRouter() {
   return <Routes>
@@ -43,11 +34,11 @@ export function AppRouter() {
       <Route path="/espacos/:slug/configurar" element={<SpaceConfigurator />} />
       <Route path="/espacos/:slug/disponibilidade" element={<DeferredPublicPage />} />
       <Route path="/contacto" element={<ContactPublic />} />
-      <Route path="/reservar" element={<BookingStep title="Escolher o que pretende reservar" />} />
-      <Route path="/reservar/:bookableType/:bookableId/data" element={<BookingStep title="Escolher data" />} />
-      <Route path="/reservar/:bookableType/:bookableId/horario" element={<BookingStep title="Escolher horário" />} />
-      <Route path="/reservar/:bookableType/:bookableId/dados" element={<BookingStep title="Dados do cliente" />} />
-      <Route path="/reservar/:bookableType/:bookableId/rever" element={<BookingStep title="Rever pedido" />} />
+      <Route path="/reservar" element={<DeferredPublicPage />} />
+      <Route path="/reservar/:bookableType/:bookableId/data" element={<BookingDate />} />
+      <Route path="/reservar/:bookableType/:bookableId/horario" element={<BookingTime />} />
+      <Route path="/reservar/:bookableType/:bookableId/dados" element={<BookingCustomer />} />
+      <Route path="/reservar/:bookableType/:bookableId/rever" element={<BookingReview />} />
       <Route path="/reservar/confirmacao/:reference" element={<BookingConfirmation />} />
       {import.meta.env.DEV && <Route path="/__dev/components" element={<ComponentLab />} />}
       <Route path="*" element={<NotFound />} />
