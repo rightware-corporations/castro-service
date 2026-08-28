@@ -1,11 +1,11 @@
 import type { BookingTarget } from './index'
 
 export type PublicConfig = {
-  brandName?: string
-  locale?: string
+  businessTimezone: string
 }
 
 export type Service = {
+  id: string
   slug: string
   name: string
   summary?: string
@@ -15,7 +15,7 @@ export type Service = {
 }
 
 export type Course = {
-  id?: string
+  id: string
   slug: string
   name: string
   summary?: string
@@ -24,15 +24,19 @@ export type Course = {
 
 export type CourseSession = {
   id: string
-  courseSlug: string
   startAt: string
   endAt: string
 }
 
 export type Space = {
+  id: string
   slug: string
   name: string
   summary?: string
+  description?: string
+  location?: string
+  capacityMin?: number
+  capacityMax?: number
 }
 
 export type AvailabilityStatus = 'available' | 'booked'
@@ -50,16 +54,35 @@ export type AvailabilityQuery = {
   durationMinutes: number
 }
 
+export type BookingCustomer = {
+  firstName: string
+  lastName?: string
+  email?: string
+  phone?: string
+}
+
+export type SpaceBookingConfiguration = {
+  layoutId?: string
+  purpose?: string
+  amenityIds?: string[]
+}
+
 export type BookingDraft = {
   bookableType: BookingTarget
   bookableId: string
   date: string
-  start: string
-  customerName?: string
-  customerEmail?: string
+  startTime: string
+  endTime: string
+  participants?: number
+  customer: BookingCustomer
+  spaceConfiguration?: SpaceBookingConfiguration
+  notes?: string
 }
 
 export type BookingConfirmation = {
+  id?: string
   reference: string
   status: string
+  startAt: string
+  endAt: string
 }
