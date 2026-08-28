@@ -1,5 +1,6 @@
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { AuthLayout, OperationsLayout, PublicLayout } from '../layouts/Layouts'
+import { useApi, useSession, useSessionReady } from '../providers/AppProviders'
 import { AuthPage } from '../../pages/auth/AuthPages'
 import { NotFound } from '../../pages/NotFound'
 import { OperationsFoundationPage } from '../../pages/operations/OperationsFoundationPage'
@@ -11,6 +12,7 @@ import { ContactPublic } from '../../features/contact/components/ContactPublic'
 import { SpaceConfigurator, SpaceDetail, SpaceExplorer, SpacesCatalog } from '../../features/spaces/components/SpacesPublic'
 import { BookingConfirmation, BookingCustomer, BookingDate, BookingReview, BookingTime } from '../../features/booking/components/BookingPublic'
 import { DeferredPublicPage } from '../../pages/public/DeferredPublicPage'
+import { LoadingState } from '../../design-system/patterns/feedback-overlays'
 
 const operationPaths = [
   '/app/dashboard', '/app/pedidos', '/app/pedidos/:id', '/app/reservas', '/app/reservas/:id', '/app/clientes', '/app/clientes/:id',
@@ -19,6 +21,16 @@ const operationPaths = [
   '/app/configuracoes/recursos', '/app/configuracoes/disponibilidade', '/app/configuracoes/conteudo', '/app/configuracoes/utilizadores',
   '/app/configuracoes/funcoes', '/app/configuracoes/permissoes', '/app/configuracoes/geral',
 ]
+
+function OperationsGuard() {
+  const api = useApi()
+  const session = useSession()
+  const ready = useSessionReady()
+  if (api.kind === 'mock' && import.meta.env.DEV) return <OperationsLayout />
+  if (!ready) return <main className="operations-auth-loading"><LoadingState label="A validar sessão." /></main>
+  if (!session?.authenticated) return <Navigate to="/login" replace />
+  return <OperationsLayout />
+}
 
 export function AppRouter() {
   return <Routes>
@@ -48,7 +60,7 @@ export function AppRouter() {
       <Route path="/forgot-password" element={<AuthPage kind="forgot" />} />
       <Route path="/reset-password" element={<AuthPage kind="reset" />} />
     </Route>
-    <Route element={<OperationsLayout />}>
+    <Route element={<OperationsGuard />}>
       {operationPaths.map((path) => <Route key={path} path={path} element={<OperationsFoundationPage />} />)}
     </Route>
   </Routes>
