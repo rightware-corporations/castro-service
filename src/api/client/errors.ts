@@ -3,6 +3,9 @@ import type { ProblemDetailResponse } from '../contracts'
 export type ApiErrorCode =
   | 'VALIDATION_FAILED'
   | 'BOOKING_SLOT_UNAVAILABLE'
+  | 'BOOKING_BOOKABLE_TYPE_UNSUPPORTED'
+  | 'BOOKABLE_INACTIVE'
+  | 'RESOURCE_NOT_FOUND'
   | 'DUPLICATE_RESOURCE'
   | 'IDEMPOTENCY_KEY_REUSED'
   | 'INTERNAL_ERROR'
@@ -49,7 +52,16 @@ function normalizeFieldErrors(details: Record<string, unknown> | undefined): Rec
 }
 
 function normalizeErrorCode(code: ProblemDetailResponse['code'], status?: number): ApiErrorCode {
-  if (code === 'VALIDATION_FAILED' || code === 'BOOKING_SLOT_UNAVAILABLE' || code === 'DUPLICATE_RESOURCE' || code === 'IDEMPOTENCY_KEY_REUSED' || code === 'INTERNAL_ERROR') return code
+  if (
+    code === 'VALIDATION_FAILED'
+    || code === 'BOOKING_SLOT_UNAVAILABLE'
+    || code === 'BOOKING_BOOKABLE_TYPE_UNSUPPORTED'
+    || code === 'BOOKABLE_INACTIVE'
+    || code === 'RESOURCE_NOT_FOUND'
+    || code === 'DUPLICATE_RESOURCE'
+    || code === 'IDEMPOTENCY_KEY_REUSED'
+    || code === 'INTERNAL_ERROR'
+  ) return code
   if (status && status >= 500) return 'INTERNAL_ERROR'
   return 'UNKNOWN_ERROR'
 }
