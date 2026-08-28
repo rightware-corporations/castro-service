@@ -7,6 +7,10 @@ export function isPublicBookableType(value: string): value is BookingTarget {
 
 export type Permission =
   | 'dashboard.read'
+  | 'customer.read'
+  | 'customer.create'
+  | 'customer.update'
+  | 'customer.delete'
   | 'request.read'
   | 'request.create'
   | 'request.update'
