@@ -1,21 +1,7 @@
 import type {
-  ApiPort,
-  AuthSessionDto,
-  AvailabilityQueryDto,
-  AvailabilityResultDto,
-  AvailabilitySlotDto,
-  BookingRequestDto,
-  BookingResponseDto,
-  CourseDto,
-  CourseSessionDto,
-  CsrfTokenResponse,
-  IdempotencyOptions,
-  PublicBookingLookupDto,
-  PublicConfigDto,
-  RequestInput,
-  RequestResponseDto,
-  ServiceDto,
-  SpaceDto,
+  ApiPort, AuthSessionDto, AvailabilityQueryDto, AvailabilityResultDto, AvailabilitySlotDto, BookingRequestDto, BookingResponseDto,
+  CourseDto, CourseSessionDto, CsrfTokenResponse, IdempotencyOptions, OperationsBookingItemDto, OperationsCustomerItemDto,
+  OperationsRequestItemDto, OperationsSummaryDto, PublicBookingLookupDto, PublicConfigDto, RequestInput, RequestResponseDto, ServiceDto, SpaceDto,
 } from '../contracts'
 import type { AuthSession, Collection } from '../../domain'
 import { HttpApiClient, createIdempotencyKey } from './HttpApiClient'
@@ -25,7 +11,14 @@ import { serializeAvailabilityQuery } from './serialization'
 export interface ApiAdapter extends ApiPort { readonly kind: 'mock' | 'http' }
 const emptyCollection = <T>(): Collection<T> => ({ items: [], total: 0 })
 const toCollection = <T>(items: T[]): Collection<T> => ({ items, total: items.length })
-const mapSession = (dto: AuthSessionDto): AuthSession => ({ authenticated: dto.authenticated, username: dto.email, subject: dto.email })
+const mapSession = (dto: AuthSessionDto): AuthSession => ({
+  authenticated: dto.authenticated,
+  username: dto.email,
+  subject: dto.email,
+  displayName: [dto.firstName, dto.lastName].filter(Boolean).join(' ') || dto.email,
+  organizationId: dto.organizationId,
+  permissions: dto.permissions ?? [],
+})
 
 const confirmedMockServices: ServiceDto[] = [
   { id: '10000000-0000-0000-0000-000000000001', slug: 'atendimento-ao-cliente', name: 'Atendimento ao Cliente', bookingEnabled: false },
@@ -34,20 +27,13 @@ const confirmedMockServices: ServiceDto[] = [
   { id: '10000000-0000-0000-0000-000000000004', slug: 'treinamento-corporativo-personalizado', name: 'Treinamento Corporativo Personalizado', bookingEnabled: false },
 ]
 
-const confirmedMockSpaces: SpaceDto[] = [
-  {
-    id: '20000000-0000-0000-0000-000000000001',
-    slug: 'espaco-castros',
-    name: 'Espaço Castro’s',
-    description: 'Espaço físico preparado para reuniões, formação e workshops. Conteúdo visual real ainda pendente de assets aprovados.',
-  },
-]
+const confirmedMockSpaces: SpaceDto[] = [{ id: '20000000-0000-0000-0000-000000000001', slug: 'espaco-castros', name: 'Espaço Castro’s', description: 'Espaço físico preparado para reuniões, formação e workshops. Conteúdo visual real ainda pendente de assets aprovados.' }]
 
 export class MockApiAdapter implements ApiAdapter {
   readonly kind = 'mock' as const
   async getCsrf(): Promise<CsrfTokenResponse> { return { token: 'mock-csrf-token' } }
   async getSession(): Promise<AuthSession | null> { return null }
-  async login(email: string, password: string): Promise<AuthSession> { void password; return { authenticated: true, username: email, subject: email } }
+  async login(email: string, password: string): Promise<AuthSession> { void password; return { authenticated: true, username: email, subject: email, displayName: email, permissions: [] } }
   async logout(): Promise<void> { return undefined }
   async getConfig(): Promise<PublicConfigDto> { return { businessTimezone: 'Africa/Maputo' } }
   async listServices(): Promise<Collection<ServiceDto>> { return toCollection(confirmedMockServices) }
@@ -58,10 +44,7 @@ export class MockApiAdapter implements ApiAdapter {
   async listSpaces(): Promise<Collection<SpaceDto>> { return toCollection(confirmedMockSpaces) }
   async getSpace(slug: string): Promise<SpaceDto> { return confirmedMockSpaces.find((item) => item.slug === slug) ?? { id: '00000000-0000-0000-0000-000000000000', slug, name: '[CONTENT TBD]' } }
   async listAvailability(query: AvailabilityQueryDto): Promise<Collection<AvailabilitySlotDto>> { void query; return emptyCollection() }
-  async createBooking(request: BookingRequestDto, options?: IdempotencyOptions): Promise<BookingResponseDto> {
-    void request; void options
-    return { id: '00000000-0000-0000-0000-000000000000', reference: 'REFERENCE TBD', status: 'not-configured', startAt: '', endAt: '' }
-  }
+  async createBooking(request: BookingRequestDto, options?: IdempotencyOptions): Promise<BookingResponseDto> { void request; void options; return { id: '00000000-0000-0000-0000-000000000000', reference: 'REFERENCE TBD', status: 'not-configured', startAt: '', endAt: '' } }
   async getBooking(reference: string): Promise<PublicBookingLookupDto> { return { reference, status: 'not-configured', startAt: '', endAt: '' } }
   async createRequest(request: RequestInput, options?: IdempotencyOptions): Promise<RequestResponseDto> { void request; void options; return { id: 'REQUEST TBD', status: 'NEW' } }
   get auth(): ApiPort['auth'] { return { getCsrf: () => this.getCsrf(), getSession: () => this.getSession(), login: (email, password) => this.login(email, password), logout: () => this.logout() } }
@@ -69,58 +52,18 @@ export class MockApiAdapter implements ApiAdapter {
   get availability(): ApiPort['availability'] { return { list: (query) => this.listAvailability(query) } }
   get bookings(): ApiPort['bookings'] { return { create: (request, options) => this.createBooking(request, options), getByReference: (reference) => this.getBooking(reference) } }
   get requests(): ApiPort['requests'] { return { create: (request, options) => this.createRequest(request, options) } }
+  get operations(): ApiPort['operations'] { return { getSummary: async () => ({ requests: 0, bookings: 0, customers: 0 }), listRequests: async () => emptyCollection<OperationsRequestItemDto>(), listBookings: async () => emptyCollection<OperationsBookingItemDto>(), listCustomers: async () => emptyCollection<OperationsCustomerItemDto>() } }
 }
 
 export class HttpApiAdapter implements ApiAdapter {
   readonly kind = 'http' as const
   constructor(private readonly client: HttpApiClient) {}
-
-  get auth(): ApiPort['auth'] {
-    return {
-      getCsrf: () => this.client.requestOrThrow<CsrfTokenResponse>(apiRoutes.csrf),
-      getSession: async () => mapSession(await this.client.requestOrThrow<AuthSessionDto>(apiRoutes.me)),
-      login: async (email, password) => mapSession(await this.client.requestOrThrow<AuthSessionDto>(apiRoutes.login, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) })),
-      logout: () => this.client.requestOrThrow<void>(apiRoutes.logout, { method: 'POST' }),
-    }
-  }
-
-  get public(): ApiPort['public'] {
-    return {
-      getConfig: () => this.client.requestOrThrow<PublicConfigDto>(apiRoutes.publicConfig),
-      listServices: async () => toCollection(await this.client.requestOrThrow<ServiceDto[]>(apiRoutes.services)),
-      getService: (slug) => this.client.requestOrThrow<ServiceDto>(apiRoutes.service(slug)),
-      listCourses: async () => toCollection(await this.client.requestOrThrow<CourseDto[]>(apiRoutes.courses)),
-      getCourse: (slug) => this.client.requestOrThrow<CourseDto>(apiRoutes.course(slug)),
-      listCourseSessions: async (id) => toCollection(await this.client.requestOrThrow<CourseSessionDto[]>(apiRoutes.courseSessions(id))),
-      listSpaces: async () => toCollection(await this.client.requestOrThrow<SpaceDto[]>(apiRoutes.spaces)),
-      getSpace: (slug) => this.client.requestOrThrow<SpaceDto>(apiRoutes.space(slug)),
-    }
-  }
-
-  get availability(): ApiPort['availability'] {
-    return {
-      list: async (query) => {
-        const result = await this.client.requestOrThrow<AvailabilityResultDto>(`${apiRoutes.availability}?${serializeAvailabilityQuery(query)}`)
-        return toCollection(result.slots)
-      },
-    }
-  }
-
-  get bookings(): ApiPort['bookings'] {
-    return {
-      create: (request, options) => this.client.requestOrThrow<BookingResponseDto>(apiRoutes.bookings, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request) }, { idempotencyKey: options?.idempotencyKey ?? createIdempotencyKey() }),
-      getByReference: (reference) => this.client.requestOrThrow<PublicBookingLookupDto>(apiRoutes.booking(reference)),
-    }
-  }
-
-  get requests(): ApiPort['requests'] {
-    return {
-      create: (request, options) => this.client.requestOrThrow<RequestResponseDto>(apiRoutes.requests, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request) }, { idempotencyKey: options?.idempotencyKey ?? createIdempotencyKey() }),
-    }
-  }
+  get auth(): ApiPort['auth'] { return { getCsrf: () => this.client.requestOrThrow<CsrfTokenResponse>(apiRoutes.csrf), getSession: async () => mapSession(await this.client.requestOrThrow<AuthSessionDto>(apiRoutes.me)), login: async (email, password) => mapSession(await this.client.requestOrThrow<AuthSessionDto>(apiRoutes.login, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) })), logout: () => this.client.requestOrThrow<void>(apiRoutes.logout, { method: 'POST' }) } }
+  get public(): ApiPort['public'] { return { getConfig: () => this.client.requestOrThrow<PublicConfigDto>(apiRoutes.publicConfig), listServices: async () => toCollection(await this.client.requestOrThrow<ServiceDto[]>(apiRoutes.services)), getService: (slug) => this.client.requestOrThrow<ServiceDto>(apiRoutes.service(slug)), listCourses: async () => toCollection(await this.client.requestOrThrow<CourseDto[]>(apiRoutes.courses)), getCourse: (slug) => this.client.requestOrThrow<CourseDto>(apiRoutes.course(slug)), listCourseSessions: async (id) => toCollection(await this.client.requestOrThrow<CourseSessionDto[]>(apiRoutes.courseSessions(id))), listSpaces: async () => toCollection(await this.client.requestOrThrow<SpaceDto[]>(apiRoutes.spaces)), getSpace: (slug) => this.client.requestOrThrow<SpaceDto>(apiRoutes.space(slug)) } }
+  get availability(): ApiPort['availability'] { return { list: async (query) => { const result = await this.client.requestOrThrow<AvailabilityResultDto>(`${apiRoutes.availability}?${serializeAvailabilityQuery(query)}`); return toCollection(result.slots) } } }
+  get bookings(): ApiPort['bookings'] { return { create: (request, options) => this.client.requestOrThrow<BookingResponseDto>(apiRoutes.bookings, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request) }, { idempotencyKey: options?.idempotencyKey ?? createIdempotencyKey() }), getByReference: (reference) => this.client.requestOrThrow<PublicBookingLookupDto>(apiRoutes.booking(reference)) } }
+  get requests(): ApiPort['requests'] { return { create: (request, options) => this.client.requestOrThrow<RequestResponseDto>(apiRoutes.requests, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request) }, { idempotencyKey: options?.idempotencyKey ?? createIdempotencyKey() }) } }
+  get operations(): ApiPort['operations'] { return { getSummary: () => this.client.requestOrThrow<OperationsSummaryDto>(apiRoutes.operationsSummary), listRequests: async () => toCollection(await this.client.requestOrThrow<OperationsRequestItemDto[]>(apiRoutes.operationsRequests)), listBookings: async () => toCollection(await this.client.requestOrThrow<OperationsBookingItemDto[]>(apiRoutes.operationsBookings)), listCustomers: async () => toCollection(await this.client.requestOrThrow<OperationsCustomerItemDto[]>(apiRoutes.operationsCustomers)) } }
 }
 
-export function createApiAdapter(): ApiAdapter {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL?.trim()
-  return baseUrl ? new HttpApiAdapter(new HttpApiClient(baseUrl)) : new MockApiAdapter()
-}
+export function createApiAdapter(): ApiAdapter { const baseUrl = import.meta.env.VITE_API_BASE_URL?.trim(); return baseUrl ? new HttpApiAdapter(new HttpApiClient(baseUrl)) : new MockApiAdapter() }
