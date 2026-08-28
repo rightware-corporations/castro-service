@@ -3,34 +3,38 @@ import type { AuthSession, BookingTarget, Collection } from '../../domain'
 export type BookableType = BookingTarget
 
 export type PublicConfigDto = {
-  brandName?: string
-  locale?: string
+  businessTimezone: string
 }
 
 export type ServiceDto = {
-  slug: string
+  id: string
   name: string
-  summary?: string
-  description?: string
-  durationMinutes?: number
-  bookingEnabled?: boolean
+  slug: string
+  description?: string | null
+  durationMinutes?: number | null
+  bookingEnabled?: boolean | null
 }
 
 export type CourseDto = {
-  id?: string
-  slug: string
+  id: string
   name: string
-  summary?: string
-  description?: string
+  slug: string
+  description?: string | null
 }
 
 export type CsrfTokenResponse = {
   token: string
+  headerName?: string
+  parameterName?: string
+}
+
+export type AuthSessionDto = {
+  email: string
+  authenticated: boolean
 }
 
 export type CourseSessionDto = {
   id: string
-  courseSlug: string
   startAt: string
   endAt: string
 }
@@ -38,9 +42,13 @@ export type CourseSessionDto = {
 export type CourseSessionResponse = CourseSessionDto
 
 export type SpaceDto = {
-  slug: string
+  id: string
   name: string
-  summary?: string
+  slug: string
+  description?: string | null
+  location?: string | null
+  capacityMin?: number | null
+  capacityMax?: number | null
 }
 
 export type AvailabilityQueryDto = {
@@ -56,20 +64,52 @@ export type AvailabilitySlotDto = {
   status: 'AVAILABLE' | 'BOOKED'
 }
 
+export type AvailabilityResultDto = {
+  date: string
+  timezone: string
+  slots: AvailabilitySlotDto[]
+}
+
+export type BookingCustomerInputDto = {
+  firstName: string
+  lastName?: string
+  email?: string
+  phone?: string
+}
+
+export type SpaceConfigurationDto = {
+  layoutId?: string
+  purpose?: string
+  amenityIds?: string[]
+}
+
 export type BookingRequestDto = {
   bookableType: BookableType
   bookableId: string
   date: string
-  start: string
-  customerName?: string
-  customerEmail?: string
+  startTime: string
+  endTime: string
+  participants?: number
+  customer: BookingCustomerInputDto
+  spaceConfiguration?: SpaceConfigurationDto
+  notes?: string
 }
 
 export type BookingRequest = BookingRequestDto
 
 export type BookingResponseDto = {
+  id: string
   reference: string
   status: string
+  startAt: string
+  endAt: string
+}
+
+export type PublicBookingLookupDto = {
+  reference: string
+  status: string
+  startAt: string
+  endAt: string
 }
 
 export type BookingResponse = BookingResponseDto
@@ -87,14 +127,17 @@ export type RequestInput = {
 
 export type RequestRequestDto = RequestInput
 
+export type RequestResponseDto = {
+  id: string
+  status: string
+}
+
 export type ProblemDetailResponse = {
-  type?: string
-  title?: string
+  code?: string
+  message?: string
   status?: number
-  detail?: string
-  instance?: string
-  code?: 'VALIDATION_FAILED' | 'BOOKING_SLOT_UNAVAILABLE' | 'DUPLICATE_RESOURCE' | 'IDEMPOTENCY_KEY_REUSED' | 'INTERNAL_ERROR' | string
-  errors?: Record<string, string[]>
+  timestamp?: string
+  details?: Record<string, unknown>
 }
 
 export type IdempotencyOptions = {
@@ -123,9 +166,9 @@ export type ApiPort = {
   }
   bookings: {
     create(request: BookingRequestDto, options?: IdempotencyOptions): Promise<BookingResponseDto>
-    getByReference(reference: string): Promise<BookingResponseDto>
+    getByReference(reference: string): Promise<PublicBookingLookupDto>
   }
   requests: {
-    create(request: RequestInput, options?: IdempotencyOptions): Promise<{ id: string }>
+    create(request: RequestInput, options?: IdempotencyOptions): Promise<RequestResponseDto>
   }
 }
