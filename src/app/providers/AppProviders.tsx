@@ -11,6 +11,10 @@ const PermissionContextValue = createContext<PermissionContext | null>(null)
 
 const developmentPermissions: Permission[] = [
   'dashboard.read',
+  'customer.read',
+  'customer.create',
+  'customer.update',
+  'customer.delete',
   'request.read',
   'request.create',
   'request.update',
