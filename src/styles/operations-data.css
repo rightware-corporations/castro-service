@@ -1,0 +1,26 @@
+.ops-data-row { display:grid; grid-template-columns:1.5fr 1fr 1fr .8fr .8fr; gap:0; align-items:center; min-height:4.7rem; border-bottom:1px solid var(--color-border); padding:.8rem 1rem; font-size:var(--text-sm); }
+.ops-data-row:last-child { border-bottom:0; }
+.ops-data-row--bookings { grid-template-columns:1fr 1.4fr 1.2fr 1fr .8fr; }
+.ops-data-row > span { min-width:0; padding-right:.75rem; color:var(--color-charcoal); }
+.ops-data-row strong { display:block; overflow:hidden; color:var(--color-deep-navy); text-overflow:ellipsis; white-space:nowrap; }
+.ops-data-row small { display:block; margin-top:.2rem; overflow:hidden; color:var(--color-muted); font-size:.72rem; text-overflow:ellipsis; white-space:nowrap; }
+.ops-status { display:inline-flex; min-height:1.7rem; align-items:center; border:1px solid var(--color-border); padding:.2rem .55rem; color:var(--color-charcoal); font-size:.7rem; font-weight:700; letter-spacing:.04em; white-space:nowrap; }
+.ops-status--new,.ops-status--pending { border-color:color-mix(in srgb,var(--color-teal) 45%,var(--color-border)); background:color-mix(in srgb,var(--color-teal) 8%,white); color:var(--color-navy); }
+.ops-status--confirmed,.ops-status--completed { background:var(--color-cream); color:var(--color-deep-navy); }
+.ops-status--cancelled,.ops-status--closed { color:var(--color-muted); }
+.ops-calendar-event,.ops-calendar-more { display:block; margin-top:.3rem; overflow:hidden; border-left:2px solid var(--color-teal); background:var(--color-cream); padding:.2rem .3rem; color:var(--color-deep-navy); font-size:.62rem; text-overflow:ellipsis; white-space:nowrap; }
+.ops-calendar-more { border-left-color:var(--color-navy); background:transparent; }
+@media (max-width:767px) {
+  .ops-data-row,.ops-data-row--bookings { grid-template-columns:1fr 1fr; gap:.75rem; align-items:start; padding:1rem; }
+  .ops-data-row > span { padding-right:0; }
+  .ops-data-row > span:first-child { grid-column:1 / -1; }
+  .ops-data-row > span::before { display:block; margin-bottom:.15rem; color:var(--color-muted); font-size:.6rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase; }
+  .ops-data-row > span:nth-child(2)::before { content:'Detalhe'; }
+  .ops-data-row > span:nth-child(3)::before { content:'Contacto'; }
+  .ops-data-row > span:nth-child(4)::before { content:'Estado'; }
+  .ops-data-row > span:nth-child(5)::before { content:'Data'; }
+  .ops-data-row--bookings > span:nth-child(2)::before { content:'Cliente'; }
+  .ops-data-row--bookings > span:nth-child(3)::before { content:'Reserva'; }
+  .ops-data-row--bookings > span:nth-child(4)::before { content:'Data'; }
+  .ops-data-row--bookings > span:nth-child(5)::before { content:'Estado'; }
+}
