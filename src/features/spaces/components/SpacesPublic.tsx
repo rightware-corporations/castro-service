@@ -102,7 +102,10 @@ export function SpaceConfigurator() {
   const space = query.data
   const peopleTooHigh = typeof people === 'number' && space.capacityMax !== undefined && people > space.capacityMax
   const purposeLabel = purposeOptions.find((item) => item.value === purpose)?.label
-  const bookingHref = bookingRoute('SPACE', space.id, 'selection')
+  const bookingParams = new URLSearchParams()
+  if (purpose) bookingParams.set('purpose', purpose)
+  if (people !== '') bookingParams.set('people', String(people))
+  const bookingHref = `${bookingRoute('SPACE', space.id, 'selection')}?${bookingParams.toString()}`
 
   return <div className="space-config-v2">
     <section className="container space-config-v2__header"><Breadcrumbs items={[{ label: 'Espaços', href: '/espacos' }, { label: space.name, href: `/espacos/${space.slug}` }, { label: 'Configurar' }]} /><div><span className="eyebrow">CONFIGURAR ESPAÇO</span><h1>Prepare o encontro <em>à sua maneira.</em></h1><p>Escolha apenas o que já pode ser definido sem assumir layouts ou equipamentos ainda não publicados.</p></div></section>
