@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useLocation } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, CalendarDays, CheckSquare2, ClipboardList, Filter, Inbox, LayoutDashboard, Plus, Search, Settings, ShieldCheck, SlidersHorizontal, UsersRound } from 'lucide-react'
+import { ArrowLeft, ArrowRight, CalendarDays, CheckSquare2, ClipboardList, Filter, Inbox, LayoutDashboard, Search, Settings, ShieldCheck, SlidersHorizontal, UsersRound } from 'lucide-react'
 import { useApi, useCan } from '../../app/providers/AppProviders'
 import type { BookingOperationalStatus, OperationsBookingItemDto, OperationsCustomerItemDto, OperationsRequestItemDto, RequestOperationalStatus } from '../../api/contracts'
 import { ErrorState, LoadingState } from '../../design-system/patterns/feedback-overlays'
