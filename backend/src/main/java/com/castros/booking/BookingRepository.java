@@ -10,5 +10,6 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
     List<Booking> findOverlaps(@Param("type") BookableType type,@Param("id") UUID id,@Param("statuses") Collection<BookingStatus> statuses,@Param("startAt") OffsetDateTime startAt,@Param("endAt") OffsetDateTime endAt);
     Optional<Booking> findByReference(String reference);
     Optional<Booking> findByOrganizationIdAndIdempotencyKey(UUID organizationId, String idempotencyKey);
+    Optional<Booking> findByOrganizationIdAndId(UUID organizationId, UUID id);
     List<Booking> findAllByOrganizationIdOrderByStartAtDesc(UUID organizationId);
 }
