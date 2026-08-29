@@ -1,7 +1,7 @@
 import type {
-  ApiPort, AuthSessionDto, AvailabilityQueryDto, AvailabilityResultDto, AvailabilitySlotDto, BookingRequestDto, BookingResponseDto,
+  ApiPort, AuthSessionDto, AvailabilityQueryDto, AvailabilityResultDto, AvailabilitySlotDto, BookingOperationalStatus, BookingRequestDto, BookingResponseDto,
   CourseDto, CourseSessionDto, CsrfTokenResponse, IdempotencyOptions, OperationsBookingItemDto, OperationsCustomerItemDto,
-  OperationsRequestItemDto, OperationsSummaryDto, PublicBookingLookupDto, PublicConfigDto, RequestInput, RequestResponseDto, ServiceDto, SpaceDto,
+  OperationsRequestItemDto, OperationsSummaryDto, PublicBookingLookupDto, PublicConfigDto, RequestInput, RequestOperationalStatus, RequestResponseDto, ServiceDto, SpaceDto,
 } from '../contracts'
 import type { AuthSession, Collection } from '../../domain'
 import { HttpApiClient, createIdempotencyKey } from './HttpApiClient'
@@ -52,7 +52,20 @@ export class MockApiAdapter implements ApiAdapter {
   get availability(): ApiPort['availability'] { return { list: (query) => this.listAvailability(query) } }
   get bookings(): ApiPort['bookings'] { return { create: (request, options) => this.createBooking(request, options), getByReference: (reference) => this.getBooking(reference) } }
   get requests(): ApiPort['requests'] { return { create: (request, options) => this.createRequest(request, options) } }
-  get operations(): ApiPort['operations'] { return { getSummary: async () => ({ requests: 0, bookings: 0, customers: 0 }), listRequests: async () => emptyCollection<OperationsRequestItemDto>(), listBookings: async () => emptyCollection<OperationsBookingItemDto>(), listCustomers: async () => emptyCollection<OperationsCustomerItemDto>() } }
+  get operations(): ApiPort['operations'] {
+    const unavailable = async () => { throw new Error('Operational mock detail is not configured.') }
+    return {
+      getSummary: async () => ({ requests: 0, bookings: 0, customers: 0 }),
+      listRequests: async () => emptyCollection<OperationsRequestItemDto>(),
+      getRequest: unavailable,
+      updateRequestStatus: async (_id: string, _status: RequestOperationalStatus) => unavailable(),
+      listBookings: async () => emptyCollection<OperationsBookingItemDto>(),
+      getBooking: unavailable,
+      updateBookingStatus: async (_id: string, _status: BookingOperationalStatus) => unavailable(),
+      listCustomers: async () => emptyCollection<OperationsCustomerItemDto>(),
+      getCustomer: unavailable,
+    }
+  }
 }
 
 export class HttpApiAdapter implements ApiAdapter {
@@ -63,7 +76,19 @@ export class HttpApiAdapter implements ApiAdapter {
   get availability(): ApiPort['availability'] { return { list: async (query) => { const result = await this.client.requestOrThrow<AvailabilityResultDto>(`${apiRoutes.availability}?${serializeAvailabilityQuery(query)}`); return toCollection(result.slots) } } }
   get bookings(): ApiPort['bookings'] { return { create: (request, options) => this.client.requestOrThrow<BookingResponseDto>(apiRoutes.bookings, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request) }, { idempotencyKey: options?.idempotencyKey ?? createIdempotencyKey() }), getByReference: (reference) => this.client.requestOrThrow<PublicBookingLookupDto>(apiRoutes.booking(reference)) } }
   get requests(): ApiPort['requests'] { return { create: (request, options) => this.client.requestOrThrow<RequestResponseDto>(apiRoutes.requests, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request) }, { idempotencyKey: options?.idempotencyKey ?? createIdempotencyKey() }) } }
-  get operations(): ApiPort['operations'] { return { getSummary: () => this.client.requestOrThrow<OperationsSummaryDto>(apiRoutes.operationsSummary), listRequests: async () => toCollection(await this.client.requestOrThrow<OperationsRequestItemDto[]>(apiRoutes.operationsRequests)), listBookings: async () => toCollection(await this.client.requestOrThrow<OperationsBookingItemDto[]>(apiRoutes.operationsBookings)), listCustomers: async () => toCollection(await this.client.requestOrThrow<OperationsCustomerItemDto[]>(apiRoutes.operationsCustomers)) } }
+  get operations(): ApiPort['operations'] {
+    return {
+      getSummary: () => this.client.requestOrThrow<OperationsSummaryDto>(apiRoutes.operationsSummary),
+      listRequests: async () => toCollection(await this.client.requestOrThrow<OperationsRequestItemDto[]>(apiRoutes.operationsRequests)),
+      getRequest: (id) => this.client.requestOrThrow<OperationsRequestItemDto>(apiRoutes.operationsRequest(id)),
+      updateRequestStatus: (id, status) => this.client.requestOrThrow<OperationsRequestItemDto>(apiRoutes.operationsRequestStatus(id), { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) }),
+      listBookings: async () => toCollection(await this.client.requestOrThrow<OperationsBookingItemDto[]>(apiRoutes.operationsBookings)),
+      getBooking: (id) => this.client.requestOrThrow<OperationsBookingItemDto>(apiRoutes.operationsBooking(id)),
+      updateBookingStatus: (id, status) => this.client.requestOrThrow<OperationsBookingItemDto>(apiRoutes.operationsBookingStatus(id), { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) }),
+      listCustomers: async () => toCollection(await this.client.requestOrThrow<OperationsCustomerItemDto[]>(apiRoutes.operationsCustomers)),
+      getCustomer: (id) => this.client.requestOrThrow<OperationsCustomerItemDto>(apiRoutes.operationsCustomer(id)),
+    }
+  }
 }
 
 export function createApiAdapter(): ApiAdapter { const baseUrl = import.meta.env.VITE_API_BASE_URL?.trim(); return baseUrl ? new HttpApiAdapter(new HttpApiClient(baseUrl)) : new MockApiAdapter() }
