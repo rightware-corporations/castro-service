@@ -58,10 +58,10 @@ export class MockApiAdapter implements ApiAdapter {
       getSummary: async () => ({ requests: 0, bookings: 0, customers: 0 }),
       listRequests: async () => emptyCollection<OperationsRequestItemDto>(),
       getRequest: unavailable,
-      updateRequestStatus: async (_id: string, _status: RequestOperationalStatus) => unavailable(),
+      updateRequestStatus: async (id: string, status: RequestOperationalStatus) => { void id; void status; return unavailable() },
       listBookings: async () => emptyCollection<OperationsBookingItemDto>(),
       getBooking: unavailable,
-      updateBookingStatus: async (_id: string, _status: BookingOperationalStatus) => unavailable(),
+      updateBookingStatus: async (id: string, status: BookingOperationalStatus) => { void id; void status; return unavailable() },
       listCustomers: async () => emptyCollection<OperationsCustomerItemDto>(),
       getCustomer: unavailable,
     }
