@@ -34,13 +34,15 @@ export type RequestInput = { firstName: string; lastName: string; email: string;
 export type RequestRequestDto = RequestInput
 export type RequestResponseDto = { id: string; status: string }
 
+export type RequestOperationalStatus = 'NEW' | 'CONTACTED' | 'QUALIFIED' | 'WAITING_CUSTOMER' | 'CONVERTED' | 'CLOSED' | 'CANCELLED'
+export type BookingOperationalStatus = 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW'
 export type OperationsSummaryDto = { requests: number; bookings: number; customers: number }
 export type OperationsRequestItemDto = {
-  id: string; type: string; status: string; message?: string | null; createdAt: string
+  id: string; type: string; status: RequestOperationalStatus; message?: string | null; createdAt: string
   customerId?: string | null; firstName?: string | null; lastName?: string | null; email?: string | null; phone?: string | null
 }
 export type OperationsBookingItemDto = {
-  id: string; reference: string; status: string; bookableType: string; bookableId: string; startAt: string; endAt: string
+  id: string; reference: string; status: BookingOperationalStatus; bookableType: string; bookableId: string; startAt: string; endAt: string
   participants?: number | null; purpose?: string | null; createdAt: string; customerId?: string | null; firstName?: string | null
   lastName?: string | null; email?: string | null; phone?: string | null
 }
@@ -75,7 +77,12 @@ export type ApiPort = {
   operations: {
     getSummary(): Promise<OperationsSummaryDto>
     listRequests(): Promise<Collection<OperationsRequestItemDto>>
+    getRequest(id: string): Promise<OperationsRequestItemDto>
+    updateRequestStatus(id: string, status: RequestOperationalStatus): Promise<OperationsRequestItemDto>
     listBookings(): Promise<Collection<OperationsBookingItemDto>>
+    getBooking(id: string): Promise<OperationsBookingItemDto>
+    updateBookingStatus(id: string, status: BookingOperationalStatus): Promise<OperationsBookingItemDto>
     listCustomers(): Promise<Collection<OperationsCustomerItemDto>>
+    getCustomer(id: string): Promise<OperationsCustomerItemDto>
   }
 }
