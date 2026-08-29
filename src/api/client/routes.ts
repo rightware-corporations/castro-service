@@ -17,6 +17,11 @@ export const apiRoutes = {
   csrf: '/api/v1/auth/csrf',
   operationsSummary: '/api/v1/operations/summary',
   operationsRequests: '/api/v1/operations/requests',
+  operationsRequest: (id: string) => `/api/v1/operations/requests/${encodeURIComponent(id)}`,
+  operationsRequestStatus: (id: string) => `/api/v1/operations/requests/${encodeURIComponent(id)}/status`,
   operationsBookings: '/api/v1/operations/bookings',
+  operationsBooking: (id: string) => `/api/v1/operations/bookings/${encodeURIComponent(id)}`,
+  operationsBookingStatus: (id: string) => `/api/v1/operations/bookings/${encodeURIComponent(id)}/status`,
   operationsCustomers: '/api/v1/operations/customers',
+  operationsCustomer: (id: string) => `/api/v1/operations/customers/${encodeURIComponent(id)}`,
 } as const
