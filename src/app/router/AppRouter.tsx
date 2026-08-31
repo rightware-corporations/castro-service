@@ -13,6 +13,7 @@ import { SpaceSettingsPage } from '../../pages/operations/SpaceSettingsPage'
 import { ManualBookingPage } from '../../pages/operations/ManualBookingPage'
 import { AccessSettingsPage } from '../../pages/operations/AccessSettingsPage'
 import { GeneralSettingsPage } from '../../pages/operations/GeneralSettingsPage'
+import { ContentSettingsPage } from '../../pages/operations/ContentSettingsPage'
 import { TasksPage } from '../../pages/operations/TasksPage'
 import { NotificationsPage } from '../../pages/operations/NotificationsPage'
 import { ReportsPage } from '../../pages/operations/ReportsPage'
@@ -34,7 +35,6 @@ const permissionRoutes: ReadonlyArray<readonly [string, Permission]> = [
   ['/app/calendario', 'booking.read'],
   ['/app/espacos', 'space.read'], ['/app/servicos', 'service.read'], ['/app/formacao', 'course.read'],
   ['/app/configuracoes', 'settings.read'], ['/app/configuracoes/layouts', 'space.read'], ['/app/configuracoes/recursos', 'space.read'],
-  ['/app/configuracoes/conteudo', 'content.read'],
 ]
 
 function OperationsGuard() {
@@ -97,6 +97,7 @@ export function AppRouter() {
       <Route path="/app/configuracoes/funcoes" element={guarded('role.read', <AccessSettingsPage />)} />
       <Route path="/app/configuracoes/permissoes" element={guarded('permission.read', <AccessSettingsPage />)} />
       <Route path="/app/configuracoes/geral" element={guarded('settings.read', <GeneralSettingsPage />)} />
+      <Route path="/app/configuracoes/conteudo" element={guarded('content.read', <ContentSettingsPage />)} />
       {permissionRoutes.map(([path, permission]) => <Route key={path} path={path} element={guarded(permission, <OperationsFoundationPage />)} />)}
     </Route>
   </Routes>
