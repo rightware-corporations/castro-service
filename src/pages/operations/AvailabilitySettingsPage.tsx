@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { CalendarOff, Clock3, Plus, ShieldCheck, Trash2 } from 'lucide-react'
 import { useApi, useCan } from '../../app/providers/AppProviders'
@@ -37,7 +37,6 @@ export function AvailabilitySettingsPage() {
   const createBlocked = useMutation({ mutationFn: () => api.operations.createBlockedPeriod(blockedDraft), onSuccess: () => { setBlockedDraft(initialBlocked); void queryClient.invalidateQueries({ queryKey: ['operations', 'availability', 'blocked'] }) } })
   const deleteBlocked = useMutation({ mutationFn: (id: string) => api.operations.deleteBlockedPeriod(id), onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['operations', 'availability', 'blocked'] }) })
 
-  const resourceLabel = useMemo(() => labelForResource(draft.bookableType), [draft.bookableType])
   const valid = Boolean(draft.bookableId && draft.opensAt < draft.closesAt && draft.slotIntervalMinutes > 0 && draft.maximumAdvanceDays > 0)
   const exceptionValid = Boolean(exceptionDraft.bookableId && exceptionDraft.date && (exceptionDraft.closed || (exceptionDraft.opensAt && exceptionDraft.closesAt && exceptionDraft.opensAt < exceptionDraft.closesAt)))
   const blockedValid = Boolean(blockedDraft.bookableId && blockedDraft.startAt && blockedDraft.endAt && blockedDraft.startAt < blockedDraft.endAt)
@@ -60,7 +59,7 @@ export function AvailabilitySettingsPage() {
       <aside className="availability-admin__form-panel">
         <span className="eyebrow">NOVA REGRA</span><h2>Definir horário</h2><p>Associe a regra a um recurso real já existente no catálogo.</p>
         <div className="availability-admin__form">
-          <BookableFields type={draft.bookableType} id={draft.bookableId} onType={(bookableType) => setDraft((current) => ({ ...current, bookableType, bookableId: '' }))} onId={(bookableId) => setDraft((current) => ({ ...current, bookableId }))} resourceLabel={resourceLabel} />
+          <BookableFields type={draft.bookableType} id={draft.bookableId} onType={(bookableType) => setDraft((current) => ({ ...current, bookableType, bookableId: '' }))} onId={(bookableId) => setDraft((current) => ({ ...current, bookableId }))} />
           <label><span>Dia</span><select value={draft.dayOfWeek} onChange={(event) => setDraft((current) => ({ ...current, dayOfWeek: event.target.value }))}>{days.map((day) => <option key={day} value={day}>{dayLabels[day]}</option>)}</select></label>
           <div className="availability-admin__two"><label><span>Abre</span><input type="time" value={draft.opensAt} onChange={(event) => setDraft((current) => ({ ...current, opensAt: event.target.value }))} /></label><label><span>Fecha</span><input type="time" value={draft.closesAt} onChange={(event) => setDraft((current) => ({ ...current, closesAt: event.target.value }))} /></label></div>
           <div className="availability-admin__two"><label><span>Intervalo (min)</span><input type="number" min="1" value={draft.slotIntervalMinutes} onChange={(event) => setDraft((current) => ({ ...current, slotIntervalMinutes: Number(event.target.value) }))} /></label><label><span>Máx. antecedência (dias)</span><input type="number" min="1" value={draft.maximumAdvanceDays} onChange={(event) => setDraft((current) => ({ ...current, maximumAdvanceDays: Number(event.target.value) }))} /></label></div>
@@ -77,7 +76,7 @@ export function AvailabilitySettingsPage() {
       <article className="availability-admin__editor-card">
         <div className="availability-admin__editor-heading"><span><CalendarOff size={20} /></span><div><span className="eyebrow">EXCEÇÕES</span><h2>Dias especiais</h2><p>Feche um dia ou publique um horário extraordinário para um recurso.</p></div></div>
         <div className="availability-admin__form">
-          <BookableFields type={exceptionDraft.bookableType} id={exceptionDraft.bookableId} onType={(bookableType) => setExceptionDraft((current) => ({ ...current, bookableType, bookableId: '' }))} onId={(bookableId) => setExceptionDraft((current) => ({ ...current, bookableId }))} resourceLabel={labelForResource(exceptionDraft.bookableType)} />
+          <BookableFields type={exceptionDraft.bookableType} id={exceptionDraft.bookableId} onType={(bookableType) => setExceptionDraft((current) => ({ ...current, bookableType, bookableId: '' }))} onId={(bookableId) => setExceptionDraft((current) => ({ ...current, bookableId }))} />
           <label><span>Data</span><input type="date" value={exceptionDraft.date} onChange={(event) => setExceptionDraft((current) => ({ ...current, date: event.target.value }))} /></label>
           <label className="availability-admin__check"><input type="checkbox" checked={exceptionDraft.closed} onChange={(event) => setExceptionDraft((current) => ({ ...current, closed: event.target.checked, opensAt: event.target.checked ? null : current.opensAt, closesAt: event.target.checked ? null : current.closesAt }))} /><span>Dia fechado</span></label>
           {!exceptionDraft.closed && <div className="availability-admin__two"><label><span>Abre</span><input type="time" value={exceptionDraft.opensAt ?? ''} onChange={(event) => setExceptionDraft((current) => ({ ...current, opensAt: event.target.value }))} /></label><label><span>Fecha</span><input type="time" value={exceptionDraft.closesAt ?? ''} onChange={(event) => setExceptionDraft((current) => ({ ...current, closesAt: event.target.value }))} /></label></div>}
@@ -92,7 +91,7 @@ export function AvailabilitySettingsPage() {
       <article className="availability-admin__editor-card">
         <div className="availability-admin__editor-heading"><span><Clock3 size={20} /></span><div><span className="eyebrow">PERÍODOS BLOQUEADOS</span><h2>Bloquear intervalo</h2><p>Impeça reservas num período específico, independentemente das regras semanais.</p></div></div>
         <div className="availability-admin__form">
-          <BookableFields type={blockedDraft.bookableType} id={blockedDraft.bookableId} onType={(bookableType) => setBlockedDraft((current) => ({ ...current, bookableType, bookableId: '' }))} onId={(bookableId) => setBlockedDraft((current) => ({ ...current, bookableId }))} resourceLabel={labelForResource(blockedDraft.bookableType)} />
+          <BookableFields type={blockedDraft.bookableType} id={blockedDraft.bookableId} onType={(bookableType) => setBlockedDraft((current) => ({ ...current, bookableType, bookableId: '' }))} onId={(bookableId) => setBlockedDraft((current) => ({ ...current, bookableId }))} />
           <div className="availability-admin__two"><label><span>Início</span><input type="datetime-local" value={blockedDraft.startAt} onChange={(event) => setBlockedDraft((current) => ({ ...current, startAt: event.target.value }))} /></label><label><span>Fim</span><input type="datetime-local" value={blockedDraft.endAt} onChange={(event) => setBlockedDraft((current) => ({ ...current, endAt: event.target.value }))} /></label></div>
           <label><span>Motivo (opcional)</span><input value={blockedDraft.reason ?? ''} onChange={(event) => setBlockedDraft((current) => ({ ...current, reason: event.target.value }))} placeholder="Contexto interno" /></label>
           {createBlocked.isError && <p className="field-error" role="alert">Não foi possível guardar o bloqueio.</p>}
@@ -106,8 +105,22 @@ export function AvailabilitySettingsPage() {
   </section>
 }
 
-function BookableFields({ type, id, onType, onId, resourceLabel }: { type: BookableType; id: string; onType: (type: BookableType) => void; onId: (id: string) => void; resourceLabel: string }) {
-  return <><label><span>Tipo</span><select value={type} onChange={(event) => onType(event.target.value as BookableType)}><option value="SPACE">Espaço</option><option value="SERVICE">Serviço</option><option value="COURSE_SESSION">Sessão de formação</option></select></label><label><span>{resourceLabel}</span><input value={id} onChange={(event) => onId(event.target.value)} placeholder="UUID" /></label></>
+function BookableFields({ type, id, onType, onId }: { type: BookableType; id: string; onType: (type: BookableType) => void; onId: (id: string) => void }) {
+  const api = useApi()
+  const [courseId, setCourseId] = useState('')
+  const spaces = useQuery({ queryKey: ['catalog', 'spaces', 'availability-admin'], queryFn: () => api.public.listSpaces(), enabled: type === 'SPACE' })
+  const services = useQuery({ queryKey: ['catalog', 'services', 'availability-admin'], queryFn: () => api.public.listServices(), enabled: type === 'SERVICE' })
+  const courses = useQuery({ queryKey: ['catalog', 'courses', 'availability-admin'], queryFn: () => api.public.listCourses(), enabled: type === 'COURSE_SESSION' })
+  const sessions = useQuery({ queryKey: ['catalog', 'course-sessions', 'availability-admin', courseId], queryFn: () => api.public.listCourseSessions(courseId), enabled: type === 'COURSE_SESSION' && Boolean(courseId) })
+
+  const resourceQuery = type === 'SPACE' ? spaces : type === 'SERVICE' ? services : sessions
+  const resourceItems = resourceQuery.data?.items ?? []
+
+  return <>
+    <label><span>Tipo</span><select value={type} onChange={(event) => { setCourseId(''); onType(event.target.value as BookableType) }}><option value="SPACE">Espaço</option><option value="SERVICE">Serviço</option><option value="COURSE_SESSION">Sessão de formação</option></select></label>
+    {type === 'COURSE_SESSION' ? <label><span>Formação</span><select value={courseId} onChange={(event) => { setCourseId(event.target.value); onId('') }} disabled={courses.isLoading || courses.isError}><option value="">Selecionar formação</option>{courses.data?.items.map((course) => <option key={course.id} value={course.id}>{course.name}</option>)}</select>{courses.isError ? <small className="availability-admin__field-note is-error">Não foi possível carregar a formação.</small> : courses.data?.items.length === 0 ? <small className="availability-admin__field-note">Sem formação publicada.</small> : null}</label> : null}
+    <label><span>{type === 'SPACE' ? 'Espaço' : type === 'SERVICE' ? 'Serviço' : 'Sessão'}</span><select value={id} onChange={(event) => onId(event.target.value)} disabled={resourceQuery.isLoading || resourceQuery.isError || (type === 'COURSE_SESSION' && !courseId)}><option value="">{resourceQuery.isLoading ? 'A carregar…' : 'Selecionar recurso'}</option>{resourceItems.map((item) => <option key={item.id} value={item.id}>{'name' in item ? item.name : formatSessionLabel(item.startAt, item.endAt)}</option>)}</select>{resourceQuery.isError ? <small className="availability-admin__field-note is-error">Não foi possível carregar os recursos.</small> : !resourceQuery.isLoading && resourceItems.length === 0 ? <small className="availability-admin__field-note">Não existem recursos disponíveis para este tipo.</small> : null}</label>
+  </>
 }
 
 function AvailabilityRecords({ loading, error, empty, children }: { loading: boolean; error: boolean; empty: string; children: React.ReactNode }) {
@@ -121,6 +134,6 @@ function AvailabilityEmpty({ icon: Icon, title, description }: { icon: typeof Sh
   return <div className="availability-admin__empty"><Icon size={22} /><h3>{title}</h3><p>{description}</p></div>
 }
 function humanizeType(type: string) { return type === 'SPACE' ? 'Espaço' : type === 'SERVICE' ? 'Serviço' : 'Sessão de formação' }
-function labelForResource(type: BookableType) { return type === 'SPACE' ? 'ID do espaço' : type === 'SERVICE' ? 'ID do serviço' : 'ID da sessão de formação' }
 function formatDate(value: string) { return new Intl.DateTimeFormat('pt-PT', { dateStyle: 'medium' }).format(new Date(`${value}T00:00:00`)) }
 function formatDateTime(value: string) { return new Intl.DateTimeFormat('pt-PT', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value)) }
+function formatSessionLabel(startAt: string, endAt: string) { return `${formatDateTime(startAt)} — ${new Intl.DateTimeFormat('pt-PT', { timeStyle: 'short' }).format(new Date(endAt))}` }
