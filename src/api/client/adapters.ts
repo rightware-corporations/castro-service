@@ -1,5 +1,6 @@
 import type {
-  AdminServiceDto, AdminServiceInputDto, ApiPort, AuthSessionDto, AvailabilityExceptionDto, AvailabilityExceptionInputDto, AvailabilityQueryDto, AvailabilityResultDto, AvailabilityRuleDto,
+  AdminCourseDto, AdminCourseInputDto, AdminCourseSessionDto, AdminCourseSessionInputDto, AdminServiceDto, AdminServiceInputDto, AdminSpaceDto, AdminSpaceInputDto,
+  ApiPort, AuthSessionDto, AvailabilityExceptionDto, AvailabilityExceptionInputDto, AvailabilityQueryDto, AvailabilityResultDto, AvailabilityRuleDto,
   AvailabilityRuleInputDto, AvailabilitySlotDto, BlockedPeriodDto, BlockedPeriodInputDto, BookingOperationalStatus, BookingRequestDto, BookingResponseDto,
   CourseDto, CourseSessionDto, CsrfTokenResponse, IdempotencyOptions, OperationsBookingItemDto, OperationsCustomerItemDto,
   OperationsRequestItemDto, OperationsSummaryDto, PublicBookingLookupDto, PublicConfigDto, RequestInput, RequestOperationalStatus, RequestResponseDto, ServiceDto, SpaceDto,
@@ -79,6 +80,18 @@ export class MockApiAdapter implements ApiAdapter {
       createAdminService: async (input: AdminServiceInputDto) => { void input; return unavailable() },
       updateAdminService: async (id: string, input: AdminServiceInputDto) => { void id; void input; return unavailable() },
       deactivateAdminService: async (id: string) => { void id },
+      listAdminCourses: async () => emptyCollection<AdminCourseDto>(),
+      createAdminCourse: async (input: AdminCourseInputDto) => { void input; return unavailable() },
+      updateAdminCourse: async (id: string, input: AdminCourseInputDto) => { void id; void input; return unavailable() },
+      deactivateAdminCourse: async (id: string) => { void id },
+      listAdminCourseSessions: async (courseId: string) => { void courseId; return emptyCollection<AdminCourseSessionDto>() },
+      createAdminCourseSession: async (courseId: string, input: AdminCourseSessionInputDto) => { void courseId; void input; return unavailable() },
+      updateAdminCourseSession: async (courseId: string, id: string, input: AdminCourseSessionInputDto) => { void courseId; void id; void input; return unavailable() },
+      deactivateAdminCourseSession: async (courseId: string, id: string) => { void courseId; void id },
+      listAdminSpaces: async () => emptyCollection<AdminSpaceDto>(),
+      createAdminSpace: async (input: AdminSpaceInputDto) => { void input; return unavailable() },
+      updateAdminSpace: async (id: string, input: AdminSpaceInputDto) => { void id; void input; return unavailable() },
+      deactivateAdminSpace: async (id: string) => { void id },
     }
   }
 }
@@ -117,6 +130,18 @@ export class HttpApiAdapter implements ApiAdapter {
       createAdminService: (input) => this.client.requestOrThrow<AdminServiceDto>(apiRoutes.operationsAdminServices, { method: 'POST', headers: json, body: JSON.stringify(input) }),
       updateAdminService: (id, input) => this.client.requestOrThrow<AdminServiceDto>(apiRoutes.operationsAdminService(id), { method: 'PUT', headers: json, body: JSON.stringify(input) }),
       deactivateAdminService: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsAdminService(id), { method: 'DELETE' }),
+      listAdminCourses: async () => toCollection(await this.client.requestOrThrow<AdminCourseDto[]>(apiRoutes.operationsAdminCourses)),
+      createAdminCourse: (input) => this.client.requestOrThrow<AdminCourseDto>(apiRoutes.operationsAdminCourses, { method: 'POST', headers: json, body: JSON.stringify(input) }),
+      updateAdminCourse: (id, input) => this.client.requestOrThrow<AdminCourseDto>(apiRoutes.operationsAdminCourse(id), { method: 'PUT', headers: json, body: JSON.stringify(input) }),
+      deactivateAdminCourse: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsAdminCourse(id), { method: 'DELETE' }),
+      listAdminCourseSessions: async (courseId) => toCollection(await this.client.requestOrThrow<AdminCourseSessionDto[]>(apiRoutes.operationsAdminCourseSessions(courseId))),
+      createAdminCourseSession: (courseId, input) => this.client.requestOrThrow<AdminCourseSessionDto>(apiRoutes.operationsAdminCourseSessions(courseId), { method: 'POST', headers: json, body: JSON.stringify(input) }),
+      updateAdminCourseSession: (courseId, id, input) => this.client.requestOrThrow<AdminCourseSessionDto>(apiRoutes.operationsAdminCourseSession(courseId, id), { method: 'PUT', headers: json, body: JSON.stringify(input) }),
+      deactivateAdminCourseSession: (courseId, id) => this.client.requestOrThrow<void>(apiRoutes.operationsAdminCourseSession(courseId, id), { method: 'DELETE' }),
+      listAdminSpaces: async () => toCollection(await this.client.requestOrThrow<AdminSpaceDto[]>(apiRoutes.operationsAdminSpaces)),
+      createAdminSpace: (input) => this.client.requestOrThrow<AdminSpaceDto>(apiRoutes.operationsAdminSpaces, { method: 'POST', headers: json, body: JSON.stringify(input) }),
+      updateAdminSpace: (id, input) => this.client.requestOrThrow<AdminSpaceDto>(apiRoutes.operationsAdminSpace(id), { method: 'PUT', headers: json, body: JSON.stringify(input) }),
+      deactivateAdminSpace: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsAdminSpace(id), { method: 'DELETE' }),
     }
   }
 }
