@@ -2,11 +2,8 @@ package com.castros.booking;
 
 import com.castros.availability.AvailabilityService;
 import com.castros.catalog.CourseSessionRepository;
-import com.castros.catalog.CourseSession;
-import com.castros.catalog.ServiceEntity;
 import com.castros.catalog.ServiceRepository;
 import com.castros.catalog.SpaceRepository;
-import com.castros.catalog.Space;
 import com.castros.customer.Customer;
 import com.castros.customer.CustomerRepository;
 import com.castros.organization.OrganizationRepository;
@@ -45,18 +42,23 @@ public class BookingApplicationService {
     public Booking create(BookingRequest request, ZoneId zone, String idempotencyKey) {
         UUID org = organizations.findAll().stream().filter(o -> o.active).findFirst().map(o -> o.id)
                 .orElseThrow(() -> new ApiException("RESOURCE_NOT_FOUND", "No active organization is configured.", HttpStatus.NOT_FOUND));
+        return createForOrganization(org, request, zone, idempotencyKey, "PUBLIC_BOOKING");
+    }
+
+    @Transactional
+    public Booking createForOrganization(UUID organizationId, BookingRequest request, ZoneId zone, String idempotencyKey, String customerSource) {
         String normalizedKey = normalizeKey(idempotencyKey);
         String fingerprint = fingerprint(request, zone);
         if (normalizedKey != null) {
-            Optional<Booking> prior = bookings.findByOrganizationIdAndIdempotencyKey(org, normalizedKey);
+            Optional<Booking> prior = bookings.findByOrganizationIdAndIdempotencyKey(organizationId, normalizedKey);
             if (prior.isPresent()) return replayOrReject(prior.get(), fingerprint);
         }
-        validateResource(request.bookableType(), request.bookableId());
+        validateResource(organizationId, request.bookableType(), request.bookableId());
         OffsetDateTime start = ZonedDateTime.of(request.date(), request.startTime(), zone).toOffsetDateTime();
         OffsetDateTime end = ZonedDateTime.of(request.date(), request.endTime(), zone).toOffsetDateTime();
         availability.assertAvailable(request.bookableType(), request.bookableId(), start, end);
-        Customer customer = findOrCreateCustomer(org, request.customer());
-        Booking booking = new Booking(org, customer.id, request.bookableType(), request.bookableId(), start, end, reference());
+        Customer customer = findOrCreateCustomer(organizationId, request.customer(), customerSource);
+        Booking booking = new Booking(organizationId, customer.id, request.bookableType(), request.bookableId(), start, end, reference());
         booking.notes = request.notes(); booking.participants = request.participants(); booking.idempotencyKey = normalizedKey; booking.idempotencyFingerprint = fingerprint;
         booking.purpose = request.spaceConfiguration() == null ? null : request.spaceConfiguration().purpose();
         booking.layoutId = request.spaceConfiguration() == null ? null : request.spaceConfiguration().layoutId();
@@ -64,7 +66,7 @@ public class BookingApplicationService {
             return bookings.saveAndFlush(booking);
         } catch (DataIntegrityViolationException ex) {
             if (normalizedKey != null) {
-                Optional<Booking> prior = bookings.findByOrganizationIdAndIdempotencyKey(org, normalizedKey);
+                Optional<Booking> prior = bookings.findByOrganizationIdAndIdempotencyKey(organizationId, normalizedKey);
                 if (prior.isPresent()) return replayOrReject(prior.get(), fingerprint);
             }
             throw new ApiException("BOOKING_SLOT_UNAVAILABLE", "The selected time slot is no longer available.", HttpStatus.CONFLICT);
@@ -75,26 +77,26 @@ public class BookingApplicationService {
         return bookings.findByReference(reference).orElseThrow(() -> new ApiException("RESOURCE_NOT_FOUND", "Booking not found.", HttpStatus.NOT_FOUND));
     }
 
-    private void validateResource(BookableType type, UUID id) {
+    private void validateResource(UUID organizationId, BookableType type, UUID id) {
         if (type == BookableType.CONSULTATION) {
             throw new ApiException("BOOKING_BOOKABLE_TYPE_UNSUPPORTED", "Consultations must be represented by a SERVICE booking.", HttpStatus.BAD_REQUEST);
         }
-        if (type == BookableType.SERVICE && services.findById(id).filter(s -> s.active && s.bookingEnabled).isEmpty()) {
+        if (type == BookableType.SERVICE && services.findByOrganizationIdAndId(organizationId, id).filter(s -> s.active && s.bookingEnabled).isEmpty()) {
             throw new ApiException("BOOKABLE_INACTIVE", "The service is not available for booking.", HttpStatus.CONFLICT);
         }
-        if (type == BookableType.SPACE && spaces.findById(id).filter(s -> s.active).isEmpty()) {
+        if (type == BookableType.SPACE && spaces.findByOrganizationIdAndId(organizationId, id).filter(s -> s.active).isEmpty()) {
             throw new ApiException("BOOKABLE_INACTIVE", "The space is not available for booking.", HttpStatus.CONFLICT);
         }
-        if (type == BookableType.COURSE_SESSION && courseSessions.findById(id).filter(s -> s.active).isEmpty()) {
+        if (type == BookableType.COURSE_SESSION && courseSessions.findByOrganizationIdAndId(organizationId, id).filter(s -> s.active).isEmpty()) {
             throw new ApiException("BOOKABLE_INACTIVE", "The course session is not available for booking.", HttpStatus.CONFLICT);
         }
     }
 
-    private Customer findOrCreateCustomer(UUID org, CustomerInput input) {
+    private Customer findOrCreateCustomer(UUID org, CustomerInput input, String source) {
         Customer customer = null;
         if (input.email() != null && !input.email().isBlank()) customer = customers.findFirstByOrganizationIdAndEmailIgnoreCase(org, input.email()).orElse(null);
         if (customer == null && input.phone() != null && !input.phone().isBlank()) customer = customers.findFirstByOrganizationIdAndPhone(org, input.phone()).orElse(null);
-        return customer == null ? customers.save(new Customer(org, input.firstName(), input.lastName(), input.email(), input.phone(), "PUBLIC_BOOKING")) : customer;
+        return customer == null ? customers.save(new Customer(org, input.firstName(), input.lastName(), input.email(), input.phone(), source)) : customer;
     }
 
     private Booking replayOrReject(Booking prior, String fingerprint) {
