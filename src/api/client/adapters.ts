@@ -4,7 +4,7 @@ import type {
   AvailabilityExceptionDto, AvailabilityExceptionInputDto, AvailabilityQueryDto, AvailabilityResultDto, AvailabilityRuleDto,
   AvailabilityRuleInputDto, AvailabilitySlotDto, BlockedPeriodDto, BlockedPeriodInputDto, BookingOperationalStatus, BookingRequestDto,
   BookingResponseDto, CourseDto, CourseSessionDto, CreateAdminUserDto, CsrfTokenResponse, GeneralSettingsDto, GeneralSettingsInputDto,
-  IdempotencyOptions, OperationsBookingItemDto, OperationsCustomerItemDto, OperationsNotificationDto, OperationsRequestItemDto, OperationsSummaryDto,
+  IdempotencyOptions, OperationsBookingItemDto, OperationsCustomerItemDto, OperationsNotificationDto, OperationsReportDto, OperationsRequestItemDto, OperationsSummaryDto,
   OperationsTaskInputDto, OperationsTaskItemDto, PublicBookingLookupDto, PublicConfigDto, RequestInput, RequestOperationalStatus,
   RequestResponseDto, ServiceDto, SpaceDto, TaskStatus, UpdateAdminUserDto,
 } from '../contracts'
@@ -13,7 +13,8 @@ import { HttpApiClient, createIdempotencyKey } from './HttpApiClient'
 import { apiRoutes } from './routes'
 import { serializeAvailabilityQuery } from './serialization'
 
-export interface ApiAdapter extends ApiPort { readonly kind: 'mock' | 'http' }
+export interface ApiAdapter extends ApiPort { readonly kind = undefined as never; }
+
 const emptyCollection = <T>(): Collection<T> => ({ items: [], total: 0 })
 const toCollection = <T>(items: T[]): Collection<T> => ({ items, total: items.length })
 const mapSession = (dto: AuthSessionDto): AuthSession => ({ authenticated: dto.authenticated, username: dto.email, subject: dto.email, displayName: [dto.firstName, dto.lastName].filter(Boolean).join(' ') || dto.email, organizationId: dto.organizationId, permissions: dto.permissions ?? [] })
@@ -26,7 +27,7 @@ const confirmedMockServices: ServiceDto[] = [
 ]
 const confirmedMockSpaces: SpaceDto[] = [{ id: '20000000-0000-0000-0000-000000000001', slug: 'espaco-castros', name: 'Espaço Castro’s', description: 'Espaço físico preparado para reuniões, formação e workshops. Conteúdo visual real ainda pendente de assets aprovados.' }]
 
-export class MockApiAdapter implements ApiAdapter {
+export class MockApiAdapter implements ApiPort {
   readonly kind = 'mock' as const
   async getCsrf(): Promise<CsrfTokenResponse> { return { token: 'mock-csrf-token' } }
   async getSession(): Promise<AuthSession | null> { return null }
@@ -60,6 +61,7 @@ export class MockApiAdapter implements ApiAdapter {
       listCustomers: async () => emptyCollection<OperationsCustomerItemDto>(), getCustomer: unavailable,
       listTasks: async () => emptyCollection<OperationsTaskItemDto>(), createTask: async (input: OperationsTaskInputDto) => { void input; return unavailable() }, updateTask: async (id: string, input: OperationsTaskInputDto) => { void id; void input; return unavailable() }, updateTaskStatus: async (id: string, status: TaskStatus) => { void id; void status; return unavailable() }, deleteTask: async (id: string) => { void id },
       listNotifications: async () => emptyCollection<OperationsNotificationDto>(), markNotificationRead: async (id: string) => { void id; return unavailable() }, markAllNotificationsRead: async () => undefined,
+      getReport: async (from: string, to: string) => ({ from, to, requestsCreated: 0, bookingsCreated: 0, customersCreated: 0, tasksCreated: 0, requestStatuses: {}, bookingStatuses: {}, daily: [] }),
       listAvailabilityRules: async () => emptyCollection<AvailabilityRuleDto>(), createAvailabilityRule: async (input: AvailabilityRuleInputDto) => { void input; return unavailable() }, updateAvailabilityRule: async (id: string, input: AvailabilityRuleInputDto) => { void id; void input; return unavailable() }, deleteAvailabilityRule: async (id: string) => { void id },
       listAvailabilityExceptions: async () => emptyCollection<AvailabilityExceptionDto>(), createAvailabilityException: async (input: AvailabilityExceptionInputDto) => { void input; return unavailable() }, deleteAvailabilityException: async (id: string) => { void id },
       listBlockedPeriods: async () => emptyCollection<BlockedPeriodDto>(), createBlockedPeriod: async (input: BlockedPeriodInputDto) => { void input; return unavailable() }, deleteBlockedPeriod: async (id: string) => { void id },
@@ -76,7 +78,7 @@ export class MockApiAdapter implements ApiAdapter {
   }
 }
 
-export class HttpApiAdapter implements ApiAdapter {
+export class HttpApiAdapter implements ApiPort {
   readonly kind = 'http' as const
   constructor(private readonly client: HttpApiClient) {}
   get auth(): ApiPort['auth'] { return { getCsrf: () => this.client.requestOrThrow<CsrfTokenResponse>(apiRoutes.csrf), getSession: async () => mapSession(await this.client.requestOrThrow<AuthSessionDto>(apiRoutes.me)), login: async (email, password) => mapSession(await this.client.requestOrThrow<AuthSessionDto>(apiRoutes.login, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) })), logout: () => this.client.requestOrThrow<void>(apiRoutes.logout, { method: 'POST' }) } }
@@ -93,6 +95,7 @@ export class HttpApiAdapter implements ApiAdapter {
       listCustomers: async () => toCollection(await this.client.requestOrThrow<OperationsCustomerItemDto[]>(apiRoutes.operationsCustomers)), getCustomer: (id) => this.client.requestOrThrow<OperationsCustomerItemDto>(apiRoutes.operationsCustomer(id)),
       listTasks: async () => toCollection(await this.client.requestOrThrow<OperationsTaskItemDto[]>(apiRoutes.operationsTasks)), createTask: (input) => this.client.requestOrThrow<OperationsTaskItemDto>(apiRoutes.operationsTasks, { method: 'POST', headers: json, body: JSON.stringify(input) }), updateTask: (id, input) => this.client.requestOrThrow<OperationsTaskItemDto>(apiRoutes.operationsTask(id), { method: 'PUT', headers: json, body: JSON.stringify(input) }), updateTaskStatus: (id, status) => this.client.requestOrThrow<OperationsTaskItemDto>(apiRoutes.operationsTaskStatus(id), { method: 'PATCH', headers: json, body: JSON.stringify({ status }) }), deleteTask: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsTask(id), { method: 'DELETE' }),
       listNotifications: async () => toCollection(await this.client.requestOrThrow<OperationsNotificationDto[]>(apiRoutes.operationsNotifications)), markNotificationRead: (id) => this.client.requestOrThrow<OperationsNotificationDto>(apiRoutes.operationsNotificationRead(id), { method: 'PATCH', headers: json }), markAllNotificationsRead: () => this.client.requestOrThrow<void>(apiRoutes.operationsNotificationsReadAll, { method: 'PATCH', headers: json }),
+      getReport: (from, to) => this.client.requestOrThrow<OperationsReportDto>(`${apiRoutes.operationsReportSummary}?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`),
       listAvailabilityRules: async () => toCollection(await this.client.requestOrThrow<AvailabilityRuleDto[]>(apiRoutes.operationsAvailabilityRules)), createAvailabilityRule: (input) => this.client.requestOrThrow<AvailabilityRuleDto>(apiRoutes.operationsAvailabilityRules, { method: 'POST', headers: json, body: JSON.stringify(input) }), updateAvailabilityRule: (id, input) => this.client.requestOrThrow<AvailabilityRuleDto>(apiRoutes.operationsAvailabilityRule(id), { method: 'PUT', headers: json, body: JSON.stringify(input) }), deleteAvailabilityRule: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsAvailabilityRule(id), { method: 'DELETE' }),
       listAvailabilityExceptions: async () => toCollection(await this.client.requestOrThrow<AvailabilityExceptionDto[]>(apiRoutes.operationsAvailabilityExceptions)), createAvailabilityException: (input) => this.client.requestOrThrow<AvailabilityExceptionDto>(apiRoutes.operationsAvailabilityExceptions, { method: 'POST', headers: json, body: JSON.stringify(input) }), deleteAvailabilityException: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsAvailabilityException(id), { method: 'DELETE' }),
       listBlockedPeriods: async () => toCollection(await this.client.requestOrThrow<BlockedPeriodDto[]>(apiRoutes.operationsBlockedPeriods)), createBlockedPeriod: (input) => this.client.requestOrThrow<BlockedPeriodDto>(apiRoutes.operationsBlockedPeriods, { method: 'POST', headers: json, body: JSON.stringify(input) }), deleteBlockedPeriod: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsBlockedPeriod(id), { method: 'DELETE' }),
@@ -109,4 +112,5 @@ export class HttpApiAdapter implements ApiAdapter {
   }
 }
 
+export type ApiAdapter = MockApiAdapter | HttpApiAdapter
 export function createApiAdapter(): ApiAdapter { const baseUrl = import.meta.env.VITE_API_BASE_URL?.trim(); return baseUrl ? new HttpApiAdapter(new HttpApiClient(baseUrl)) : new MockApiAdapter() }
