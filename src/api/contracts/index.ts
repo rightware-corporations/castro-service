@@ -25,6 +25,10 @@ export type RequestRequestDto = RequestInput
 export type RequestResponseDto = { id: string; status: string }
 export type RequestOperationalStatus = 'NEW' | 'CONTACTED' | 'QUALIFIED' | 'WAITING_CUSTOMER' | 'CONVERTED' | 'CLOSED' | 'CANCELLED'
 export type BookingOperationalStatus = 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW'
+export type TaskStatus = 'OPEN' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED'
+export type TaskPriority = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT'
+export type OperationsTaskItemDto = { id: string; title: string; description?: string | null; status: TaskStatus; priority: TaskPriority; dueAt?: string | null; assignedUserId?: string | null; assignedUserName?: string | null; requestId?: string | null; bookingId?: string | null; customerId?: string | null; createdAt: string; updatedAt: string }
+export type OperationsTaskInputDto = { title: string; description?: string; status: TaskStatus; priority: TaskPriority; dueAt?: string | null; assignedUserId?: string | null; requestId?: string | null; bookingId?: string | null; customerId?: string | null }
 export type OperationsSummaryDto = { requests: number; bookings: number; customers: number }
 export type OperationsRequestItemDto = { id: string; type: string; status: RequestOperationalStatus; message?: string | null; createdAt: string; customerId?: string | null; firstName?: string | null; lastName?: string | null; email?: string | null; phone?: string | null }
 export type OperationsBookingItemDto = { id: string; reference: string; status: BookingOperationalStatus; bookableType: string; bookableId: string; startAt: string; endAt: string; participants?: number | null; purpose?: string | null; createdAt: string; customerId?: string | null; firstName?: string | null; lastName?: string | null; email?: string | null; phone?: string | null }
@@ -65,6 +69,7 @@ export type ApiPort = {
     listRequests(): Promise<Collection<OperationsRequestItemDto>>; getRequest(id: string): Promise<OperationsRequestItemDto>; updateRequestStatus(id: string, status: RequestOperationalStatus): Promise<OperationsRequestItemDto>
     listBookings(): Promise<Collection<OperationsBookingItemDto>>; createBooking(input: BookingRequestDto, options?: IdempotencyOptions): Promise<OperationsBookingItemDto>; getBooking(id: string): Promise<OperationsBookingItemDto>; updateBookingStatus(id: string, status: BookingOperationalStatus): Promise<OperationsBookingItemDto>
     listCustomers(): Promise<Collection<OperationsCustomerItemDto>>; getCustomer(id: string): Promise<OperationsCustomerItemDto>
+    listTasks(): Promise<Collection<OperationsTaskItemDto>>; createTask(input: OperationsTaskInputDto): Promise<OperationsTaskItemDto>; updateTask(id: string, input: OperationsTaskInputDto): Promise<OperationsTaskItemDto>; updateTaskStatus(id: string, status: TaskStatus): Promise<OperationsTaskItemDto>; deleteTask(id: string): Promise<void>
     listAvailabilityRules(): Promise<Collection<AvailabilityRuleDto>>; createAvailabilityRule(input: AvailabilityRuleInputDto): Promise<AvailabilityRuleDto>; updateAvailabilityRule(id: string, input: AvailabilityRuleInputDto): Promise<AvailabilityRuleDto>; deleteAvailabilityRule(id: string): Promise<void>
     listAvailabilityExceptions(): Promise<Collection<AvailabilityExceptionDto>>; createAvailabilityException(input: AvailabilityExceptionInputDto): Promise<AvailabilityExceptionDto>; deleteAvailabilityException(id: string): Promise<void>
     listBlockedPeriods(): Promise<Collection<BlockedPeriodDto>>; createBlockedPeriod(input: BlockedPeriodInputDto): Promise<BlockedPeriodDto>; deleteBlockedPeriod(id: string): Promise<void>

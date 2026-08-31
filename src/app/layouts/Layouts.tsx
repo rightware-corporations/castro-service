@@ -17,7 +17,7 @@ const operationLinks = [
   { to: '/app/reservas', label: 'Reservas', icon: ClipboardList, permission: 'booking.read' as const },
   { to: '/app/calendario', label: 'Calendário', icon: CalendarDays, permission: 'booking.read' as const },
   { to: '/app/clientes', label: 'Clientes', icon: UsersRound, permission: 'customer.read' as const },
-  { to: '/app/tarefas', label: 'Tarefas', icon: CheckSquare2, permission: 'request.read' as const },
+  { to: '/app/tarefas', label: 'Tarefas', icon: CheckSquare2, permission: 'task.read' as const },
   { to: '/app/configuracoes', label: 'Configurações', icon: Settings, permission: 'settings.read' as const },
 ]
 

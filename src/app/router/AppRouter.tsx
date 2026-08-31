@@ -13,6 +13,7 @@ import { SpaceSettingsPage } from '../../pages/operations/SpaceSettingsPage'
 import { ManualBookingPage } from '../../pages/operations/ManualBookingPage'
 import { AccessSettingsPage } from '../../pages/operations/AccessSettingsPage'
 import { GeneralSettingsPage } from '../../pages/operations/GeneralSettingsPage'
+import { TasksPage } from '../../pages/operations/TasksPage'
 import { ComponentLab } from '../../pages/dev/ComponentLab'
 import { HomePublic } from '../../features/home/components/HomePublic'
 import { ServicesCatalog, ServiceDetail } from '../../features/services/components/ServicesPublic'
@@ -22,10 +23,6 @@ import { SpaceConfigurator, SpaceDetail, SpaceExplorer, SpacesCatalog } from '..
 import { BookingConfirmation, BookingCustomer, BookingDate, BookingReview, BookingTime } from '../../features/booking/components/BookingPublic'
 import { DeferredPublicPage } from '../../pages/public/DeferredPublicPage'
 import { ErrorState, LoadingState } from '../../design-system/patterns/feedback-overlays'
-
-const operationPaths = [
-  '/app/tarefas',
-]
 
 const permissionRoutes: ReadonlyArray<readonly [string, Permission]> = [
   ['/app/dashboard', 'dashboard.read'],
@@ -88,6 +85,7 @@ export function AppRouter() {
     </Route>
     <Route element={<OperationsGuard />}>
       <Route path="/app/reservas/nova" element={guarded('booking.create', <ManualBookingPage />)} />
+      <Route path="/app/tarefas" element={guarded('task.read', <TasksPage />)} />
       <Route path="/app/configuracoes/disponibilidade" element={guarded('availability.read', <AvailabilitySettingsPage />)} />
       <Route path="/app/configuracoes/servicos" element={guarded('service.read', <ServiceSettingsPage />)} />
       <Route path="/app/configuracoes/formacao" element={guarded('course.read', <CourseSettingsPage />)} />
@@ -97,7 +95,6 @@ export function AppRouter() {
       <Route path="/app/configuracoes/permissoes" element={guarded('permission.read', <AccessSettingsPage />)} />
       <Route path="/app/configuracoes/geral" element={guarded('settings.read', <GeneralSettingsPage />)} />
       {permissionRoutes.map(([path, permission]) => <Route key={path} path={path} element={guarded(permission, <OperationsFoundationPage />)} />)}
-      {operationPaths.map((path) => <Route key={path} path={path} element={<OperationsFoundationPage />} />)}
     </Route>
   </Routes>
 }
