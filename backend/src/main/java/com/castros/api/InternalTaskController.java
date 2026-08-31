@@ -52,16 +52,19 @@ public class InternalTaskController {
             insert into tasks(id,organization_id,title,description,status,priority,due_at,assigned_user_id,request_id,booking_id,customer_id,created_by)
             values (?,?,?,?,?,?,?,?,?,?,?,?)
             """, id,org,input.title().trim(),blankToNull(input.description()),input.status().name(),input.priority().name(),input.dueAt(),input.assignedUserId(),input.requestId(),input.bookingId(),input.customerId(),actor);
+        notifyAssignment(org, actor, input.assignedUserId(), id, input.title().trim());
         return one(org,id);
     }
 
     @PutMapping("/{id}") @PreAuthorize("hasAuthority('task.manage')") @Transactional
     public TaskItem update(@PathVariable UUID id,@Valid @RequestBody TaskInput input,Authentication authentication) {
-        UUID org=organizationId(authentication); ensureExists(org,id); validateReferences(org,input);
+        UUID org=organizationId(authentication); UUID actor=actorId(authentication); ensureExists(org,id); validateReferences(org,input);
+        UUID previousAssignee = jdbc.queryForObject("select assigned_user_id from tasks where id=? and organization_id=?", UUID.class, id, org);
         jdbc.update("""
             update tasks set title=?,description=?,status=?,priority=?,due_at=?,assigned_user_id=?,request_id=?,booking_id=?,customer_id=?,updated_at=now()
             where id=? and organization_id=?
             """,input.title().trim(),blankToNull(input.description()),input.status().name(),input.priority().name(),input.dueAt(),input.assignedUserId(),input.requestId(),input.bookingId(),input.customerId(),id,org);
+        if (!java.util.Objects.equals(previousAssignee, input.assignedUserId())) notifyAssignment(org, actor, input.assignedUserId(), id, input.title().trim());
         return one(org,id);
     }
 
@@ -91,6 +94,13 @@ public class InternalTaskController {
     }
     private void validateReferences(UUID org,TaskInput input){
         ensureOrgRef(org,"users",input.assignedUserId()); ensureOrgRef(org,"requests",input.requestId()); ensureOrgRef(org,"bookings",input.bookingId()); ensureOrgRef(org,"customers",input.customerId());
+    }
+    private void notifyAssignment(UUID org, UUID actor, UUID recipient, UUID taskId, String taskTitle) {
+        if (recipient == null || recipient.equals(actor)) return;
+        jdbc.update("""
+            insert into notifications(id,organization_id,recipient_user_id,type,title,body,resource_type,resource_id)
+            values (?,?,?,?,?,?,?,?)
+            """, UUID.randomUUID(), org, recipient, "TASK_ASSIGNED", "Nova tarefa atribuída", taskTitle, "TASK", taskId);
     }
     private void ensureOrgRef(UUID org,String table,UUID id){ if(id==null)return; Integer count=jdbc.queryForObject("select count(*) from "+table+" where id=? and organization_id=?",Integer.class,id,org); if(count==null||count==0) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Related resource does not belong to organization"); }
     private void ensureExists(UUID org,UUID id){ Integer count=jdbc.queryForObject("select count(*) from tasks where id=? and organization_id=?",Integer.class,id,org); if(count==null||count==0) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Task not found"); }

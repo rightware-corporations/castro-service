@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { Menu, X, LayoutDashboard, Inbox, CalendarDays, Settings, ChevronRight, ArrowUpRight, ClipboardList, UsersRound, CheckSquare2, LogOut } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Inbox, CalendarDays, Settings, ChevronRight, ArrowUpRight, ClipboardList, UsersRound, CheckSquare2, Bell, LogOut } from 'lucide-react'
 import { useApi, useCan, useSession } from '../providers/AppProviders'
 
 const publicLinks = [
@@ -18,6 +18,7 @@ const operationLinks = [
   { to: '/app/calendario', label: 'Calendário', icon: CalendarDays, permission: 'booking.read' as const },
   { to: '/app/clientes', label: 'Clientes', icon: UsersRound, permission: 'customer.read' as const },
   { to: '/app/tarefas', label: 'Tarefas', icon: CheckSquare2, permission: 'task.read' as const },
+  { to: '/app/notificacoes', label: 'Notificações', icon: Bell, permission: 'notification.read' as const },
   { to: '/app/configuracoes', label: 'Configurações', icon: Settings, permission: 'settings.read' as const },
 ]
 
