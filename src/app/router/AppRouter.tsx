@@ -9,6 +9,7 @@ import { ServiceSettingsPage } from '../../pages/operations/ServiceSettingsPage'
 import { CourseSettingsPage } from '../../pages/operations/CourseSettingsPage'
 import { SpaceSettingsPage } from '../../pages/operations/SpaceSettingsPage'
 import { ManualBookingPage } from '../../pages/operations/ManualBookingPage'
+import { AccessSettingsPage } from '../../pages/operations/AccessSettingsPage'
 import { ComponentLab } from '../../pages/dev/ComponentLab'
 import { HomePublic } from '../../features/home/components/HomePublic'
 import { ServicesCatalog, ServiceDetail } from '../../features/services/components/ServicesPublic'
@@ -22,14 +23,11 @@ import { LoadingState } from '../../design-system/patterns/feedback-overlays'
 const operationPaths = [
   '/app/dashboard', '/app/pedidos', '/app/pedidos/:id', '/app/reservas', '/app/reservas/:id', '/app/clientes', '/app/clientes/:id',
   '/app/calendario', '/app/espacos', '/app/servicos', '/app/formacao', '/app/tarefas', '/app/relatorios', '/app/configuracoes',
-  '/app/configuracoes/layouts', '/app/configuracoes/recursos', '/app/configuracoes/conteudo', '/app/configuracoes/utilizadores',
-  '/app/configuracoes/funcoes', '/app/configuracoes/permissoes', '/app/configuracoes/geral',
+  '/app/configuracoes/layouts', '/app/configuracoes/recursos', '/app/configuracoes/conteudo', '/app/configuracoes/geral',
 ]
 
 function OperationsGuard() {
-  const api = useApi()
-  const session = useSession()
-  const ready = useSessionReady()
+  const api = useApi(); const session = useSession(); const ready = useSessionReady()
   if (api.kind === 'mock' && import.meta.env.DEV) return <OperationsLayout />
   if (!ready) return <main className="operations-auth-loading"><LoadingState label="A validar sessão." /></main>
   if (!session?.authenticated) return <Navigate to="/login" replace />
@@ -70,6 +68,9 @@ export function AppRouter() {
       <Route path="/app/configuracoes/servicos" element={<ServiceSettingsPage />} />
       <Route path="/app/configuracoes/formacao" element={<CourseSettingsPage />} />
       <Route path="/app/configuracoes/espacos" element={<SpaceSettingsPage />} />
+      <Route path="/app/configuracoes/utilizadores" element={<AccessSettingsPage />} />
+      <Route path="/app/configuracoes/funcoes" element={<AccessSettingsPage />} />
+      <Route path="/app/configuracoes/permissoes" element={<AccessSettingsPage />} />
       {operationPaths.map((path) => <Route key={path} path={path} element={<OperationsFoundationPage />} />)}
     </Route>
   </Routes>
