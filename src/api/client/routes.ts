@@ -30,4 +30,6 @@ export const apiRoutes = {
   operationsAvailabilityException: (id: string) => `/api/v1/operations/availability/exceptions/${encodeURIComponent(id)}`,
   operationsBlockedPeriods: '/api/v1/operations/availability/blocked-periods',
   operationsBlockedPeriod: (id: string) => `/api/v1/operations/availability/blocked-periods/${encodeURIComponent(id)}`,
+  operationsAdminServices: '/api/v1/operations/catalog/services',
+  operationsAdminService: (id: string) => `/api/v1/operations/catalog/services/${encodeURIComponent(id)}`,
 } as const
