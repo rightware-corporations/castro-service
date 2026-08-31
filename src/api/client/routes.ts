@@ -40,4 +40,5 @@ export const apiRoutes = {
   operationsAdminRoles: '/api/v1/operations/access/roles',
   operationsAdminRole: (id: string) => `/api/v1/operations/access/roles/${encodeURIComponent(id)}`,
   operationsAdminPermissions: '/api/v1/operations/access/permissions',
+  operationsGeneralSettings: '/api/v1/operations/settings/general',
 } as const
