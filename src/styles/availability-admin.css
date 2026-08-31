@@ -1,0 +1,35 @@
+.availability-admin { max-width: 76rem; margin-inline: auto; }
+.availability-admin__summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); margin-top:2rem; border-top:1px solid var(--color-border); border-left:1px solid var(--color-border); }
+.availability-admin__summary article { display:grid; gap:.35rem; border-right:1px solid var(--color-border); border-bottom:1px solid var(--color-border); background:var(--color-white); padding:1.1rem 1.25rem; }
+.availability-admin__summary small { color:var(--color-muted); font-size:.68rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+.availability-admin__summary strong { color:var(--color-deep-navy); font-family:var(--font-editorial); font-size:2rem; font-weight:400; }
+.availability-admin__layout { display:grid; grid-template-columns:minmax(0,1.7fr) minmax(20rem,.8fr); gap:2rem; margin-top:3rem; align-items:start; }
+.availability-admin__main { min-width:0; }
+.availability-admin__rules { border:1px solid var(--color-border); background:var(--color-white); }
+.availability-rule-row { display:grid; grid-template-columns:1.1fr 1.8fr .8fr .9fr auto; gap:1rem; align-items:center; min-height:5rem; border-bottom:1px solid var(--color-border); padding:.9rem 1rem; }
+.availability-rule-row:last-child { border-bottom:0; }
+.availability-rule-row__day { color:var(--color-deep-navy); font-weight:700; }
+.availability-rule-row strong,.availability-rule-row span { color:var(--color-deep-navy); }
+.availability-rule-row small { display:block; margin-top:.15rem; overflow:hidden; color:var(--color-muted); font-size:.7rem; text-overflow:ellipsis; white-space:nowrap; }
+.availability-rule-row__delete { display:grid; width:2.35rem; height:2.35rem; place-items:center; border:1px solid var(--color-border); background:transparent; color:var(--color-muted); cursor:pointer; }
+.availability-rule-row__delete:hover { color:var(--color-deep-navy); }
+.availability-admin__empty { display:grid; justify-items:center; padding:3.5rem 1.5rem; text-align:center; }
+.availability-admin__empty svg { color:var(--color-teal); }
+.availability-admin__empty h3 { margin:.8rem 0 .35rem; color:var(--color-deep-navy); font-family:var(--font-editorial); font-size:1.8rem; font-weight:400; }
+.availability-admin__empty p { max-width:28rem; margin:0; color:var(--color-muted); font-size:var(--text-sm); }
+.availability-admin__form-panel { position:sticky; top:1.5rem; border:1px solid var(--color-border); background:var(--color-white); padding:1.4rem; }
+.availability-admin__form-panel h2 { margin:.5rem 0 .55rem; color:var(--color-deep-navy); font-family:var(--font-editorial); font-size:2rem; font-weight:400; }
+.availability-admin__form-panel > p { margin:0 0 1.2rem; color:var(--color-muted); font-size:var(--text-sm); }
+.availability-admin__form { display:grid; gap:.85rem; }
+.availability-admin__form label { display:grid; gap:.35rem; color:var(--color-charcoal); font-size:.78rem; font-weight:700; }
+.availability-admin__form input,.availability-admin__form select { min-height:2.8rem; width:100%; border:1px solid var(--color-border); background:var(--color-off-white); padding:0 .75rem; color:var(--color-charcoal); font:inherit; font-weight:500; }
+.availability-admin__two { display:grid; grid-template-columns:1fr 1fr; gap:.65rem; }
+.availability-admin__check { display:flex !important; align-items:center; gap:.55rem !important; }
+.availability-admin__check input { min-height:0; width:1rem; height:1rem; }
+.availability-admin__secondary { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:2rem; }
+.availability-admin__secondary article { display:grid; grid-template-columns:auto 1fr; gap:1rem; border:1px solid var(--color-border); background:var(--color-white); padding:1.2rem; }
+.availability-admin__secondary svg { color:var(--color-teal); }
+.availability-admin__secondary h2 { margin:.35rem 0 .2rem; color:var(--color-deep-navy); font-family:var(--font-editorial); font-size:2rem; font-weight:400; }
+.availability-admin__secondary p { margin:0; color:var(--color-muted); font-size:var(--text-sm); }
+@media (max-width:1023px) { .availability-admin__layout { grid-template-columns:1fr; } .availability-admin__form-panel { position:static; } .availability-rule-row { grid-template-columns:1fr 1.5fr .8fr auto; } .availability-rule-row > div:nth-of-type(3) { display:none; } }
+@media (max-width:767px) { .availability-admin__summary,.availability-admin__secondary { grid-template-columns:1fr; } .availability-admin__layout { gap:1.25rem; margin-top:2rem; } .availability-rule-row { grid-template-columns:1fr auto; gap:.55rem; } .availability-rule-row > div { grid-column:1 / -1; } .availability-rule-row > div:nth-of-type(2),.availability-rule-row > div:nth-of-type(3) { display:grid; grid-template-columns:1fr 1fr; } .availability-rule-row__delete { grid-column:2; grid-row:1; } .availability-admin__two { grid-template-columns:1fr; } }
