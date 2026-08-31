@@ -65,6 +65,12 @@ export type BlockedPeriodDto = {
 }
 export type BlockedPeriodInputDto = Omit<BlockedPeriodDto, 'id'>
 
+export type AdminServiceDto = {
+  id: string; name: string; slug: string; shortDescription?: string | null; description?: string | null; durationMinutes?: number | null
+  bookingEnabled: boolean; active: boolean; featured: boolean; sortOrder: number; createdAt: string
+}
+export type AdminServiceInputDto = Omit<AdminServiceDto, 'id' | 'createdAt'>
+
 export type ProblemDetailResponse = { code?: string; message?: string; status?: number; timestamp?: string; details?: Record<string, unknown> }
 export type IdempotencyOptions = { idempotencyKey?: string }
 
@@ -108,5 +114,9 @@ export type ApiPort = {
     listBlockedPeriods(): Promise<Collection<BlockedPeriodDto>>
     createBlockedPeriod(input: BlockedPeriodInputDto): Promise<BlockedPeriodDto>
     deleteBlockedPeriod(id: string): Promise<void>
+    listAdminServices(): Promise<Collection<AdminServiceDto>>
+    createAdminService(input: AdminServiceInputDto): Promise<AdminServiceDto>
+    updateAdminService(id: string, input: AdminServiceInputDto): Promise<AdminServiceDto>
+    deactivateAdminService(id: string): Promise<void>
   }
 }
