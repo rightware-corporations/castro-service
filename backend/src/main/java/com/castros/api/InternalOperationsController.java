@@ -1,6 +1,7 @@
 package com.castros.api;
 
 import com.castros.booking.Booking;
+import com.castros.booking.BookingApplicationService;
 import com.castros.booking.BookingRepository;
 import com.castros.booking.BookingStatus;
 import com.castros.customer.Customer;
@@ -8,6 +9,7 @@ import com.castros.customer.CustomerRepository;
 import com.castros.request.RequestEntity;
 import com.castros.request.RequestRepository;
 import com.castros.request.RequestStatus;
+import com.castros.shared.config.AppProperties;
 import com.castros.user.UserAccount;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -17,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -27,11 +30,16 @@ public class InternalOperationsController {
     private final RequestRepository requests;
     private final BookingRepository bookings;
     private final CustomerRepository customers;
+    private final BookingApplicationService bookingApplicationService;
+    private final AppProperties appProperties;
 
-    public InternalOperationsController(RequestRepository requests, BookingRepository bookings, CustomerRepository customers) {
+    public InternalOperationsController(RequestRepository requests, BookingRepository bookings, CustomerRepository customers,
+                                        BookingApplicationService bookingApplicationService, AppProperties appProperties) {
         this.requests = requests;
         this.bookings = bookings;
         this.customers = customers;
+        this.bookingApplicationService = bookingApplicationService;
+        this.appProperties = appProperties;
     }
 
     @GetMapping("/summary")
@@ -85,6 +93,24 @@ public class InternalOperationsController {
         return bookings.findAllByOrganizationIdOrderByStartAtDesc(organizationId).stream()
             .map(item -> toBooking(item, customerById.get(item.customerId)))
             .toList();
+    }
+
+    @PostMapping("/bookings")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('booking.create')")
+    public OperationsBookingItem createBooking(@Valid @RequestBody BookingApplicationService.BookingRequest input,
+                                               @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+                                               Authentication authentication) {
+        UUID organizationId = organizationId(authentication);
+        Booking booking = bookingApplicationService.createForOrganization(
+            organizationId,
+            input,
+            ZoneId.of(appProperties.getBusinessTimezone()),
+            idempotencyKey,
+            "OPERATIONS_BOOKING"
+        );
+        Customer customer = customers.findByOrganizationIdAndId(organizationId, booking.customerId).orElse(null);
+        return toBooking(booking, customer);
     }
 
     @GetMapping("/bookings/{id}")
@@ -185,8 +211,8 @@ public class InternalOperationsController {
     }
 
     private UUID organizationId(Authentication authentication) {
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserAccount user)) {
-            throw new IllegalStateException("Authenticated organization context is required.");
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserAccount user) || user.organizationId == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Organization context unavailable");
         }
         return user.organizationId;
     }
