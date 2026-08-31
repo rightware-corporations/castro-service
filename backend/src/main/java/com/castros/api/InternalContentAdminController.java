@@ -87,10 +87,12 @@ public class InternalContentAdminController {
     }
 
     private ContentItem get(UUID org, UUID id) {
-        return jdbc.query("""
+        ContentItem item = jdbc.query("""
             select id, content_key, title, body, media_url, status, published_at, created_at, updated_at
             from content_entries where organization_id=? and id=?
             """, rs -> rs.next() ? map(rs) : null, org, id);
+        if (item == null) throw new ResponseStatusException(NOT_FOUND, "Content entry not found");
+        return item;
     }
 
     private ContentItem map(java.sql.ResultSet rs) throws java.sql.SQLException {
