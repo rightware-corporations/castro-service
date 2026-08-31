@@ -28,6 +28,8 @@ export const apiRoutes = {
   operationsNotificationRead: (id: string) => `/api/v1/operations/notifications/${encodeURIComponent(id)}/read`,
   operationsNotificationsReadAll: '/api/v1/operations/notifications/read-all',
   operationsReportSummary: '/api/v1/operations/reports/summary',
+  operationsContent: '/api/v1/operations/content',
+  operationsContentItem: (id: string) => `/api/v1/operations/content/${encodeURIComponent(id)}`,
   operationsAvailabilityRules: '/api/v1/operations/availability/rules',
   operationsAvailabilityRule: (id: string) => `/api/v1/operations/availability/rules/${encodeURIComponent(id)}`,
   operationsAvailabilityExceptions: '/api/v1/operations/availability/exceptions',

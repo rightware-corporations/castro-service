@@ -32,6 +32,9 @@ export type OperationsTaskInputDto = { title: string; description?: string; stat
 export type OperationsNotificationDto = { id: string; type: string; title: string; body?: string | null; resourceType?: string | null; resourceId?: string | null; readAt?: string | null; createdAt: string }
 export type OperationsReportDailyDto = { date: string; requests: number; bookings: number; customers: number; tasks: number }
 export type OperationsReportDto = { from: string; to: string; requestsCreated: number; bookingsCreated: number; customersCreated: number; tasksCreated: number; requestStatuses: Record<string, number>; bookingStatuses: Record<string, number>; daily: OperationsReportDailyDto[] }
+export type ContentStatus = 'DRAFT' | 'PUBLISHED'
+export type AdminContentItemDto = { id: string; contentKey: string; title?: string | null; body?: string | null; mediaUrl?: string | null; status: ContentStatus; publishedAt?: string | null; createdAt: string; updatedAt: string }
+export type AdminContentInputDto = { contentKey: string; title?: string; body?: string; mediaUrl?: string; status: ContentStatus }
 export type OperationsSummaryDto = { requests: number; bookings: number; customers: number }
 export type OperationsRequestItemDto = { id: string; type: string; status: RequestOperationalStatus; message?: string | null; createdAt: string; customerId?: string | null; firstName?: string | null; lastName?: string | null; email?: string | null; phone?: string | null }
 export type OperationsBookingItemDto = { id: string; reference: string; status: BookingOperationalStatus; bookableType: string; bookableId: string; startAt: string; endAt: string; participants?: number | null; purpose?: string | null; createdAt: string; customerId?: string | null; firstName?: string | null; lastName?: string | null; email?: string | null; phone?: string | null }
@@ -75,6 +78,7 @@ export type ApiPort = {
     listTasks(): Promise<Collection<OperationsTaskItemDto>>; createTask(input: OperationsTaskInputDto): Promise<OperationsTaskItemDto>; updateTask(id: string, input: OperationsTaskInputDto): Promise<OperationsTaskItemDto>; updateTaskStatus(id: string, status: TaskStatus): Promise<OperationsTaskItemDto>; deleteTask(id: string): Promise<void>
     listNotifications(): Promise<Collection<OperationsNotificationDto>>; markNotificationRead(id: string): Promise<OperationsNotificationDto>; markAllNotificationsRead(): Promise<void>
     getReport(from: string, to: string): Promise<OperationsReportDto>
+    listContent(): Promise<Collection<AdminContentItemDto>>; createContent(input: AdminContentInputDto): Promise<AdminContentItemDto>; updateContent(id: string, input: AdminContentInputDto): Promise<AdminContentItemDto>; deleteContent(id: string): Promise<void>
     listAvailabilityRules(): Promise<Collection<AvailabilityRuleDto>>; createAvailabilityRule(input: AvailabilityRuleInputDto): Promise<AvailabilityRuleDto>; updateAvailabilityRule(id: string, input: AvailabilityRuleInputDto): Promise<AvailabilityRuleDto>; deleteAvailabilityRule(id: string): Promise<void>
     listAvailabilityExceptions(): Promise<Collection<AvailabilityExceptionDto>>; createAvailabilityException(input: AvailabilityExceptionInputDto): Promise<AvailabilityExceptionDto>; deleteAvailabilityException(id: string): Promise<void>
     listBlockedPeriods(): Promise<Collection<BlockedPeriodDto>>; createBlockedPeriod(input: BlockedPeriodInputDto): Promise<BlockedPeriodDto>; deleteBlockedPeriod(id: string): Promise<void>
