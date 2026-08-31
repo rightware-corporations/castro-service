@@ -51,6 +51,20 @@ export type OperationsCustomerItemDto = {
   source?: string | null; createdAt: string; updatedAt: string
 }
 
+export type AvailabilityRuleDto = {
+  id: string; bookableType: BookableType; bookableId: string; dayOfWeek: string; opensAt: string; closesAt: string
+  slotIntervalMinutes: number; bufferBeforeMinutes: number; bufferAfterMinutes: number; minimumNoticeMinutes: number; maximumAdvanceDays: number; active: boolean
+}
+export type AvailabilityRuleInputDto = Omit<AvailabilityRuleDto, 'id'>
+export type AvailabilityExceptionDto = {
+  id: string; bookableType: BookableType; bookableId: string; date: string; closed: boolean; opensAt?: string | null; closesAt?: string | null
+}
+export type AvailabilityExceptionInputDto = Omit<AvailabilityExceptionDto, 'id'>
+export type BlockedPeriodDto = {
+  id: string; bookableType: BookableType; bookableId: string; startAt: string; endAt: string; reason?: string | null
+}
+export type BlockedPeriodInputDto = Omit<BlockedPeriodDto, 'id'>
+
 export type ProblemDetailResponse = { code?: string; message?: string; status?: number; timestamp?: string; details?: Record<string, unknown> }
 export type IdempotencyOptions = { idempotencyKey?: string }
 
@@ -84,5 +98,15 @@ export type ApiPort = {
     updateBookingStatus(id: string, status: BookingOperationalStatus): Promise<OperationsBookingItemDto>
     listCustomers(): Promise<Collection<OperationsCustomerItemDto>>
     getCustomer(id: string): Promise<OperationsCustomerItemDto>
+    listAvailabilityRules(): Promise<Collection<AvailabilityRuleDto>>
+    createAvailabilityRule(input: AvailabilityRuleInputDto): Promise<AvailabilityRuleDto>
+    updateAvailabilityRule(id: string, input: AvailabilityRuleInputDto): Promise<AvailabilityRuleDto>
+    deleteAvailabilityRule(id: string): Promise<void>
+    listAvailabilityExceptions(): Promise<Collection<AvailabilityExceptionDto>>
+    createAvailabilityException(input: AvailabilityExceptionInputDto): Promise<AvailabilityExceptionDto>
+    deleteAvailabilityException(id: string): Promise<void>
+    listBlockedPeriods(): Promise<Collection<BlockedPeriodDto>>
+    createBlockedPeriod(input: BlockedPeriodInputDto): Promise<BlockedPeriodDto>
+    deleteBlockedPeriod(id: string): Promise<void>
   }
 }
