@@ -14,6 +14,7 @@ import { ManualBookingPage } from '../../pages/operations/ManualBookingPage'
 import { AccessSettingsPage } from '../../pages/operations/AccessSettingsPage'
 import { GeneralSettingsPage } from '../../pages/operations/GeneralSettingsPage'
 import { TasksPage } from '../../pages/operations/TasksPage'
+import { NotificationsPage } from '../../pages/operations/NotificationsPage'
 import { ComponentLab } from '../../pages/dev/ComponentLab'
 import { HomePublic } from '../../features/home/components/HomePublic'
 import { ServicesCatalog, ServiceDetail } from '../../features/services/components/ServicesPublic'
@@ -86,6 +87,7 @@ export function AppRouter() {
     <Route element={<OperationsGuard />}>
       <Route path="/app/reservas/nova" element={guarded('booking.create', <ManualBookingPage />)} />
       <Route path="/app/tarefas" element={guarded('task.read', <TasksPage />)} />
+      <Route path="/app/notificacoes" element={guarded('notification.read', <NotificationsPage />)} />
       <Route path="/app/configuracoes/disponibilidade" element={guarded('availability.read', <AvailabilitySettingsPage />)} />
       <Route path="/app/configuracoes/servicos" element={guarded('service.read', <ServiceSettingsPage />)} />
       <Route path="/app/configuracoes/formacao" element={guarded('course.read', <CourseSettingsPage />)} />
