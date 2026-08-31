@@ -1,5 +1,5 @@
 import type {
-  ApiPort, AuthSessionDto, AvailabilityExceptionDto, AvailabilityExceptionInputDto, AvailabilityQueryDto, AvailabilityResultDto, AvailabilityRuleDto,
+  AdminServiceDto, AdminServiceInputDto, ApiPort, AuthSessionDto, AvailabilityExceptionDto, AvailabilityExceptionInputDto, AvailabilityQueryDto, AvailabilityResultDto, AvailabilityRuleDto,
   AvailabilityRuleInputDto, AvailabilitySlotDto, BlockedPeriodDto, BlockedPeriodInputDto, BookingOperationalStatus, BookingRequestDto, BookingResponseDto,
   CourseDto, CourseSessionDto, CsrfTokenResponse, IdempotencyOptions, OperationsBookingItemDto, OperationsCustomerItemDto,
   OperationsRequestItemDto, OperationsSummaryDto, PublicBookingLookupDto, PublicConfigDto, RequestInput, RequestOperationalStatus, RequestResponseDto, ServiceDto, SpaceDto,
@@ -75,6 +75,10 @@ export class MockApiAdapter implements ApiAdapter {
       listBlockedPeriods: async () => emptyCollection<BlockedPeriodDto>(),
       createBlockedPeriod: async (input: BlockedPeriodInputDto) => { void input; return unavailable() },
       deleteBlockedPeriod: async (id: string) => { void id },
+      listAdminServices: async () => emptyCollection<AdminServiceDto>(),
+      createAdminService: async (input: AdminServiceInputDto) => { void input; return unavailable() },
+      updateAdminService: async (id: string, input: AdminServiceInputDto) => { void id; void input; return unavailable() },
+      deactivateAdminService: async (id: string) => { void id },
     }
   }
 }
@@ -109,6 +113,10 @@ export class HttpApiAdapter implements ApiAdapter {
       listBlockedPeriods: async () => toCollection(await this.client.requestOrThrow<BlockedPeriodDto[]>(apiRoutes.operationsBlockedPeriods)),
       createBlockedPeriod: (input) => this.client.requestOrThrow<BlockedPeriodDto>(apiRoutes.operationsBlockedPeriods, { method: 'POST', headers: json, body: JSON.stringify(input) }),
       deleteBlockedPeriod: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsBlockedPeriod(id), { method: 'DELETE' }),
+      listAdminServices: async () => toCollection(await this.client.requestOrThrow<AdminServiceDto[]>(apiRoutes.operationsAdminServices)),
+      createAdminService: (input) => this.client.requestOrThrow<AdminServiceDto>(apiRoutes.operationsAdminServices, { method: 'POST', headers: json, body: JSON.stringify(input) }),
+      updateAdminService: (id, input) => this.client.requestOrThrow<AdminServiceDto>(apiRoutes.operationsAdminService(id), { method: 'PUT', headers: json, body: JSON.stringify(input) }),
+      deactivateAdminService: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsAdminService(id), { method: 'DELETE' }),
     }
   }
 }
