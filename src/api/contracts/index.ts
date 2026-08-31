@@ -71,6 +71,16 @@ export type AdminServiceDto = {
 }
 export type AdminServiceInputDto = Omit<AdminServiceDto, 'id' | 'createdAt'>
 
+export type AdminCourseDto = { id: string; name: string; slug: string; description?: string | null; active: boolean }
+export type AdminCourseInputDto = Omit<AdminCourseDto, 'id'>
+export type AdminCourseSessionDto = { id: string; courseId: string; startAt: string; endAt: string; active: boolean }
+export type AdminCourseSessionInputDto = Omit<AdminCourseSessionDto, 'id' | 'courseId'>
+export type AdminSpaceDto = {
+  id: string; name: string; slug: string; description?: string | null; location?: string | null
+  capacityMin?: number | null; capacityMax?: number | null; sizeSquareMeters?: number | null; active: boolean
+}
+export type AdminSpaceInputDto = Omit<AdminSpaceDto, 'id'>
+
 export type ProblemDetailResponse = { code?: string; message?: string; status?: number; timestamp?: string; details?: Record<string, unknown> }
 export type IdempotencyOptions = { idempotencyKey?: string }
 
@@ -118,5 +128,17 @@ export type ApiPort = {
     createAdminService(input: AdminServiceInputDto): Promise<AdminServiceDto>
     updateAdminService(id: string, input: AdminServiceInputDto): Promise<AdminServiceDto>
     deactivateAdminService(id: string): Promise<void>
+    listAdminCourses(): Promise<Collection<AdminCourseDto>>
+    createAdminCourse(input: AdminCourseInputDto): Promise<AdminCourseDto>
+    updateAdminCourse(id: string, input: AdminCourseInputDto): Promise<AdminCourseDto>
+    deactivateAdminCourse(id: string): Promise<void>
+    listAdminCourseSessions(courseId: string): Promise<Collection<AdminCourseSessionDto>>
+    createAdminCourseSession(courseId: string, input: AdminCourseSessionInputDto): Promise<AdminCourseSessionDto>
+    updateAdminCourseSession(courseId: string, id: string, input: AdminCourseSessionInputDto): Promise<AdminCourseSessionDto>
+    deactivateAdminCourseSession(courseId: string, id: string): Promise<void>
+    listAdminSpaces(): Promise<Collection<AdminSpaceDto>>
+    createAdminSpace(input: AdminSpaceInputDto): Promise<AdminSpaceDto>
+    updateAdminSpace(id: string, input: AdminSpaceInputDto): Promise<AdminSpaceDto>
+    deactivateAdminSpace(id: string): Promise<void>
   }
 }
