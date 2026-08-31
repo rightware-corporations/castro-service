@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AuthLayout, OperationsLayout, PublicLayout } from '../layouts/Layouts'
-import { useApi, useCan, useSession, useSessionReady } from '../providers/AppProviders'
+import { useApi, useCan, useSession, useSessionError, useSessionReady } from '../providers/AppProviders'
 import type { Permission } from '../../domain'
 import { AuthPage } from '../../pages/auth/AuthPages'
 import { NotFound } from '../../pages/NotFound'
@@ -20,7 +20,7 @@ import { ContactPublic } from '../../features/contact/components/ContactPublic'
 import { SpaceConfigurator, SpaceDetail, SpaceExplorer, SpacesCatalog } from '../../features/spaces/components/SpacesPublic'
 import { BookingConfirmation, BookingCustomer, BookingDate, BookingReview, BookingTime } from '../../features/booking/components/BookingPublic'
 import { DeferredPublicPage } from '../../pages/public/DeferredPublicPage'
-import { LoadingState } from '../../design-system/patterns/feedback-overlays'
+import { ErrorState, LoadingState } from '../../design-system/patterns/feedback-overlays'
 
 const operationPaths = [
   '/app/tarefas',
@@ -39,10 +39,11 @@ const permissionRoutes: ReadonlyArray<readonly [string, Permission]> = [
 ]
 
 function OperationsGuard() {
-  const api = useApi(); const session = useSession(); const ready = useSessionReady()
+  const api = useApi(); const session = useSession(); const ready = useSessionReady(); const sessionError = useSessionError(); const location = useLocation()
   if (api.kind === 'mock' && import.meta.env.DEV) return <OperationsLayout />
   if (!ready) return <main className="operations-auth-loading"><LoadingState label="A validar sessão." /></main>
-  if (!session?.authenticated) return <Navigate to="/login" replace />
+  if (sessionError) return <main className="operations-auth-loading"><ErrorState title="Não foi possível validar a sessão." /></main>
+  if (!session?.authenticated) return <Navigate to="/login" state={{ from: `${location.pathname}${location.search}` }} replace />
   return <OperationsLayout />
 }
 
