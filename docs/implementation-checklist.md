@@ -35,9 +35,9 @@ Working branch: `integration/castros-platform`
 - [x] Bookings workspace connected to backend
 - [x] Customers workspace connected to backend
 - [x] Calendar populated from real bookings
-- [ ] Request detail workflow and richer status actions
-- [ ] Booking detail workflow and richer status actions
-- [ ] Customer detail/history
+- [x] Request detail workflow and status actions
+- [x] Booking detail workflow and status actions
+- [x] Customer detail/history foundation
 - [ ] Manual booking creation for operations
 - [ ] Tasks/follow-up backend domain and UI
 - [ ] Notifications
@@ -86,11 +86,11 @@ Working branch: `integration/castros-platform`
 - [ ] Prepare merge/PR without changing `main` until approved
 
 ## Execution order
-1. Complete request/booking/customer internal detail workflows.
-2. Add manual operations booking and close remaining booking/context QA.
-3. Add targeted booking/catalog regression and organization-isolation tests.
-4. Implement users, roles, permission matrix and general settings.
-5. Implement space scenes/hotspots/layouts/resources and content administration.
+1. Add manual operations booking and close remaining booking/context QA.
+2. Add targeted booking/catalog regression and organization-isolation tests.
+3. Implement users, roles, permission matrix and general settings.
+4. Implement space scenes/hotspots/layouts/resources and content administration.
+5. Implement tasks/follow-up, then notifications/reports only where backed by real domain contracts.
 6. Close production security blockers: sessions, rate limiting, secrets, secure deployment, CORS, audit/outbox.
 7. Run the full product locally and generate screenshots.
 8. Perform visual/design QA and responsive correction.
