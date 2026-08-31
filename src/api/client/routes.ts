@@ -32,4 +32,10 @@ export const apiRoutes = {
   operationsBlockedPeriod: (id: string) => `/api/v1/operations/availability/blocked-periods/${encodeURIComponent(id)}`,
   operationsAdminServices: '/api/v1/operations/catalog/services',
   operationsAdminService: (id: string) => `/api/v1/operations/catalog/services/${encodeURIComponent(id)}`,
+  operationsAdminCourses: '/api/v1/operations/catalog/courses',
+  operationsAdminCourse: (id: string) => `/api/v1/operations/catalog/courses/${encodeURIComponent(id)}`,
+  operationsAdminCourseSessions: (courseId: string) => `/api/v1/operations/catalog/courses/${encodeURIComponent(courseId)}/sessions`,
+  operationsAdminCourseSession: (courseId: string, id: string) => `/api/v1/operations/catalog/courses/${encodeURIComponent(courseId)}/sessions/${encodeURIComponent(id)}`,
+  operationsAdminSpaces: '/api/v1/operations/catalog/spaces',
+  operationsAdminSpace: (id: string) => `/api/v1/operations/catalog/spaces/${encodeURIComponent(id)}`,
 } as const
