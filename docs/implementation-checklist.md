@@ -1,100 +1,286 @@
-# Castro’s Platform — Implementation Checklist
+# Castro’s Platform — Full Implementation Checklist
 
-Working branch: `integration/castros-platform`
+This document is the source of truth for functional completion. Nothing is considered delivered merely because a shell or route exists.
 
-## P0 — Stability and integration
-- [x] Integration branch combining frontend and backend foundations
-- [x] Frontend CI: lint, typecheck, test, build
+Status:
+- `[x]` implemented and previously validated by CI
+- `[ ]` still required
+- `[~]` implemented on the current branch/PR and awaiting a green gate or merge
+
+## P0 — Stability, integration and contracts
+- [x] Frontend and Spring backend integrated in one repository
+- [x] Frontend CI: lint, typecheck, tests, build
 - [x] Backend CI: Maven verify
-- [x] Session hydration, CSRF and credentialed requests
-- [x] Organization-scoped permissions for Operations foundation
-- [x] Public booking flow connected to backend
-- [x] Booking idempotency key reuse across logical retries
-- [x] Contact-request idempotency key reuse across logical retries
-- [x] Availability weekly rules, exceptions and blocked periods
-- [x] Availability resource selectors using real public catalog data
-- [ ] Add targeted regression tests for booking, availability admin and internal catalog CRUD
+- [x] PostgreSQL + Flyway migrations
+- [x] Browser session authentication
+- [x] CSRF contract for state-changing browser requests
+- [x] Credentialed CORS contract
+- [x] Public booking idempotency
+- [x] Public contact-request idempotency
+- [x] Organization-scoped permission model
+- [x] Backend method authorization for implemented internal APIs
+- [x] Frontend route-level permission guard / no-access state
+- [x] Preserve intended internal route through login
+- [x] Distinguish unauthenticated session from backend/session validation failure
+- [ ] Targeted regression suite covering all critical functional domains
+- [ ] Full multi-organization isolation integration suite
 
 ## P1 — Public product
-- [x] Homepage V2
-- [x] Services catalog/detail V2
-- [x] Courses catalog/detail V2
-- [x] Spaces catalog/detail/explorer/configurator V2
-- [x] Contact V2
-- [x] Booking date/time/customer/review/confirmation
-- [x] Service detail → booking context with published duration seeding
-- [x] Course-session booking specialization with fixed published date/duration
-- [ ] Space configurator → booking context final QA
-- [ ] Public empty/error/loading state audit
-- [ ] Responsive visual QA across target breakpoint matrix
+### Navigation and discovery
+- [x] Homepage
+- [x] Public header/footer
+- [x] Services catalog
+- [x] Service detail
+- [x] Formation/course catalog
+- [x] Course detail
+- [x] Published course sessions
+- [x] Spaces catalog
+- [x] Space detail
+- [x] Contact page
+- [ ] Final public navigation audit
+
+### Space experience
+- [x] Space explorer shell based on truthful media state
+- [x] Space configurator
+- [x] Shareable purpose/participants configuration state
+- [x] Configuration carried into booking context
+- [ ] Approved real photography/media integration
+- [ ] 360 scenes management and display
+- [ ] Hotspots management and display
+- [ ] Layout configurations
+- [ ] Space resources/amenities management
+- [ ] Public display of approved layouts/resources
+- [ ] V2 scene/layout switching where supported by real assets
+- [ ] Evaluate Three.js/R3F only if the actual spatial requirement justifies it
+- [ ] AR remains future scope, not a V1 blocker
+
+### Public booking
+- [x] Unified bookable types: SPACE / SERVICE / COURSE_SESSION
+- [x] Date step
+- [x] Real availability lookup
+- [x] Time step
+- [x] Customer-data step
+- [x] Review step
+- [x] Confirmation page/reference lookup
+- [x] Draft survives refresh/deep-link using safe client persistence
+- [x] Stable idempotency key across logical retry
+- [x] Service duration seeding
+- [x] Course session fixed date/duration specialization
+- [x] Space purpose/participants carried into booking
+- [ ] Dedicated full booking-flow component/integration tests
+- [ ] Final booking error-state audit
+- [ ] Final booking responsive/accessibility audit
+
+### Public quality states
+- [ ] Loading-state audit across every public route
+- [ ] Error-state audit across every public route
+- [ ] Empty-state audit across every public route
+- [ ] 404/system-state audit
+- [ ] Final content validation against Castro-approved facts
 
 ## P2 — Operations
-- [x] Authentication guard and logout
-- [x] Dashboard connected to real summary
-- [x] Requests workspace connected to backend
-- [x] Bookings workspace connected to backend
-- [x] Customers workspace connected to backend
-- [x] Calendar populated from real bookings
-- [x] Request detail workflow and status actions
-- [x] Booking detail workflow and status actions
+### Core workspace
+- [x] Authenticated Operations layout
+- [x] Permission-aware navigation
+- [x] Logout
+- [x] Dashboard with real operational summary
+- [x] Requests list
+- [x] Request detail
+- [x] Request status workflow
+- [x] Bookings list
+- [x] Booking detail
+- [x] Booking status workflow
+- [x] Manual booking creation
+- [x] Customers list
 - [x] Customer detail/history foundation
-- [ ] Manual booking creation for operations
-- [ ] Tasks/follow-up backend domain and UI
-- [ ] Notifications
-- [ ] Reports
+- [x] Calendar populated from real bookings
+- [ ] Server-side pagination for requests/bookings/customers
+- [ ] Server-side search/filter contracts
+- [ ] Operational count queries instead of loading full collections for summaries
+
+### Follow-up and work management
+- [ ] Tasks/follow-up domain model
+- [ ] Tasks list
+- [ ] Task create/edit/complete
+- [ ] Link task to customer/request/booking where applicable
+- [ ] Due dates/ownership where requirements support them
+- [ ] Notifications domain
+- [ ] Internal notifications UI
+- [ ] Reports domain and endpoints
+- [ ] Reports UI using real operational data only
 
 ## P3 — Administration
-- [x] Availability administration backend
-- [x] Availability rules UI
-- [x] Exceptions UI
-- [x] Blocked-periods UI
-- [x] Services administration backend contract
-- [x] Services administration frontend UI
-- [x] Courses administration backend + UI
-- [x] Course sessions administration backend + UI
-- [x] Spaces administration backend + UI
-- [ ] Space scenes / hotspots / layouts / resources management
-- [ ] Content administration
-- [ ] Users administration
-- [ ] Roles administration
-- [ ] Permission matrix
-- [ ] General organization settings
-- [ ] Audit trail wiring
+### Catalog
+- [x] Services administration backend
+- [x] Services administration UI
+- [x] Formation/courses administration backend
+- [x] Formation/courses administration UI
+- [x] Course sessions administration backend
+- [x] Course sessions administration UI
+- [x] Spaces administration backend
+- [x] Spaces administration UI
+
+### Availability
+- [x] Weekly availability rules backend
+- [x] Weekly rules UI
+- [x] Exceptions backend/UI
+- [x] Blocked periods backend/UI
+- [x] Resource selector using real catalog entries
+- [ ] Availability CRUD regression tests
+- [ ] Conflict/edge-case tests for buffers, notice and max advance
+
+### Access administration
+- [x] Users backend
+- [x] Users UI
+- [x] Roles backend
+- [x] Roles UI
+- [x] Permission catalog backend
+- [x] Permission matrix through role editing
+- [ ] Access-admin integration tests
+- [ ] Prevent/handle dangerous self-lockout scenarios where appropriate
+
+### General/settings/content
+- [~] Organization general settings backend
+- [~] Organization general settings UI
+- [~] Organization business timezone persistence
+- [ ] Content administration model
+- [ ] Content administration UI
+- [ ] Approved public copy/media publishing workflow
+- [ ] Remaining organization settings only when real requirements are known
+
+### Space administration expansion
+- [ ] Space layouts domain/API/UI
+- [ ] Space resources/amenities domain/API/UI
+- [ ] Space scenes domain/API/UI
+- [ ] Scene hotspots domain/API/UI
+- [ ] Availability linkage to layouts/resources where required
+
+### Audit
+- [ ] Audit event model
+- [ ] Audit persistence
+- [ ] Audit read API protected by `audit.read`
+- [ ] Audit trail UI
 
 ## P4 — Security and production readiness
+### Authorization and organization isolation
 - [x] Granular permission catalog
-- [x] Backend method authorization on initial Operations/Admin APIs
-- [x] Organization scoping on initial Operations/Admin APIs
-- [ ] Integration tests proving cross-organization isolation on every internal domain
-- [ ] Production session store
+- [x] Organization-scoped implemented Operations/Admin reads
+- [x] Organization-scoped manual booking resource validation
+- [ ] Two-organization integration fixtures
+- [ ] Prove cross-org isolation for requests
+- [ ] Prove cross-org isolation for bookings
+- [ ] Prove cross-org isolation for customers
+- [ ] Prove cross-org isolation for catalog administration
+- [ ] Prove cross-org isolation for availability administration
+- [ ] Prove cross-org isolation for users/roles/settings
+- [ ] Database-level organization-membership integrity hardening
+
+### Production infrastructure
+- [ ] Production-grade shared session store
 - [ ] Rate limiting / abuse controls
-- [ ] Secrets and deployment hardening
-- [ ] HTTPS + secure-cookie production configuration validation
-- [ ] Outbox / audit event wiring
-- [ ] Production CORS origin verification
+- [ ] Secrets management/deployment validation
+- [ ] HTTPS secure-cookie configuration validation
+- [ ] Production CORS allowed-origin validation
+- [ ] Environment-specific safe configuration defaults
+- [ ] Health/readiness deployment checks
+- [ ] Secure initial administrator provisioning
+- [ ] Remove any need for hardcoded production credentials
 
-## P5 — Design QA and delivery
-- [ ] Clone/pull `integration/castros-platform` into a runnable local workspace
-- [ ] Run frontend + PostgreSQL + Spring backend together
-- [ ] Capture real screenshots for public pages
-- [ ] Capture real screenshots for Operations/Admin pages
-- [ ] Screen-by-screen design critique
-- [ ] Fix typography, spacing, hierarchy and responsive defects
-- [ ] Accessibility pass
-- [ ] Final content validation: no invented business facts
-- [ ] Final CI gate
-- [ ] Prepare merge/PR without changing `main` until approved
+### Reliability/audit
+- [ ] Outbox/event delivery wiring where operational mutations require it
+- [ ] Audit wiring for privileged mutations
+- [ ] Idempotency review for all retry-sensitive mutations
+- [ ] Database indexes/query review for operational scale
 
-## Execution order
-1. Add manual operations booking and close remaining booking/context QA.
-2. Add targeted booking/catalog regression and organization-isolation tests.
-3. Implement users, roles, permission matrix and general settings.
-4. Implement space scenes/hotspots/layouts/resources and content administration.
-5. Implement tasks/follow-up, then notifications/reports only where backed by real domain contracts.
-6. Close production security blockers: sessions, rate limiting, secrets, secure deployment, CORS, audit/outbox.
-7. Run the full product locally and generate screenshots.
-8. Perform visual/design QA and responsive correction.
-9. Complete accessibility and final content validation.
-10. Final gate and merge preparation.
+## P5 — Responsive, accessibility and visual delivery
+### Required responsive matrix
+- [ ] 320x568
+- [ ] 360x800
+- [ ] 390x844
+- [ ] 430x932
+- [ ] 768x1024
+- [ ] 820x1180
+- [ ] 1024x768
+- [ ] 1180x820
+- [ ] 1280x720
+- [ ] 1366x768
+- [ ] 1440x900
+- [ ] 1536x864
+- [ ] 1646x928
+- [ ] 1920x1080
 
-This file is the running execution list. Completed items should be checked in as implementation lands; no commercial facts should be invented to satisfy an unchecked item.
+### Public visual QA
+- [ ] Homepage screenshot and critique
+- [ ] Services list/detail screenshot and critique
+- [ ] Formation list/detail screenshot and critique
+- [ ] Spaces list/detail/explorer/configurator screenshot and critique
+- [ ] Booking flow screenshot and critique
+- [ ] Contact screenshot and critique
+- [ ] Header/footer final pass
+- [ ] Instrument Serif display usage consistency
+- [ ] Manrope UI/body consistency
+- [ ] Typography hierarchy
+- [ ] Spacing/rhythm
+- [ ] CTA hierarchy
+- [ ] Photography/media treatment
+- [ ] No generic SaaS/card-heavy visual regression
+
+### Operations/Admin visual QA
+- [ ] Dashboard
+- [ ] Requests list/detail
+- [ ] Bookings list/detail/manual create
+- [ ] Customers list/detail
+- [ ] Calendar
+- [ ] Tasks/notifications/reports when implemented
+- [ ] Services admin
+- [ ] Formation/sessions admin
+- [ ] Spaces admin
+- [ ] Availability admin
+- [ ] Users/roles/permissions
+- [ ] General settings/content/audit
+- [ ] Desktop sidebar behavior
+- [ ] Collapsed sidebar behavior
+- [ ] Tablet off-canvas behavior
+- [ ] Mobile navigation behavior
+- [ ] Tables → mobile entity cards
+- [ ] Mobile forms + sticky CTA behavior
+
+### Accessibility
+- [ ] Keyboard navigation pass
+- [ ] Focus visibility/order
+- [ ] Dialog/sheet focus management audit
+- [ ] Labels and form errors
+- [ ] Semantic headings/landmarks
+- [ ] Contrast audit
+- [ ] Reduced-motion behavior
+- [ ] Screen-reader status/error announcements
+
+## P6 — Final validation and delivery
+- [ ] Run PostgreSQL + Spring backend + frontend together locally
+- [ ] Smoke test every public route
+- [ ] Smoke test every Operations route
+- [ ] Smoke test every Admin route
+- [ ] Run full frontend test/lint/typecheck/build gate
+- [ ] Run full backend verify gate
+- [ ] Run PostgreSQL integration test suite
+- [ ] Final security/configuration review
+- [ ] Final audit for invented commercial facts, prices, testimonials, capacities or policies
+- [ ] Update README with exact local run instructions
+- [ ] Document required environment variables
+- [ ] Confirm migration path from a clean database
+- [ ] Final main-branch merge only after green gate
+
+## Execution order from here
+1. Make General Settings PR green and merge it.
+2. Add targeted regression + full multi-organization authorization tests.
+3. Implement Tasks/follow-up.
+4. Implement Notifications and Reports against real domain contracts.
+5. Implement Content administration.
+6. Implement Space layouts/resources/scenes/hotspots.
+7. Implement Audit trail and mutation audit wiring.
+8. Add pagination/search/filter/count-query improvements.
+9. Close production session/rate-limit/secrets/CORS/HTTPS/provisioning blockers.
+10. Run full stack locally, capture screenshots and perform visual/responsive/accessibility polish.
+11. Execute complete final validation and content audit.
+
+No unchecked item may be silently dropped. If a projected feature cannot be implemented because Castro business requirements or approved assets are missing, it remains explicitly unchecked and is documented as blocked rather than invented.
