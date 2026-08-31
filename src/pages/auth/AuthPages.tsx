@@ -1,12 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 import { useApi } from '../../app/providers/AppProviders'
 
 type AuthKind = 'login' | 'forgot' | 'reset'
 type FormValues = { email?: string; password?: string; confirmation?: string }
+type LoginLocationState = { from?: string }
 
 function createAuthSchema(kind: AuthKind) {
   return z.object({ email: z.string().optional(), password: z.string().optional(), confirmation: z.string().optional() }).superRefine((values, context) => {
@@ -22,6 +23,7 @@ function createAuthSchema(kind: AuthKind) {
 export function AuthPage({ kind }: { kind: AuthKind }) {
   const api = useApi()
   const navigate = useNavigate()
+  const location = useLocation()
   const queryClient = useQueryClient()
   const schema = createAuthSchema(kind)
   const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm<FormValues>({ resolver: zodResolver(schema), mode: 'onBlur' })
@@ -39,7 +41,9 @@ export function AuthPage({ kind }: { kind: AuthKind }) {
     try {
       const session = await api.auth.login(values.email!, values.password!)
       queryClient.setQueryData(['auth', 'me'], session)
-      navigate('/app/dashboard', { replace: true })
+      const state = location.state as LoginLocationState | null
+      const destination = state?.from?.startsWith('/app/') ? state.from : '/app/dashboard'
+      navigate(destination, { replace: true })
     } catch {
       setError('root', { message: 'Não foi possível iniciar sessão. Verifique as credenciais e tente novamente.' })
     }
