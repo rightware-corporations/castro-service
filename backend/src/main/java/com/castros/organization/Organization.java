@@ -9,6 +9,7 @@ public class Organization {
     @Id @GeneratedValue(strategy=GenerationType.UUID) public UUID id;
     @Column(nullable=false, unique=true) public String name;
     @Column(nullable=false, unique=true) public String slug;
+    @Column(name="business_timezone") public String businessTimezone;
     @Column(nullable=false) public boolean active = true;
     @Column(nullable=false) public OffsetDateTime createdAt = OffsetDateTime.now();
     protected Organization() { }

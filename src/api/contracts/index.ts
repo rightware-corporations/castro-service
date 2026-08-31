@@ -49,6 +49,8 @@ export type UpdateAdminUserDto = Omit<CreateAdminUserDto, 'password'> & { passwo
 export type AdminRoleDto = { id: string; name: string; permissionCodes: string[] }
 export type AdminRoleInputDto = { name: string; permissionCodes: string[] }
 export type AdminPermissionDto = { code: string }
+export type GeneralSettingsDto = { organizationId: string; organizationName: string; organizationSlug: string; businessTimezone: string }
+export type GeneralSettingsInputDto = Pick<GeneralSettingsDto, 'organizationName' | 'businessTimezone'>
 export type ProblemDetailResponse = { code?: string; message?: string; status?: number; timestamp?: string; details?: Record<string, unknown> }
 export type IdempotencyOptions = { idempotencyKey?: string }
 
@@ -70,8 +72,9 @@ export type ApiPort = {
     listAdminCourses(): Promise<Collection<AdminCourseDto>>; createAdminCourse(input: AdminCourseInputDto): Promise<AdminCourseDto>; updateAdminCourse(id: string, input: AdminCourseInputDto): Promise<AdminCourseDto>; deactivateAdminCourse(id: string): Promise<void>
     listAdminCourseSessions(courseId: string): Promise<Collection<AdminCourseSessionDto>>; createAdminCourseSession(courseId: string, input: AdminCourseSessionInputDto): Promise<AdminCourseSessionDto>; updateAdminCourseSession(courseId: string, id: string, input: AdminCourseSessionInputDto): Promise<AdminCourseSessionDto>; deactivateAdminCourseSession(courseId: string, id: string): Promise<void>
     listAdminSpaces(): Promise<Collection<AdminSpaceDto>>; createAdminSpace(input: AdminSpaceInputDto): Promise<AdminSpaceDto>; updateAdminSpace(id: string, input: AdminSpaceInputDto): Promise<AdminSpaceDto>; deactivateAdminSpace(id: string): Promise<void>
-    listAdminUsers?(): Promise<Collection<AdminUserDto>>; createAdminUser?(input: CreateAdminUserDto): Promise<AdminUserDto>; updateAdminUser?(id: string, input: UpdateAdminUserDto): Promise<AdminUserDto>
-    listAdminRoles?(): Promise<Collection<AdminRoleDto>>; createAdminRole?(input: AdminRoleInputDto): Promise<AdminRoleDto>; updateAdminRole?(id: string, input: AdminRoleInputDto): Promise<AdminRoleDto>; deleteAdminRole?(id: string): Promise<void>
-    listAdminPermissions?(): Promise<Collection<AdminPermissionDto>>
+    listAdminUsers(): Promise<Collection<AdminUserDto>>; createAdminUser(input: CreateAdminUserDto): Promise<AdminUserDto>; updateAdminUser(id: string, input: UpdateAdminUserDto): Promise<AdminUserDto>
+    listAdminRoles(): Promise<Collection<AdminRoleDto>>; createAdminRole(input: AdminRoleInputDto): Promise<AdminRoleDto>; updateAdminRole(id: string, input: AdminRoleInputDto): Promise<AdminRoleDto>; deleteAdminRole(id: string): Promise<void>
+    listAdminPermissions(): Promise<Collection<AdminPermissionDto>>
+    getGeneralSettings(): Promise<GeneralSettingsDto>; updateGeneralSettings(input: GeneralSettingsInputDto): Promise<GeneralSettingsDto>
   }
 }

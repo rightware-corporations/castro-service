@@ -3,9 +3,10 @@ import type {
   AdminServiceDto, AdminServiceInputDto, AdminSpaceDto, AdminSpaceInputDto, AdminUserDto, ApiPort, AuthSessionDto,
   AvailabilityExceptionDto, AvailabilityExceptionInputDto, AvailabilityQueryDto, AvailabilityResultDto, AvailabilityRuleDto,
   AvailabilityRuleInputDto, AvailabilitySlotDto, BlockedPeriodDto, BlockedPeriodInputDto, BookingOperationalStatus, BookingRequestDto,
-  BookingResponseDto, CourseDto, CourseSessionDto, CreateAdminUserDto, CsrfTokenResponse, IdempotencyOptions, OperationsBookingItemDto,
-  OperationsCustomerItemDto, OperationsRequestItemDto, OperationsSummaryDto, PublicBookingLookupDto, PublicConfigDto, RequestInput,
-  RequestOperationalStatus, RequestResponseDto, ServiceDto, SpaceDto, UpdateAdminUserDto,
+  BookingResponseDto, CourseDto, CourseSessionDto, CreateAdminUserDto, CsrfTokenResponse, GeneralSettingsDto, GeneralSettingsInputDto,
+  IdempotencyOptions, OperationsBookingItemDto, OperationsCustomerItemDto, OperationsRequestItemDto, OperationsSummaryDto,
+  PublicBookingLookupDto, PublicConfigDto, RequestInput, RequestOperationalStatus, RequestResponseDto, ServiceDto, SpaceDto,
+  UpdateAdminUserDto,
 } from '../contracts'
 import type { AuthSession, Collection } from '../../domain'
 import { HttpApiClient, createIdempotencyKey } from './HttpApiClient'
@@ -67,6 +68,8 @@ export class MockApiAdapter implements ApiAdapter {
       listAdminUsers: async () => emptyCollection<AdminUserDto>(), createAdminUser: async (input: CreateAdminUserDto) => { void input; return unavailable() }, updateAdminUser: async (id: string, input: UpdateAdminUserDto) => { void id; void input; return unavailable() },
       listAdminRoles: async () => emptyCollection<AdminRoleDto>(), createAdminRole: async (input: AdminRoleInputDto) => { void input; return unavailable() }, updateAdminRole: async (id: string, input: AdminRoleInputDto) => { void id; void input; return unavailable() }, deleteAdminRole: async (id: string) => { void id },
       listAdminPermissions: async () => emptyCollection<AdminPermissionDto>(),
+      getGeneralSettings: async () => ({ organizationId: 'mock', organizationName: 'Castro’s Services', organizationSlug: 'castros-services', businessTimezone: 'Africa/Maputo' }),
+      updateGeneralSettings: async (input: GeneralSettingsInputDto) => ({ organizationId: 'mock', organizationName: input.organizationName, organizationSlug: 'castros-services', businessTimezone: input.businessTimezone }),
     }
   }
 }
@@ -96,6 +99,8 @@ export class HttpApiAdapter implements ApiAdapter {
       listAdminUsers: async () => toCollection(await this.client.requestOrThrow<AdminUserDto[]>(apiRoutes.operationsAdminUsers)), createAdminUser: (input) => this.client.requestOrThrow<AdminUserDto>(apiRoutes.operationsAdminUsers, { method: 'POST', headers: json, body: JSON.stringify(input) }), updateAdminUser: (id, input) => this.client.requestOrThrow<AdminUserDto>(apiRoutes.operationsAdminUser(id), { method: 'PUT', headers: json, body: JSON.stringify(input) }),
       listAdminRoles: async () => toCollection(await this.client.requestOrThrow<AdminRoleDto[]>(apiRoutes.operationsAdminRoles)), createAdminRole: (input) => this.client.requestOrThrow<AdminRoleDto>(apiRoutes.operationsAdminRoles, { method: 'POST', headers: json, body: JSON.stringify(input) }), updateAdminRole: (id, input) => this.client.requestOrThrow<AdminRoleDto>(apiRoutes.operationsAdminRole(id), { method: 'PUT', headers: json, body: JSON.stringify(input) }), deleteAdminRole: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsAdminRole(id), { method: 'DELETE' }),
       listAdminPermissions: async () => toCollection(await this.client.requestOrThrow<AdminPermissionDto[]>(apiRoutes.operationsAdminPermissions)),
+      getGeneralSettings: () => this.client.requestOrThrow<GeneralSettingsDto>(apiRoutes.operationsGeneralSettings),
+      updateGeneralSettings: (input) => this.client.requestOrThrow<GeneralSettingsDto>(apiRoutes.operationsGeneralSettings, { method: 'PUT', headers: json, body: JSON.stringify(input) }),
     }
   }
 }
