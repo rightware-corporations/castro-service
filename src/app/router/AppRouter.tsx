@@ -4,6 +4,7 @@ import { useApi, useSession, useSessionReady } from '../providers/AppProviders'
 import { AuthPage } from '../../pages/auth/AuthPages'
 import { NotFound } from '../../pages/NotFound'
 import { OperationsFoundationPage } from '../../pages/operations/OperationsFoundationPage'
+import { AvailabilitySettingsPage } from '../../pages/operations/AvailabilitySettingsPage'
 import { ComponentLab } from '../../pages/dev/ComponentLab'
 import { HomePublic } from '../../features/home/components/HomePublic'
 import { ServicesCatalog, ServiceDetail } from '../../features/services/components/ServicesPublic'
@@ -18,7 +19,7 @@ const operationPaths = [
   '/app/dashboard', '/app/pedidos', '/app/pedidos/:id', '/app/reservas', '/app/reservas/:id', '/app/clientes', '/app/clientes/:id',
   '/app/calendario', '/app/espacos', '/app/servicos', '/app/formacao', '/app/tarefas', '/app/relatorios', '/app/configuracoes',
   '/app/configuracoes/servicos', '/app/configuracoes/formacao', '/app/configuracoes/espacos', '/app/configuracoes/layouts',
-  '/app/configuracoes/recursos', '/app/configuracoes/disponibilidade', '/app/configuracoes/conteudo', '/app/configuracoes/utilizadores',
+  '/app/configuracoes/recursos', '/app/configuracoes/conteudo', '/app/configuracoes/utilizadores',
   '/app/configuracoes/funcoes', '/app/configuracoes/permissoes', '/app/configuracoes/geral',
 ]
 
@@ -61,6 +62,7 @@ export function AppRouter() {
       <Route path="/reset-password" element={<AuthPage kind="reset" />} />
     </Route>
     <Route element={<OperationsGuard />}>
+      <Route path="/app/configuracoes/disponibilidade" element={<AvailabilitySettingsPage />} />
       {operationPaths.map((path) => <Route key={path} path={path} element={<OperationsFoundationPage />} />)}
     </Route>
   </Routes>
