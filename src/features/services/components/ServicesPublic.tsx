@@ -5,6 +5,7 @@ import { Alert, EmptyState, ErrorState, LoadingState } from '../../../design-sys
 import { Breadcrumbs } from '../../../design-system/patterns/navigation'
 import { Badge } from '../../../design-system/primitives'
 import type { Service } from '../../../domain/models'
+import { bookingRoute } from '../../booking/routes'
 
 export type CollectionResource<T> = { isLoading: boolean; isError: boolean; data?: { items: T[] } }
 export type DetailResource<T> = { isLoading: boolean; isError: boolean; data?: T }
@@ -61,11 +62,13 @@ export function ServiceDetailView({ resource }: { resource: DetailResource<Servi
   if (resource.isError) return <section className="public-page container"><ErrorState title="Não foi possível carregar este serviço." /><Link className="text-link" to="/servicos">Voltar aos serviços</Link></section>
   if (!resource.data) return <section className="public-page container"><EmptyState title="Serviço não encontrado.">O endereço não corresponde a um serviço disponível.</EmptyState><Link className="text-link" to="/servicos">Voltar aos serviços</Link></section>
   const service = resource.data
+  const bookingBase = bookingRoute('SERVICE', service.id, 'selection')
+  const bookingHref = service.durationMinutes && service.durationMinutes > 0 ? `${bookingBase}?duration=${service.durationMinutes}` : bookingBase
   return <div className="service-detail-v2">
     <section className="container public-v2-page"><Breadcrumbs items={[{ label: 'Serviços', href: '/servicos' }, { label: service.name }]} /><ServicesIntro detail />
       <div className="service-detail-v2__grid">
         <div className="service-detail-v2__main"><span className="eyebrow">SERVIÇO</span><h2>{service.name}</h2><p className="service-detail-v2__description">{service.description ?? service.summary ?? 'Conteúdo detalhado pendente de publicação.'}</p>{service.durationMinutes !== undefined && <p className="metadata"><Clock3 size={16} />{service.durationMinutes} minutos</p>}{service.bookingEnabled === true && <Alert tone="info" title="Este serviço pode seguir para reserva">A disponibilidade final é sempre calculada pelo backend antes da confirmação.</Alert>}</div>
-        <aside className="service-detail-v2__aside"><div className="service-detail-v2__art" aria-hidden="true"><span>CASTRO’S</span><strong>{service.name}</strong><i /><i /><i /></div><div className="service-detail-v2__action"><span className="eyebrow">PRÓXIMO PASSO</span><h3>Quer conversar sobre este serviço?</h3><Link className="ds-button ds-button--primary" to="/contacto">Falar connosco <ArrowRight size={16} /></Link></div></aside>
+        <aside className="service-detail-v2__aside"><div className="service-detail-v2__art" aria-hidden="true"><span>CASTRO’S</span><strong>{service.name}</strong><i /><i /><i /></div><div className="service-detail-v2__action"><span className="eyebrow">PRÓXIMO PASSO</span><h3>{service.bookingEnabled === true ? 'Escolha entre reservar ou conversar primeiro.' : 'Quer conversar sobre este serviço?'}</h3>{service.bookingEnabled === true ? <Link className="ds-button ds-button--primary" to={bookingHref}>Ver disponibilidade <ArrowRight size={16} /></Link> : null}<Link className={service.bookingEnabled === true ? 'text-link' : 'ds-button ds-button--primary'} to="/contacto">Falar connosco {service.bookingEnabled !== true ? <ArrowRight size={16} /> : null}</Link></div></aside>
       </div>
     </section>
   </div>
