@@ -1,9 +1,11 @@
 import type {
-  AdminCourseDto, AdminCourseInputDto, AdminCourseSessionDto, AdminCourseSessionInputDto, AdminServiceDto, AdminServiceInputDto, AdminSpaceDto, AdminSpaceInputDto,
-  ApiPort, AuthSessionDto, AvailabilityExceptionDto, AvailabilityExceptionInputDto, AvailabilityQueryDto, AvailabilityResultDto, AvailabilityRuleDto,
-  AvailabilityRuleInputDto, AvailabilitySlotDto, BlockedPeriodDto, BlockedPeriodInputDto, BookingOperationalStatus, BookingRequestDto, BookingResponseDto,
-  CourseDto, CourseSessionDto, CsrfTokenResponse, IdempotencyOptions, OperationsBookingItemDto, OperationsCustomerItemDto,
-  OperationsRequestItemDto, OperationsSummaryDto, PublicBookingLookupDto, PublicConfigDto, RequestInput, RequestOperationalStatus, RequestResponseDto, ServiceDto, SpaceDto,
+  AdminCourseDto, AdminCourseInputDto, AdminCourseSessionDto, AdminCourseSessionInputDto, AdminPermissionDto, AdminRoleDto, AdminRoleInputDto,
+  AdminServiceDto, AdminServiceInputDto, AdminSpaceDto, AdminSpaceInputDto, AdminUserDto, ApiPort, AuthSessionDto,
+  AvailabilityExceptionDto, AvailabilityExceptionInputDto, AvailabilityQueryDto, AvailabilityResultDto, AvailabilityRuleDto,
+  AvailabilityRuleInputDto, AvailabilitySlotDto, BlockedPeriodDto, BlockedPeriodInputDto, BookingOperationalStatus, BookingRequestDto,
+  BookingResponseDto, CourseDto, CourseSessionDto, CreateAdminUserDto, CsrfTokenResponse, IdempotencyOptions, OperationsBookingItemDto,
+  OperationsCustomerItemDto, OperationsRequestItemDto, OperationsSummaryDto, PublicBookingLookupDto, PublicConfigDto, RequestInput,
+  RequestOperationalStatus, RequestResponseDto, ServiceDto, SpaceDto, UpdateAdminUserDto,
 } from '../contracts'
 import type { AuthSession, Collection } from '../../domain'
 import { HttpApiClient, createIdempotencyKey } from './HttpApiClient'
@@ -13,14 +15,7 @@ import { serializeAvailabilityQuery } from './serialization'
 export interface ApiAdapter extends ApiPort { readonly kind: 'mock' | 'http' }
 const emptyCollection = <T>(): Collection<T> => ({ items: [], total: 0 })
 const toCollection = <T>(items: T[]): Collection<T> => ({ items, total: items.length })
-const mapSession = (dto: AuthSessionDto): AuthSession => ({
-  authenticated: dto.authenticated,
-  username: dto.email,
-  subject: dto.email,
-  displayName: [dto.firstName, dto.lastName].filter(Boolean).join(' ') || dto.email,
-  organizationId: dto.organizationId,
-  permissions: dto.permissions ?? [],
-})
+const mapSession = (dto: AuthSessionDto): AuthSession => ({ authenticated: dto.authenticated, username: dto.email, subject: dto.email, displayName: [dto.firstName, dto.lastName].filter(Boolean).join(' ') || dto.email, organizationId: dto.organizationId, permissions: dto.permissions ?? [] })
 
 const confirmedMockServices: ServiceDto[] = [
   { id: '10000000-0000-0000-0000-000000000001', slug: 'atendimento-ao-cliente', name: 'Atendimento ao Cliente', bookingEnabled: false },
@@ -28,7 +23,6 @@ const confirmedMockServices: ServiceDto[] = [
   { id: '10000000-0000-0000-0000-000000000003', slug: 'palestras-workshops-formacao', name: 'Palestras, Workshops e Formação', bookingEnabled: false },
   { id: '10000000-0000-0000-0000-000000000004', slug: 'treinamento-corporativo-personalizado', name: 'Treinamento Corporativo Personalizado', bookingEnabled: false },
 ]
-
 const confirmedMockSpaces: SpaceDto[] = [{ id: '20000000-0000-0000-0000-000000000001', slug: 'espaco-castros', name: 'Espaço Castro’s', description: 'Espaço físico preparado para reuniões, formação e workshops. Conteúdo visual real ainda pendente de assets aprovados.' }]
 
 export class MockApiAdapter implements ApiAdapter {
@@ -58,41 +52,21 @@ export class MockApiAdapter implements ApiAdapter {
     const unavailable = async () => { throw new Error('Operational mock detail is not configured.') }
     return {
       getSummary: async () => ({ requests: 0, bookings: 0, customers: 0 }),
-      listRequests: async () => emptyCollection<OperationsRequestItemDto>(),
-      getRequest: unavailable,
+      listRequests: async () => emptyCollection<OperationsRequestItemDto>(), getRequest: unavailable,
       updateRequestStatus: async (id: string, status: RequestOperationalStatus) => { void id; void status; return unavailable() },
-      listBookings: async () => emptyCollection<OperationsBookingItemDto>(),
-      createBooking: async (input: BookingRequestDto, options?: IdempotencyOptions) => { void input; void options; return unavailable() },
-      getBooking: unavailable,
+      listBookings: async () => emptyCollection<OperationsBookingItemDto>(), createBooking: async (input: BookingRequestDto, options?: IdempotencyOptions) => { void input; void options; return unavailable() }, getBooking: unavailable,
       updateBookingStatus: async (id: string, status: BookingOperationalStatus) => { void id; void status; return unavailable() },
-      listCustomers: async () => emptyCollection<OperationsCustomerItemDto>(),
-      getCustomer: unavailable,
-      listAvailabilityRules: async () => emptyCollection<AvailabilityRuleDto>(),
-      createAvailabilityRule: async (input: AvailabilityRuleInputDto) => { void input; return unavailable() },
-      updateAvailabilityRule: async (id: string, input: AvailabilityRuleInputDto) => { void id; void input; return unavailable() },
-      deleteAvailabilityRule: async (id: string) => { void id },
-      listAvailabilityExceptions: async () => emptyCollection<AvailabilityExceptionDto>(),
-      createAvailabilityException: async (input: AvailabilityExceptionInputDto) => { void input; return unavailable() },
-      deleteAvailabilityException: async (id: string) => { void id },
-      listBlockedPeriods: async () => emptyCollection<BlockedPeriodDto>(),
-      createBlockedPeriod: async (input: BlockedPeriodInputDto) => { void input; return unavailable() },
-      deleteBlockedPeriod: async (id: string) => { void id },
-      listAdminServices: async () => emptyCollection<AdminServiceDto>(),
-      createAdminService: async (input: AdminServiceInputDto) => { void input; return unavailable() },
-      updateAdminService: async (id: string, input: AdminServiceInputDto) => { void id; void input; return unavailable() },
-      deactivateAdminService: async (id: string) => { void id },
-      listAdminCourses: async () => emptyCollection<AdminCourseDto>(),
-      createAdminCourse: async (input: AdminCourseInputDto) => { void input; return unavailable() },
-      updateAdminCourse: async (id: string, input: AdminCourseInputDto) => { void id; void input; return unavailable() },
-      deactivateAdminCourse: async (id: string) => { void id },
-      listAdminCourseSessions: async (courseId: string) => { void courseId; return emptyCollection<AdminCourseSessionDto>() },
-      createAdminCourseSession: async (courseId: string, input: AdminCourseSessionInputDto) => { void courseId; void input; return unavailable() },
-      updateAdminCourseSession: async (courseId: string, id: string, input: AdminCourseSessionInputDto) => { void courseId; void id; void input; return unavailable() },
-      deactivateAdminCourseSession: async (courseId: string, id: string) => { void courseId; void id },
-      listAdminSpaces: async () => emptyCollection<AdminSpaceDto>(),
-      createAdminSpace: async (input: AdminSpaceInputDto) => { void input; return unavailable() },
-      updateAdminSpace: async (id: string, input: AdminSpaceInputDto) => { void id; void input; return unavailable() },
-      deactivateAdminSpace: async (id: string) => { void id },
+      listCustomers: async () => emptyCollection<OperationsCustomerItemDto>(), getCustomer: unavailable,
+      listAvailabilityRules: async () => emptyCollection<AvailabilityRuleDto>(), createAvailabilityRule: async (input: AvailabilityRuleInputDto) => { void input; return unavailable() }, updateAvailabilityRule: async (id: string, input: AvailabilityRuleInputDto) => { void id; void input; return unavailable() }, deleteAvailabilityRule: async (id: string) => { void id },
+      listAvailabilityExceptions: async () => emptyCollection<AvailabilityExceptionDto>(), createAvailabilityException: async (input: AvailabilityExceptionInputDto) => { void input; return unavailable() }, deleteAvailabilityException: async (id: string) => { void id },
+      listBlockedPeriods: async () => emptyCollection<BlockedPeriodDto>(), createBlockedPeriod: async (input: BlockedPeriodInputDto) => { void input; return unavailable() }, deleteBlockedPeriod: async (id: string) => { void id },
+      listAdminServices: async () => emptyCollection<AdminServiceDto>(), createAdminService: async (input: AdminServiceInputDto) => { void input; return unavailable() }, updateAdminService: async (id: string, input: AdminServiceInputDto) => { void id; void input; return unavailable() }, deactivateAdminService: async (id: string) => { void id },
+      listAdminCourses: async () => emptyCollection<AdminCourseDto>(), createAdminCourse: async (input: AdminCourseInputDto) => { void input; return unavailable() }, updateAdminCourse: async (id: string, input: AdminCourseInputDto) => { void id; void input; return unavailable() }, deactivateAdminCourse: async (id: string) => { void id },
+      listAdminCourseSessions: async (courseId: string) => { void courseId; return emptyCollection<AdminCourseSessionDto>() }, createAdminCourseSession: async (courseId: string, input: AdminCourseSessionInputDto) => { void courseId; void input; return unavailable() }, updateAdminCourseSession: async (courseId: string, id: string, input: AdminCourseSessionInputDto) => { void courseId; void id; void input; return unavailable() }, deactivateAdminCourseSession: async (courseId: string, id: string) => { void courseId; void id },
+      listAdminSpaces: async () => emptyCollection<AdminSpaceDto>(), createAdminSpace: async (input: AdminSpaceInputDto) => { void input; return unavailable() }, updateAdminSpace: async (id: string, input: AdminSpaceInputDto) => { void id; void input; return unavailable() }, deactivateAdminSpace: async (id: string) => { void id },
+      listAdminUsers: async () => emptyCollection<AdminUserDto>(), createAdminUser: async (input: CreateAdminUserDto) => { void input; return unavailable() }, updateAdminUser: async (id: string, input: UpdateAdminUserDto) => { void id; void input; return unavailable() },
+      listAdminRoles: async () => emptyCollection<AdminRoleDto>(), createAdminRole: async (input: AdminRoleInputDto) => { void input; return unavailable() }, updateAdminRole: async (id: string, input: AdminRoleInputDto) => { void id; void input; return unavailable() }, deleteAdminRole: async (id: string) => { void id },
+      listAdminPermissions: async () => emptyCollection<AdminPermissionDto>(),
     }
   }
 }
@@ -109,41 +83,19 @@ export class HttpApiAdapter implements ApiAdapter {
     const json = { 'Content-Type': 'application/json' }
     return {
       getSummary: () => this.client.requestOrThrow<OperationsSummaryDto>(apiRoutes.operationsSummary),
-      listRequests: async () => toCollection(await this.client.requestOrThrow<OperationsRequestItemDto[]>(apiRoutes.operationsRequests)),
-      getRequest: (id) => this.client.requestOrThrow<OperationsRequestItemDto>(apiRoutes.operationsRequest(id)),
-      updateRequestStatus: (id, status) => this.client.requestOrThrow<OperationsRequestItemDto>(apiRoutes.operationsRequestStatus(id), { method: 'PATCH', headers: json, body: JSON.stringify({ status }) }),
-      listBookings: async () => toCollection(await this.client.requestOrThrow<OperationsBookingItemDto[]>(apiRoutes.operationsBookings)),
-      createBooking: (input, options) => this.client.requestOrThrow<OperationsBookingItemDto>(apiRoutes.operationsBookings, { method: 'POST', headers: json, body: JSON.stringify(input) }, { idempotencyKey: options?.idempotencyKey ?? createIdempotencyKey() }),
-      getBooking: (id) => this.client.requestOrThrow<OperationsBookingItemDto>(apiRoutes.operationsBooking(id)),
-      updateBookingStatus: (id, status) => this.client.requestOrThrow<OperationsBookingItemDto>(apiRoutes.operationsBookingStatus(id), { method: 'PATCH', headers: json, body: JSON.stringify({ status }) }),
-      listCustomers: async () => toCollection(await this.client.requestOrThrow<OperationsCustomerItemDto[]>(apiRoutes.operationsCustomers)),
-      getCustomer: (id) => this.client.requestOrThrow<OperationsCustomerItemDto>(apiRoutes.operationsCustomer(id)),
-      listAvailabilityRules: async () => toCollection(await this.client.requestOrThrow<AvailabilityRuleDto[]>(apiRoutes.operationsAvailabilityRules)),
-      createAvailabilityRule: (input) => this.client.requestOrThrow<AvailabilityRuleDto>(apiRoutes.operationsAvailabilityRules, { method: 'POST', headers: json, body: JSON.stringify(input) }),
-      updateAvailabilityRule: (id, input) => this.client.requestOrThrow<AvailabilityRuleDto>(apiRoutes.operationsAvailabilityRule(id), { method: 'PUT', headers: json, body: JSON.stringify(input) }),
-      deleteAvailabilityRule: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsAvailabilityRule(id), { method: 'DELETE' }),
-      listAvailabilityExceptions: async () => toCollection(await this.client.requestOrThrow<AvailabilityExceptionDto[]>(apiRoutes.operationsAvailabilityExceptions)),
-      createAvailabilityException: (input) => this.client.requestOrThrow<AvailabilityExceptionDto>(apiRoutes.operationsAvailabilityExceptions, { method: 'POST', headers: json, body: JSON.stringify(input) }),
-      deleteAvailabilityException: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsAvailabilityException(id), { method: 'DELETE' }),
-      listBlockedPeriods: async () => toCollection(await this.client.requestOrThrow<BlockedPeriodDto[]>(apiRoutes.operationsBlockedPeriods)),
-      createBlockedPeriod: (input) => this.client.requestOrThrow<BlockedPeriodDto>(apiRoutes.operationsBlockedPeriods, { method: 'POST', headers: json, body: JSON.stringify(input) }),
-      deleteBlockedPeriod: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsBlockedPeriod(id), { method: 'DELETE' }),
-      listAdminServices: async () => toCollection(await this.client.requestOrThrow<AdminServiceDto[]>(apiRoutes.operationsAdminServices)),
-      createAdminService: (input) => this.client.requestOrThrow<AdminServiceDto>(apiRoutes.operationsAdminServices, { method: 'POST', headers: json, body: JSON.stringify(input) }),
-      updateAdminService: (id, input) => this.client.requestOrThrow<AdminServiceDto>(apiRoutes.operationsAdminService(id), { method: 'PUT', headers: json, body: JSON.stringify(input) }),
-      deactivateAdminService: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsAdminService(id), { method: 'DELETE' }),
-      listAdminCourses: async () => toCollection(await this.client.requestOrThrow<AdminCourseDto[]>(apiRoutes.operationsAdminCourses)),
-      createAdminCourse: (input) => this.client.requestOrThrow<AdminCourseDto>(apiRoutes.operationsAdminCourses, { method: 'POST', headers: json, body: JSON.stringify(input) }),
-      updateAdminCourse: (id, input) => this.client.requestOrThrow<AdminCourseDto>(apiRoutes.operationsAdminCourse(id), { method: 'PUT', headers: json, body: JSON.stringify(input) }),
-      deactivateAdminCourse: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsAdminCourse(id), { method: 'DELETE' }),
-      listAdminCourseSessions: async (courseId) => toCollection(await this.client.requestOrThrow<AdminCourseSessionDto[]>(apiRoutes.operationsAdminCourseSessions(courseId))),
-      createAdminCourseSession: (courseId, input) => this.client.requestOrThrow<AdminCourseSessionDto>(apiRoutes.operationsAdminCourseSessions(courseId), { method: 'POST', headers: json, body: JSON.stringify(input) }),
-      updateAdminCourseSession: (courseId, id, input) => this.client.requestOrThrow<AdminCourseSessionDto>(apiRoutes.operationsAdminCourseSession(courseId, id), { method: 'PUT', headers: json, body: JSON.stringify(input) }),
-      deactivateAdminCourseSession: (courseId, id) => this.client.requestOrThrow<void>(apiRoutes.operationsAdminCourseSession(courseId, id), { method: 'DELETE' }),
-      listAdminSpaces: async () => toCollection(await this.client.requestOrThrow<AdminSpaceDto[]>(apiRoutes.operationsAdminSpaces)),
-      createAdminSpace: (input) => this.client.requestOrThrow<AdminSpaceDto>(apiRoutes.operationsAdminSpaces, { method: 'POST', headers: json, body: JSON.stringify(input) }),
-      updateAdminSpace: (id, input) => this.client.requestOrThrow<AdminSpaceDto>(apiRoutes.operationsAdminSpace(id), { method: 'PUT', headers: json, body: JSON.stringify(input) }),
-      deactivateAdminSpace: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsAdminSpace(id), { method: 'DELETE' }),
+      listRequests: async () => toCollection(await this.client.requestOrThrow<OperationsRequestItemDto[]>(apiRoutes.operationsRequests)), getRequest: (id) => this.client.requestOrThrow<OperationsRequestItemDto>(apiRoutes.operationsRequest(id)), updateRequestStatus: (id, status) => this.client.requestOrThrow<OperationsRequestItemDto>(apiRoutes.operationsRequestStatus(id), { method: 'PATCH', headers: json, body: JSON.stringify({ status }) }),
+      listBookings: async () => toCollection(await this.client.requestOrThrow<OperationsBookingItemDto[]>(apiRoutes.operationsBookings)), createBooking: (input, options) => this.client.requestOrThrow<OperationsBookingItemDto>(apiRoutes.operationsBookings, { method: 'POST', headers: json, body: JSON.stringify(input) }, { idempotencyKey: options?.idempotencyKey ?? createIdempotencyKey() }), getBooking: (id) => this.client.requestOrThrow<OperationsBookingItemDto>(apiRoutes.operationsBooking(id)), updateBookingStatus: (id, status) => this.client.requestOrThrow<OperationsBookingItemDto>(apiRoutes.operationsBookingStatus(id), { method: 'PATCH', headers: json, body: JSON.stringify({ status }) }),
+      listCustomers: async () => toCollection(await this.client.requestOrThrow<OperationsCustomerItemDto[]>(apiRoutes.operationsCustomers)), getCustomer: (id) => this.client.requestOrThrow<OperationsCustomerItemDto>(apiRoutes.operationsCustomer(id)),
+      listAvailabilityRules: async () => toCollection(await this.client.requestOrThrow<AvailabilityRuleDto[]>(apiRoutes.operationsAvailabilityRules)), createAvailabilityRule: (input) => this.client.requestOrThrow<AvailabilityRuleDto>(apiRoutes.operationsAvailabilityRules, { method: 'POST', headers: json, body: JSON.stringify(input) }), updateAvailabilityRule: (id, input) => this.client.requestOrThrow<AvailabilityRuleDto>(apiRoutes.operationsAvailabilityRule(id), { method: 'PUT', headers: json, body: JSON.stringify(input) }), deleteAvailabilityRule: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsAvailabilityRule(id), { method: 'DELETE' }),
+      listAvailabilityExceptions: async () => toCollection(await this.client.requestOrThrow<AvailabilityExceptionDto[]>(apiRoutes.operationsAvailabilityExceptions)), createAvailabilityException: (input) => this.client.requestOrThrow<AvailabilityExceptionDto>(apiRoutes.operationsAvailabilityExceptions, { method: 'POST', headers: json, body: JSON.stringify(input) }), deleteAvailabilityException: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsAvailabilityException(id), { method: 'DELETE' }),
+      listBlockedPeriods: async () => toCollection(await this.client.requestOrThrow<BlockedPeriodDto[]>(apiRoutes.operationsBlockedPeriods)), createBlockedPeriod: (input) => this.client.requestOrThrow<BlockedPeriodDto>(apiRoutes.operationsBlockedPeriods, { method: 'POST', headers: json, body: JSON.stringify(input) }), deleteBlockedPeriod: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsBlockedPeriod(id), { method: 'DELETE' }),
+      listAdminServices: async () => toCollection(await this.client.requestOrThrow<AdminServiceDto[]>(apiRoutes.operationsAdminServices)), createAdminService: (input) => this.client.requestOrThrow<AdminServiceDto>(apiRoutes.operationsAdminServices, { method: 'POST', headers: json, body: JSON.stringify(input) }), updateAdminService: (id, input) => this.client.requestOrThrow<AdminServiceDto>(apiRoutes.operationsAdminService(id), { method: 'PUT', headers: json, body: JSON.stringify(input) }), deactivateAdminService: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsAdminService(id), { method: 'DELETE' }),
+      listAdminCourses: async () => toCollection(await this.client.requestOrThrow<AdminCourseDto[]>(apiRoutes.operationsAdminCourses)), createAdminCourse: (input) => this.client.requestOrThrow<AdminCourseDto>(apiRoutes.operationsAdminCourses, { method: 'POST', headers: json, body: JSON.stringify(input) }), updateAdminCourse: (id, input) => this.client.requestOrThrow<AdminCourseDto>(apiRoutes.operationsAdminCourse(id), { method: 'PUT', headers: json, body: JSON.stringify(input) }), deactivateAdminCourse: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsAdminCourse(id), { method: 'DELETE' }),
+      listAdminCourseSessions: async (courseId) => toCollection(await this.client.requestOrThrow<AdminCourseSessionDto[]>(apiRoutes.operationsAdminCourseSessions(courseId))), createAdminCourseSession: (courseId, input) => this.client.requestOrThrow<AdminCourseSessionDto>(apiRoutes.operationsAdminCourseSessions(courseId), { method: 'POST', headers: json, body: JSON.stringify(input) }), updateAdminCourseSession: (courseId, id, input) => this.client.requestOrThrow<AdminCourseSessionDto>(apiRoutes.operationsAdminCourseSession(courseId, id), { method: 'PUT', headers: json, body: JSON.stringify(input) }), deactivateAdminCourseSession: (courseId, id) => this.client.requestOrThrow<void>(apiRoutes.operationsAdminCourseSession(courseId, id), { method: 'DELETE' }),
+      listAdminSpaces: async () => toCollection(await this.client.requestOrThrow<AdminSpaceDto[]>(apiRoutes.operationsAdminSpaces)), createAdminSpace: (input) => this.client.requestOrThrow<AdminSpaceDto>(apiRoutes.operationsAdminSpaces, { method: 'POST', headers: json, body: JSON.stringify(input) }), updateAdminSpace: (id, input) => this.client.requestOrThrow<AdminSpaceDto>(apiRoutes.operationsAdminSpace(id), { method: 'PUT', headers: json, body: JSON.stringify(input) }), deactivateAdminSpace: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsAdminSpace(id), { method: 'DELETE' }),
+      listAdminUsers: async () => toCollection(await this.client.requestOrThrow<AdminUserDto[]>(apiRoutes.operationsAdminUsers)), createAdminUser: (input) => this.client.requestOrThrow<AdminUserDto>(apiRoutes.operationsAdminUsers, { method: 'POST', headers: json, body: JSON.stringify(input) }), updateAdminUser: (id, input) => this.client.requestOrThrow<AdminUserDto>(apiRoutes.operationsAdminUser(id), { method: 'PUT', headers: json, body: JSON.stringify(input) }),
+      listAdminRoles: async () => toCollection(await this.client.requestOrThrow<AdminRoleDto[]>(apiRoutes.operationsAdminRoles)), createAdminRole: (input) => this.client.requestOrThrow<AdminRoleDto>(apiRoutes.operationsAdminRoles, { method: 'POST', headers: json, body: JSON.stringify(input) }), updateAdminRole: (id, input) => this.client.requestOrThrow<AdminRoleDto>(apiRoutes.operationsAdminRole(id), { method: 'PUT', headers: json, body: JSON.stringify(input) }), deleteAdminRole: (id) => this.client.requestOrThrow<void>(apiRoutes.operationsAdminRole(id), { method: 'DELETE' }),
+      listAdminPermissions: async () => toCollection(await this.client.requestOrThrow<AdminPermissionDto[]>(apiRoutes.operationsAdminPermissions)),
     }
   }
 }
