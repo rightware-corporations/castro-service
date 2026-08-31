@@ -10,6 +10,7 @@ Working branch: `integration/castros-platform`
 - [x] Organization-scoped permissions for Operations foundation
 - [x] Public booking flow connected to backend
 - [x] Booking idempotency key reuse across logical retries
+- [x] Contact-request idempotency key reuse across logical retries
 - [x] Availability weekly rules, exceptions and blocked periods
 - [x] Availability resource selectors using real public catalog data
 - [ ] Add targeted regression tests for booking, availability admin and internal catalog CRUD
@@ -21,8 +22,8 @@ Working branch: `integration/castros-platform`
 - [x] Spaces catalog/detail/explorer/configurator V2
 - [x] Contact V2
 - [x] Booking date/time/customer/review/confirmation
-- [ ] Service detail → booking context polish
-- [ ] Course-session booking specialization
+- [x] Service detail → booking context with published duration seeding
+- [x] Course-session booking specialization with fixed published date/duration
 - [ ] Space configurator → booking context final QA
 - [ ] Public empty/error/loading state audit
 - [ ] Responsive visual QA across target breakpoint matrix
@@ -49,9 +50,9 @@ Working branch: `integration/castros-platform`
 - [x] Blocked-periods UI
 - [x] Services administration backend contract
 - [x] Services administration frontend UI
-- [ ] Courses administration backend + UI
-- [ ] Course sessions administration backend + UI
-- [ ] Spaces administration backend + UI
+- [x] Courses administration backend + UI
+- [x] Course sessions administration backend + UI
+- [x] Spaces administration backend + UI
 - [ ] Space scenes / hotspots / layouts / resources management
 - [ ] Content administration
 - [ ] Users administration
@@ -85,15 +86,15 @@ Working branch: `integration/castros-platform`
 - [ ] Prepare merge/PR without changing `main` until approved
 
 ## Execution order
-1. Finish Courses + Course Sessions administration.
-2. Finish Spaces administration.
-3. Connect all catalog selectors and availability dependencies.
-4. Complete request/booking/customer internal detail workflows.
-5. Close booking/course special cases and public QA gaps.
-6. Add internal/admin regression and organization-isolation tests.
-7. Complete users/roles/permissions and production security blockers.
-8. Run the full product locally and generate screenshots.
-9. Perform visual/design QA and responsive correction.
+1. Complete request/booking/customer internal detail workflows.
+2. Add manual operations booking and close remaining booking/context QA.
+3. Add targeted booking/catalog regression and organization-isolation tests.
+4. Implement users, roles, permission matrix and general settings.
+5. Implement space scenes/hotspots/layouts/resources and content administration.
+6. Close production security blockers: sessions, rate limiting, secrets, secure deployment, CORS, audit/outbox.
+7. Run the full product locally and generate screenshots.
+8. Perform visual/design QA and responsive correction.
+9. Complete accessibility and final content validation.
 10. Final gate and merge preparation.
 
 This file is the running execution list. Completed items should be checked in as implementation lands; no commercial facts should be invented to satisfy an unchecked item.
