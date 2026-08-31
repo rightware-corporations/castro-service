@@ -24,4 +24,10 @@ export const apiRoutes = {
   operationsBookingStatus: (id: string) => `/api/v1/operations/bookings/${encodeURIComponent(id)}/status`,
   operationsCustomers: '/api/v1/operations/customers',
   operationsCustomer: (id: string) => `/api/v1/operations/customers/${encodeURIComponent(id)}`,
+  operationsAvailabilityRules: '/api/v1/operations/availability/rules',
+  operationsAvailabilityRule: (id: string) => `/api/v1/operations/availability/rules/${encodeURIComponent(id)}`,
+  operationsAvailabilityExceptions: '/api/v1/operations/availability/exceptions',
+  operationsAvailabilityException: (id: string) => `/api/v1/operations/availability/exceptions/${encodeURIComponent(id)}`,
+  operationsBlockedPeriods: '/api/v1/operations/availability/blocked-periods',
+  operationsBlockedPeriod: (id: string) => `/api/v1/operations/availability/blocked-periods/${encodeURIComponent(id)}`,
 } as const
