@@ -1,6 +1,8 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import type { ReactNode } from 'react'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AuthLayout, OperationsLayout, PublicLayout } from '../layouts/Layouts'
-import { useApi, useSession, useSessionReady } from '../providers/AppProviders'
+import { useApi, useCan, useSession, useSessionError, useSessionReady } from '../providers/AppProviders'
+import type { Permission } from '../../domain'
 import { AuthPage } from '../../pages/auth/AuthPages'
 import { NotFound } from '../../pages/NotFound'
 import { OperationsFoundationPage } from '../../pages/operations/OperationsFoundationPage'
@@ -9,6 +11,7 @@ import { ServiceSettingsPage } from '../../pages/operations/ServiceSettingsPage'
 import { CourseSettingsPage } from '../../pages/operations/CourseSettingsPage'
 import { SpaceSettingsPage } from '../../pages/operations/SpaceSettingsPage'
 import { ManualBookingPage } from '../../pages/operations/ManualBookingPage'
+import { AccessSettingsPage } from '../../pages/operations/AccessSettingsPage'
 import { ComponentLab } from '../../pages/dev/ComponentLab'
 import { HomePublic } from '../../features/home/components/HomePublic'
 import { ServicesCatalog, ServiceDetail } from '../../features/services/components/ServicesPublic'
@@ -17,24 +20,42 @@ import { ContactPublic } from '../../features/contact/components/ContactPublic'
 import { SpaceConfigurator, SpaceDetail, SpaceExplorer, SpacesCatalog } from '../../features/spaces/components/SpacesPublic'
 import { BookingConfirmation, BookingCustomer, BookingDate, BookingReview, BookingTime } from '../../features/booking/components/BookingPublic'
 import { DeferredPublicPage } from '../../pages/public/DeferredPublicPage'
-import { LoadingState } from '../../design-system/patterns/feedback-overlays'
+import { ErrorState, LoadingState } from '../../design-system/patterns/feedback-overlays'
 
 const operationPaths = [
-  '/app/dashboard', '/app/pedidos', '/app/pedidos/:id', '/app/reservas', '/app/reservas/:id', '/app/clientes', '/app/clientes/:id',
-  '/app/calendario', '/app/espacos', '/app/servicos', '/app/formacao', '/app/tarefas', '/app/relatorios', '/app/configuracoes',
-  '/app/configuracoes/layouts', '/app/configuracoes/recursos', '/app/configuracoes/conteudo', '/app/configuracoes/utilizadores',
-  '/app/configuracoes/funcoes', '/app/configuracoes/permissoes', '/app/configuracoes/geral',
+  '/app/tarefas',
+]
+
+const permissionRoutes: ReadonlyArray<readonly [string, Permission]> = [
+  ['/app/dashboard', 'dashboard.read'],
+  ['/app/pedidos', 'request.read'], ['/app/pedidos/:id', 'request.read'],
+  ['/app/reservas', 'booking.read'], ['/app/reservas/:id', 'booking.read'],
+  ['/app/clientes', 'customer.read'], ['/app/clientes/:id', 'customer.read'],
+  ['/app/calendario', 'booking.read'],
+  ['/app/espacos', 'space.read'], ['/app/servicos', 'service.read'], ['/app/formacao', 'course.read'],
+  ['/app/relatorios', 'dashboard.read'],
+  ['/app/configuracoes', 'settings.read'], ['/app/configuracoes/layouts', 'space.read'], ['/app/configuracoes/recursos', 'space.read'],
+  ['/app/configuracoes/conteudo', 'content.read'], ['/app/configuracoes/geral', 'settings.read'],
 ]
 
 function OperationsGuard() {
-  const api = useApi()
-  const session = useSession()
-  const ready = useSessionReady()
+  const api = useApi(); const session = useSession(); const ready = useSessionReady(); const sessionError = useSessionError(); const location = useLocation()
   if (api.kind === 'mock' && import.meta.env.DEV) return <OperationsLayout />
   if (!ready) return <main className="operations-auth-loading"><LoadingState label="A validar sessão." /></main>
-  if (!session?.authenticated) return <Navigate to="/login" replace />
+  if (sessionError) return <main className="operations-auth-loading"><ErrorState title="Não foi possível validar a sessão." /></main>
+  if (!session?.authenticated) return <Navigate to="/login" state={{ from: `${location.pathname}${location.search}` }} replace />
   return <OperationsLayout />
 }
+
+function RequirePermission({ permission, children }: { permission: Permission; children: ReactNode }) {
+  const api = useApi()
+  const can = useCan()
+  if (api.kind === 'mock' && import.meta.env.DEV) return <>{children}</>
+  if (can(permission)) return <>{children}</>
+  return <section className="ops-v2__page"><header className="ops-v2__hero"><div><span className="eyebrow">ACESSO</span><h1>Sem acesso</h1><p>A tua função não possui a permissão necessária para abrir esta área.</p></div></header><div className="catalog-admin__empty"><h3>Permissão necessária</h3><p><code>{permission}</code></p></div></section>
+}
+
+const guarded = (permission: Permission, element: ReactNode) => <RequirePermission permission={permission}>{element}</RequirePermission>
 
 export function AppRouter() {
   return <Routes>
@@ -65,11 +86,15 @@ export function AppRouter() {
       <Route path="/reset-password" element={<AuthPage kind="reset" />} />
     </Route>
     <Route element={<OperationsGuard />}>
-      <Route path="/app/reservas/nova" element={<ManualBookingPage />} />
-      <Route path="/app/configuracoes/disponibilidade" element={<AvailabilitySettingsPage />} />
-      <Route path="/app/configuracoes/servicos" element={<ServiceSettingsPage />} />
-      <Route path="/app/configuracoes/formacao" element={<CourseSettingsPage />} />
-      <Route path="/app/configuracoes/espacos" element={<SpaceSettingsPage />} />
+      <Route path="/app/reservas/nova" element={guarded('booking.create', <ManualBookingPage />)} />
+      <Route path="/app/configuracoes/disponibilidade" element={guarded('availability.read', <AvailabilitySettingsPage />)} />
+      <Route path="/app/configuracoes/servicos" element={guarded('service.read', <ServiceSettingsPage />)} />
+      <Route path="/app/configuracoes/formacao" element={guarded('course.read', <CourseSettingsPage />)} />
+      <Route path="/app/configuracoes/espacos" element={guarded('space.read', <SpaceSettingsPage />)} />
+      <Route path="/app/configuracoes/utilizadores" element={guarded('user.read', <AccessSettingsPage />)} />
+      <Route path="/app/configuracoes/funcoes" element={guarded('role.read', <AccessSettingsPage />)} />
+      <Route path="/app/configuracoes/permissoes" element={guarded('permission.read', <AccessSettingsPage />)} />
+      {permissionRoutes.map(([path, permission]) => <Route key={path} path={path} element={guarded(permission, <OperationsFoundationPage />)} />)}
       {operationPaths.map((path) => <Route key={path} path={path} element={<OperationsFoundationPage />} />)}
     </Route>
   </Routes>
