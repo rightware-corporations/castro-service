@@ -4,6 +4,7 @@ import { useCourse, useCourseSessions, useCourses } from '../hooks'
 import { EmptyState, ErrorState, LoadingState } from '../../../design-system/patterns/feedback-overlays'
 import { Breadcrumbs } from '../../../design-system/patterns/navigation'
 import type { Course, CourseSession } from '../../../domain/models'
+import { bookingRoute } from '../../booking/routes'
 
 function CoursesIntro({ detailTitle }: { detailTitle?: string }) {
   return <header className="courses-v2-intro">
@@ -58,5 +59,24 @@ export function CourseSessionsView({ resource }: { resource: { isLoading: boolea
   if (resource.isLoading) return <LoadingState label="A carregar sessões." />
   if (resource.isError) return <ErrorState title="Não foi possível carregar as sessões." />
   if (!resource.data?.items.length) return <EmptyState title="Não existem sessões disponíveis.">As próximas sessões serão apresentadas quando forem confirmadas.</EmptyState>
-  return <div className="sessions-v2-list">{resource.data.items.map((session, index) => <article key={session.id}><span>{String(index + 1).padStart(2, '0')}</span><div><strong>{session.startAt}</strong><small>até {session.endAt}</small></div><ArrowUpRight size={17} aria-hidden="true" /></article>)}</div>
+  return <div className="sessions-v2-list">{resource.data.items.map((session, index) => {
+    const href = sessionBookingHref(session)
+    return <article key={session.id}><span>{String(index + 1).padStart(2, '0')}</span><div><strong>{formatSessionDateTime(session.startAt)}</strong><small>até {formatSessionDateTime(session.endAt)}</small></div>{href ? <Link to={href} aria-label={`Reservar sessão de ${formatSessionDateTime(session.startAt)}`}><ArrowUpRight size={17} /></Link> : <ArrowUpRight size={17} aria-hidden="true" />}</article>
+  })}</div>
+}
+
+function sessionBookingHref(session: CourseSession) {
+  const start = new Date(session.startAt)
+  const end = new Date(session.endAt)
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) return null
+  const duration = Math.round((end.getTime() - start.getTime()) / 60000)
+  if (duration <= 0) return null
+  const date = session.startAt.slice(0, 10)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null
+  return `${bookingRoute('COURSE_SESSION', session.id, 'selection')}?date=${encodeURIComponent(date)}&duration=${duration}&fixed=1`
+}
+
+function formatSessionDateTime(value: string) {
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat('pt-PT', { dateStyle: 'medium', timeStyle: 'short' }).format(date)
 }
