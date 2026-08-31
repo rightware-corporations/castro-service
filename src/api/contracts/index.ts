@@ -110,6 +110,7 @@ export type ApiPort = {
     getRequest(id: string): Promise<OperationsRequestItemDto>
     updateRequestStatus(id: string, status: RequestOperationalStatus): Promise<OperationsRequestItemDto>
     listBookings(): Promise<Collection<OperationsBookingItemDto>>
+    createBooking(input: BookingRequestDto, options?: IdempotencyOptions): Promise<OperationsBookingItemDto>
     getBooking(id: string): Promise<OperationsBookingItemDto>
     updateBookingStatus(id: string, status: BookingOperationalStatus): Promise<OperationsBookingItemDto>
     listCustomers(): Promise<Collection<OperationsCustomerItemDto>>
