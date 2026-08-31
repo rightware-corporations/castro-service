@@ -21,7 +21,7 @@ export function TasksPage() {
   const rows = useMemo(() => (tasks.data?.items ?? []).filter((task) => `${task.title} ${task.description ?? ''} ${task.assignedUserName ?? ''}`.toLowerCase().includes(search.toLowerCase())), [tasks.data, search])
   const openCount = (tasks.data?.items ?? []).filter((task) => task.status === 'OPEN').length
   const progressCount = (tasks.data?.items ?? []).filter((task) => task.status === 'IN_PROGRESS').length
-  const overdueCount = (tasks.data?.items ?? []).filter((task) => task.dueAt && task.status !== 'DONE' && task.status !== 'CANCELLED' && new Date(task.dueAt).getTime() < Date.now()).length
+  const overdueCount = (tasks.data?.items ?? []).filter((task) => task.dueAt && task.status !== 'DONE' && task.status !== 'CANCELLED' && new Date(task.dueAt).getTime() < tasks.dataUpdatedAt).length
 
   const save = useMutation({
     mutationFn: () => {
