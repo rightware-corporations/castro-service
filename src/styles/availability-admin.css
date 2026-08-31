@@ -23,6 +23,9 @@
 .availability-admin__form { display:grid; gap:.85rem; }
 .availability-admin__form label { display:grid; gap:.35rem; color:var(--color-charcoal); font-size:.78rem; font-weight:700; }
 .availability-admin__form input,.availability-admin__form select { min-height:2.8rem; width:100%; border:1px solid var(--color-border); background:var(--color-off-white); padding:0 .75rem; color:var(--color-charcoal); font:inherit; font-weight:500; }
+.availability-admin__form input:disabled,.availability-admin__form select:disabled { cursor:not-allowed; opacity:.62; }
+.availability-admin__field-note { margin-top:.05rem; color:var(--color-muted); font-size:.68rem; font-weight:500; line-height:1.45; }
+.availability-admin__field-note.is-error { color:#9b2c2c; }
 .availability-admin__two { display:grid; grid-template-columns:1fr 1fr; gap:.65rem; }
 .availability-admin__check { display:flex !important; align-items:center; gap:.55rem !important; }
 .availability-admin__check input { min-height:0; width:1rem; height:1rem; }
