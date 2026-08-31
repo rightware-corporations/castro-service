@@ -2,12 +2,14 @@ import { createContext, useContext, useMemo, type PropsWithChildren } from 'reac
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
 import type { ApiAdapter } from '../../api/client/adapters'
 import { createApiAdapter } from '../../api/client/adapters'
+import { ApiError } from '../../api/client/errors'
 import type { AuthSession, Permission, PermissionContext } from '../../domain'
 import { createCan } from '../../domain/permissions'
 
 const ApiContext = createContext<ApiAdapter | null>(null)
 const SessionContext = createContext<AuthSession | null>(null)
 const SessionReadyContext = createContext(false)
+const SessionErrorContext = createContext(false)
 const PermissionContextValue = createContext<PermissionContext | null>(null)
 
 const developmentPermissions: Permission[] = [
@@ -22,25 +24,34 @@ const developmentPermissions: Permission[] = [
 export function useApi(): ApiAdapter { const api = useContext(ApiContext); if (!api) throw new Error('useApi must be used inside AppProviders'); return api }
 export function useSession(): AuthSession | null { return useContext(SessionContext) }
 export function useSessionReady(): boolean { return useContext(SessionReadyContext) }
+export function useSessionError(): boolean { return useContext(SessionErrorContext) }
 export function usePermission(permission: Permission): boolean { return useCan()(permission) }
 export function useCan(): (permission: Permission) => boolean { const permissions = useContext(PermissionContextValue); return useMemo(() => createCan(permissions), [permissions]) }
 
 function SessionProviders({ api, children }: PropsWithChildren<{ api: ApiAdapter }>) {
   const sessionQuery = useQuery({
     queryKey: ['auth', 'me'],
-    queryFn: async () => { try { return await api.auth.getSession() } catch { return null } },
+    queryFn: async () => {
+      try {
+        return await api.auth.getSession()
+      } catch (error) {
+        if (error instanceof ApiError && (error.status === 401 || error.status === 403)) return null
+        throw error
+      }
+    },
     retry: false,
     staleTime: 60_000,
     enabled: api.kind === 'http',
   })
   const session = api.kind === 'http' ? (sessionQuery.data ?? null) : null
   const ready = api.kind === 'mock' || sessionQuery.isFetched
+  const sessionError = api.kind === 'http' && sessionQuery.isError
   const permissionContext = useMemo<PermissionContext | null>(() => {
     if (import.meta.env.DEV && api.kind === 'mock') return { permissions: new Set<Permission>(developmentPermissions) }
     if (!session?.authenticated) return null
     return { permissions: new Set<Permission>((session.permissions ?? []) as Permission[]) }
   }, [api.kind, session])
-  return <SessionReadyContext.Provider value={ready}><SessionContext.Provider value={session}><PermissionContextValue.Provider value={permissionContext}>{children}</PermissionContextValue.Provider></SessionContext.Provider></SessionReadyContext.Provider>
+  return <SessionReadyContext.Provider value={ready}><SessionErrorContext.Provider value={sessionError}><SessionContext.Provider value={session}><PermissionContextValue.Provider value={permissionContext}>{children}</PermissionContextValue.Provider></SessionContext.Provider></SessionErrorContext.Provider></SessionReadyContext.Provider>
 }
 
 export function AppProviders({ children }: PropsWithChildren) {
