@@ -11,6 +11,7 @@ import './styles/operations-v2.css'
 import './styles/operations-data.css'
 import './styles/availability-admin.css'
 import './styles/catalog-admin.css'
+import './styles/access-admin.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
