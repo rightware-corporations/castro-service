@@ -18,7 +18,8 @@ const developmentPermissions: Permission[] = [
   'booking.read', 'booking.create', 'booking.update', 'booking.cancel',
   'service.read', 'service.manage', 'course.read', 'course.manage', 'space.read', 'space.manage',
   'availability.read', 'availability.manage', 'content.read', 'content.manage', 'user.read', 'user.manage',
-  'role.read', 'role.manage', 'permission.read', 'permission.manage', 'settings.read', 'settings.manage', 'audit.read',
+  'role.read', 'role.manage', 'permission.read', 'permission.manage', 'settings.read', 'settings.manage',
+  'task.read', 'task.manage', 'audit.read',
 ]
 
 export function useApi(): ApiAdapter { const api = useContext(ApiContext); if (!api) throw new Error('useApi must be used inside AppProviders'); return api }
