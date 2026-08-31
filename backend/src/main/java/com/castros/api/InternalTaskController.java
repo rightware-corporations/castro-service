@@ -51,7 +51,7 @@ public class InternalTaskController {
         jdbc.update("""
             insert into tasks(id,organization_id,title,description,status,priority,due_at,assigned_user_id,request_id,booking_id,customer_id,created_by)
             values (?,?,?,?,?,?,?,?,?,?,?,?)
-            """, id,org,input.title().trim(),blankToNull(input.description()),input.status(),input.priority(),input.dueAt(),input.assignedUserId(),input.requestId(),input.bookingId(),input.customerId(),actor);
+            """, id,org,input.title().trim(),blankToNull(input.description()),input.status().name(),input.priority().name(),input.dueAt(),input.assignedUserId(),input.requestId(),input.bookingId(),input.customerId(),actor);
         return one(org,id);
     }
 
@@ -61,14 +61,14 @@ public class InternalTaskController {
         jdbc.update("""
             update tasks set title=?,description=?,status=?,priority=?,due_at=?,assigned_user_id=?,request_id=?,booking_id=?,customer_id=?,updated_at=now()
             where id=? and organization_id=?
-            """,input.title().trim(),blankToNull(input.description()),input.status(),input.priority(),input.dueAt(),input.assignedUserId(),input.requestId(),input.bookingId(),input.customerId(),id,org);
+            """,input.title().trim(),blankToNull(input.description()),input.status().name(),input.priority().name(),input.dueAt(),input.assignedUserId(),input.requestId(),input.bookingId(),input.customerId(),id,org);
         return one(org,id);
     }
 
     @PatchMapping("/{id}/status") @PreAuthorize("hasAuthority('task.manage')") @Transactional
     public TaskItem updateStatus(@PathVariable UUID id,@Valid @RequestBody TaskStatusInput input,Authentication authentication) {
         UUID org=organizationId(authentication); ensureExists(org,id);
-        jdbc.update("update tasks set status=?,updated_at=now() where id=? and organization_id=?",input.status(),id,org);
+        jdbc.update("update tasks set status=?,updated_at=now() where id=? and organization_id=?",input.status().name(),id,org);
         return one(org,id);
     }
 
