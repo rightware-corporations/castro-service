@@ -41,6 +41,7 @@ export type Permission =
   | 'task.read'
   | 'task.manage'
   | 'notification.read'
+  | 'report.read'
   | 'audit.read'
 
 export type PermissionSet = ReadonlySet<Permission>
