@@ -23,21 +23,18 @@ export type RequestType = 'CONSULTATION' | 'CORPORATE_PROPOSAL' | 'TRAINING_INFO
 export type RequestInput = { firstName: string; lastName: string; email: string; phone?: string; type: RequestType; message?: string }
 export type RequestRequestDto = RequestInput
 export type RequestResponseDto = { id: string; status: string }
-
 export type RequestOperationalStatus = 'NEW' | 'CONTACTED' | 'QUALIFIED' | 'WAITING_CUSTOMER' | 'CONVERTED' | 'CLOSED' | 'CANCELLED'
 export type BookingOperationalStatus = 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW'
 export type OperationsSummaryDto = { requests: number; bookings: number; customers: number }
 export type OperationsRequestItemDto = { id: string; type: string; status: RequestOperationalStatus; message?: string | null; createdAt: string; customerId?: string | null; firstName?: string | null; lastName?: string | null; email?: string | null; phone?: string | null }
 export type OperationsBookingItemDto = { id: string; reference: string; status: BookingOperationalStatus; bookableType: string; bookableId: string; startAt: string; endAt: string; participants?: number | null; purpose?: string | null; createdAt: string; customerId?: string | null; firstName?: string | null; lastName?: string | null; email?: string | null; phone?: string | null }
 export type OperationsCustomerItemDto = { id: string; firstName: string; lastName?: string | null; email?: string | null; phone?: string | null; company?: string | null; source?: string | null; createdAt: string; updatedAt: string }
-
 export type AvailabilityRuleDto = { id: string; bookableType: BookableType; bookableId: string; dayOfWeek: string; opensAt: string; closesAt: string; slotIntervalMinutes: number; bufferBeforeMinutes: number; bufferAfterMinutes: number; minimumNoticeMinutes: number; maximumAdvanceDays: number; active: boolean }
 export type AvailabilityRuleInputDto = Omit<AvailabilityRuleDto, 'id'>
 export type AvailabilityExceptionDto = { id: string; bookableType: BookableType; bookableId: string; date: string; closed: boolean; opensAt?: string | null; closesAt?: string | null }
 export type AvailabilityExceptionInputDto = Omit<AvailabilityExceptionDto, 'id'>
 export type BlockedPeriodDto = { id: string; bookableType: BookableType; bookableId: string; startAt: string; endAt: string; reason?: string | null }
 export type BlockedPeriodInputDto = Omit<BlockedPeriodDto, 'id'>
-
 export type AdminServiceDto = { id: string; name: string; slug: string; shortDescription?: string | null; description?: string | null; durationMinutes?: number | null; bookingEnabled: boolean; active: boolean; featured: boolean; sortOrder: number; createdAt: string }
 export type AdminServiceInputDto = Omit<AdminServiceDto, 'id' | 'createdAt'>
 export type AdminCourseDto = { id: string; name: string; slug: string; description?: string | null; active: boolean }
@@ -52,7 +49,6 @@ export type UpdateAdminUserDto = Omit<CreateAdminUserDto, 'password'> & { passwo
 export type AdminRoleDto = { id: string; name: string; permissionCodes: string[] }
 export type AdminRoleInputDto = { name: string; permissionCodes: string[] }
 export type AdminPermissionDto = { code: string }
-
 export type ProblemDetailResponse = { code?: string; message?: string; status?: number; timestamp?: string; details?: Record<string, unknown> }
 export type IdempotencyOptions = { idempotencyKey?: string }
 
@@ -74,8 +70,8 @@ export type ApiPort = {
     listAdminCourses(): Promise<Collection<AdminCourseDto>>; createAdminCourse(input: AdminCourseInputDto): Promise<AdminCourseDto>; updateAdminCourse(id: string, input: AdminCourseInputDto): Promise<AdminCourseDto>; deactivateAdminCourse(id: string): Promise<void>
     listAdminCourseSessions(courseId: string): Promise<Collection<AdminCourseSessionDto>>; createAdminCourseSession(courseId: string, input: AdminCourseSessionInputDto): Promise<AdminCourseSessionDto>; updateAdminCourseSession(courseId: string, id: string, input: AdminCourseSessionInputDto): Promise<AdminCourseSessionDto>; deactivateAdminCourseSession(courseId: string, id: string): Promise<void>
     listAdminSpaces(): Promise<Collection<AdminSpaceDto>>; createAdminSpace(input: AdminSpaceInputDto): Promise<AdminSpaceDto>; updateAdminSpace(id: string, input: AdminSpaceInputDto): Promise<AdminSpaceDto>; deactivateAdminSpace(id: string): Promise<void>
-    listAdminUsers(): Promise<Collection<AdminUserDto>>; createAdminUser(input: CreateAdminUserDto): Promise<AdminUserDto>; updateAdminUser(id: string, input: UpdateAdminUserDto): Promise<AdminUserDto>
-    listAdminRoles(): Promise<Collection<AdminRoleDto>>; createAdminRole(input: AdminRoleInputDto): Promise<AdminRoleDto>; updateAdminRole(id: string, input: AdminRoleInputDto): Promise<AdminRoleDto>; deleteAdminRole(id: string): Promise<void>
-    listAdminPermissions(): Promise<Collection<AdminPermissionDto>>
+    listAdminUsers?(): Promise<Collection<AdminUserDto>>; createAdminUser?(input: CreateAdminUserDto): Promise<AdminUserDto>; updateAdminUser?(id: string, input: UpdateAdminUserDto): Promise<AdminUserDto>
+    listAdminRoles?(): Promise<Collection<AdminRoleDto>>; createAdminRole?(input: AdminRoleInputDto): Promise<AdminRoleDto>; updateAdminRole?(id: string, input: AdminRoleInputDto): Promise<AdminRoleDto>; deleteAdminRole?(id: string): Promise<void>
+    listAdminPermissions?(): Promise<Collection<AdminPermissionDto>>
   }
 }
