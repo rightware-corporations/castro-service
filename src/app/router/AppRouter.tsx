@@ -8,6 +8,7 @@ import { AvailabilitySettingsPage } from '../../pages/operations/AvailabilitySet
 import { ServiceSettingsPage } from '../../pages/operations/ServiceSettingsPage'
 import { CourseSettingsPage } from '../../pages/operations/CourseSettingsPage'
 import { SpaceSettingsPage } from '../../pages/operations/SpaceSettingsPage'
+import { ManualBookingPage } from '../../pages/operations/ManualBookingPage'
 import { ComponentLab } from '../../pages/dev/ComponentLab'
 import { HomePublic } from '../../features/home/components/HomePublic'
 import { ServicesCatalog, ServiceDetail } from '../../features/services/components/ServicesPublic'
@@ -64,6 +65,7 @@ export function AppRouter() {
       <Route path="/reset-password" element={<AuthPage kind="reset" />} />
     </Route>
     <Route element={<OperationsGuard />}>
+      <Route path="/app/reservas/nova" element={<ManualBookingPage />} />
       <Route path="/app/configuracoes/disponibilidade" element={<AvailabilitySettingsPage />} />
       <Route path="/app/configuracoes/servicos" element={<ServiceSettingsPage />} />
       <Route path="/app/configuracoes/formacao" element={<CourseSettingsPage />} />
