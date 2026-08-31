@@ -69,9 +69,11 @@ export function BookingDate() {
     if (!target) return {}
     const stored = readDraft(target.type, target.id)
     const people = parsePositiveInteger(searchParams.get('people'))
+    const duration = parsePositiveInteger(searchParams.get('duration'))
     const purpose = searchParams.get('purpose')?.trim() || undefined
     const next = {
       ...stored,
+      durationMinutes: stored.durationMinutes ?? duration,
       participants: stored.participants ?? people,
       purpose: stored.purpose ?? (target.type === 'SPACE' ? purpose : undefined),
     }
@@ -81,7 +83,7 @@ export function BookingDate() {
   if (!target) return <Navigate to="/reservar" replace />
   const canContinue = Boolean(draft.date && draft.durationMinutes && draft.durationMinutes > 0)
   const update = (patch: Partial<BookingDraft>) => { const next = { ...draft, ...patch, startTime: undefined, endTime: undefined, idempotencyKey: undefined }; setDraft(next); writeDraft(target.type, target.id, next) }
-  return <Shell step={1}><div className="booking-v2-grid"><main className="booking-v2-card"><div className="booking-v2-title"><CalendarDays size={21} /><div><span>01</span><h2>Quando pretende reservar?</h2></div></div><div className="booking-v2-fields"><TextField id="booking-date" label="Data" type="date" required value={draft.date ?? ''} onChange={(event) => update({ date: event.target.value })} /><TextField id="booking-duration" label="Duração prevista (minutos)" type="number" min="1" required value={draft.durationMinutes ?? ''} description="Indique a duração necessária. Não é aplicada uma duração comercial presumida." onChange={(event) => update({ durationMinutes: event.target.value ? Number(event.target.value) : undefined })} /></div></main><Summary target={target} draft={draft}><Button disabled={!canContinue} onClick={() => navigate(bookingRoute(target.type, target.id, 'time'))}>Ver horários <ArrowRight size={16} /></Button></Summary></div></Shell>
+  return <Shell step={1}><div className="booking-v2-grid"><main className="booking-v2-card"><div className="booking-v2-title"><CalendarDays size={21} /><div><span>01</span><h2>Quando pretende reservar?</h2></div></div><div className="booking-v2-fields"><TextField id="booking-date" label="Data" type="date" required value={draft.date ?? ''} onChange={(event) => update({ date: event.target.value })} /><TextField id="booking-duration" label="Duração prevista (minutos)" type="number" min="1" required value={draft.durationMinutes ?? ''} description="Use a duração publicada quando existir ou ajuste apenas quando o serviço permitir." onChange={(event) => update({ durationMinutes: event.target.value ? Number(event.target.value) : undefined })} /></div></main><Summary target={target} draft={draft}><Button disabled={!canContinue} onClick={() => navigate(bookingRoute(target.type, target.id, 'time'))}>Ver horários <ArrowRight size={16} /></Button></Summary></div></Shell>
 }
 
 export function BookingTime() {
@@ -110,8 +112,10 @@ export function BookingCustomer() {
 export function BookingReview() {
   const api = useApi()
   const target = useTarget()
+  const targetType = target?.type
+  const targetId = target?.id
   const navigate = useNavigate()
-  const draft = useMemo(() => target ? readDraft(target.type, target.id) : {}, [target?.type, target?.id])
+  const draft = useMemo(() => targetType && targetId ? readDraft(targetType, targetId) : {}, [targetType, targetId])
   const idempotencyKeyRef = useRef(draft.idempotencyKey ?? createIdempotencyKey())
   const mutation = useMutation({ mutationFn: async () => {
     if (!target || !draft.date || !draft.startTime || !draft.endTime || !draft.firstName) throw new Error('INCOMPLETE')
