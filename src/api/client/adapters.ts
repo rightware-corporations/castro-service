@@ -13,8 +13,7 @@ import { HttpApiClient, createIdempotencyKey } from './HttpApiClient'
 import { apiRoutes } from './routes'
 import { serializeAvailabilityQuery } from './serialization'
 
-export interface ApiAdapter extends ApiPort { readonly kind = undefined as never; }
-
+export interface ApiAdapter extends ApiPort { readonly kind: 'mock' | 'http' }
 const emptyCollection = <T>(): Collection<T> => ({ items: [], total: 0 })
 const toCollection = <T>(items: T[]): Collection<T> => ({ items, total: items.length })
 const mapSession = (dto: AuthSessionDto): AuthSession => ({ authenticated: dto.authenticated, username: dto.email, subject: dto.email, displayName: [dto.firstName, dto.lastName].filter(Boolean).join(' ') || dto.email, organizationId: dto.organizationId, permissions: dto.permissions ?? [] })
@@ -27,7 +26,7 @@ const confirmedMockServices: ServiceDto[] = [
 ]
 const confirmedMockSpaces: SpaceDto[] = [{ id: '20000000-0000-0000-0000-000000000001', slug: 'espaco-castros', name: 'Espaço Castro’s', description: 'Espaço físico preparado para reuniões, formação e workshops. Conteúdo visual real ainda pendente de assets aprovados.' }]
 
-export class MockApiAdapter implements ApiPort {
+export class MockApiAdapter implements ApiAdapter {
   readonly kind = 'mock' as const
   async getCsrf(): Promise<CsrfTokenResponse> { return { token: 'mock-csrf-token' } }
   async getSession(): Promise<AuthSession | null> { return null }
@@ -78,7 +77,7 @@ export class MockApiAdapter implements ApiPort {
   }
 }
 
-export class HttpApiAdapter implements ApiPort {
+export class HttpApiAdapter implements ApiAdapter {
   readonly kind = 'http' as const
   constructor(private readonly client: HttpApiClient) {}
   get auth(): ApiPort['auth'] { return { getCsrf: () => this.client.requestOrThrow<CsrfTokenResponse>(apiRoutes.csrf), getSession: async () => mapSession(await this.client.requestOrThrow<AuthSessionDto>(apiRoutes.me)), login: async (email, password) => mapSession(await this.client.requestOrThrow<AuthSessionDto>(apiRoutes.login, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) })), logout: () => this.client.requestOrThrow<void>(apiRoutes.logout, { method: 'POST' }) } }
@@ -112,5 +111,4 @@ export class HttpApiAdapter implements ApiPort {
   }
 }
 
-export type ApiAdapter = MockApiAdapter | HttpApiAdapter
 export function createApiAdapter(): ApiAdapter { const baseUrl = import.meta.env.VITE_API_BASE_URL?.trim(); return baseUrl ? new HttpApiAdapter(new HttpApiClient(baseUrl)) : new MockApiAdapter() }
