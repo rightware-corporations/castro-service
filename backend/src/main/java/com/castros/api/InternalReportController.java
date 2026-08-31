@@ -58,8 +58,12 @@ public class InternalReportController {
 
     private Map<String, Long> statusCounts(String table, UUID org, OffsetDateTime from, OffsetDateTime to) {
         Map<String, Long> result = new LinkedHashMap<>();
-        jdbc.query("select status,count(*) total from " + table + " where organization_id=? and created_at>=? and created_at<? group by status order by status",
-            rs -> result.put(rs.getString("status"), rs.getLong("total")), org, from, to);
+        List<StatusCount> rows = jdbc.query(
+            "select status,count(*) total from " + table + " where organization_id=? and created_at>=? and created_at<? group by status order by status",
+            (rs, rowNum) -> new StatusCount(rs.getString("status"), rs.getLong("total")),
+            org, from, to
+        );
+        rows.forEach(row -> result.put(row.status(), row.total()));
         return result;
     }
 
@@ -99,6 +103,7 @@ public class InternalReportController {
         return user.organizationId;
     }
 
+    private record StatusCount(String status, long total) {}
     public record ReportSummary(
         OffsetDateTime from, OffsetDateTime to,
         long requestsCreated, long bookingsCreated, long customersCreated, long tasksCreated,
