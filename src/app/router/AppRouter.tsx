@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AuthLayout, OperationsLayout, PublicLayout } from '../layouts/Layouts'
 import { useApi, useCan, useSession, useSessionReady } from '../providers/AppProviders'
+import type { Permission } from '../../domain'
 import { AuthPage } from '../../pages/auth/AuthPages'
 import { NotFound } from '../../pages/NotFound'
 import { OperationsFoundationPage } from '../../pages/operations/OperationsFoundationPage'
@@ -25,7 +26,7 @@ const operationPaths = [
   '/app/tarefas',
 ]
 
-const permissionRoutes = [
+const permissionRoutes: ReadonlyArray<readonly [string, Permission]> = [
   ['/app/dashboard', 'dashboard.read'],
   ['/app/pedidos', 'request.read'], ['/app/pedidos/:id', 'request.read'],
   ['/app/reservas', 'booking.read'], ['/app/reservas/:id', 'booking.read'],
@@ -35,7 +36,7 @@ const permissionRoutes = [
   ['/app/relatorios', 'dashboard.read'],
   ['/app/configuracoes', 'settings.read'], ['/app/configuracoes/layouts', 'space.read'], ['/app/configuracoes/recursos', 'space.read'],
   ['/app/configuracoes/conteudo', 'content.read'], ['/app/configuracoes/geral', 'settings.read'],
-] as const
+]
 
 function OperationsGuard() {
   const api = useApi(); const session = useSession(); const ready = useSessionReady()
@@ -45,7 +46,7 @@ function OperationsGuard() {
   return <OperationsLayout />
 }
 
-function RequirePermission({ permission, children }: { permission: string; children: ReactNode }) {
+function RequirePermission({ permission, children }: { permission: Permission; children: ReactNode }) {
   const api = useApi()
   const can = useCan()
   if (api.kind === 'mock' && import.meta.env.DEV) return <>{children}</>
@@ -53,7 +54,7 @@ function RequirePermission({ permission, children }: { permission: string; child
   return <section className="ops-v2__page"><header className="ops-v2__hero"><div><span className="eyebrow">ACESSO</span><h1>Sem acesso</h1><p>A tua função não possui a permissão necessária para abrir esta área.</p></div></header><div className="catalog-admin__empty"><h3>Permissão necessária</h3><p><code>{permission}</code></p></div></section>
 }
 
-const guarded = (permission: string, element: ReactNode) => <RequirePermission permission={permission}>{element}</RequirePermission>
+const guarded = (permission: Permission, element: ReactNode) => <RequirePermission permission={permission}>{element}</RequirePermission>
 
 export function AppRouter() {
   return <Routes>
