@@ -10,6 +10,7 @@ import './styles/booking-v2.css'
 import './styles/operations-v2.css'
 import './styles/operations-data.css'
 import './styles/availability-admin.css'
+import './styles/catalog-admin.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
