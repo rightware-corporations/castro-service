@@ -54,7 +54,12 @@ public class InternalAccessAdminController {
 
     @PutMapping("/users/{id}") @PreAuthorize("hasAuthority('user.manage')") @Transactional
     public UserItem updateUser(@PathVariable UUID id,@Valid @RequestBody UpdateUserInput input,Authentication authentication) {
-        UUID org=organizationId(authentication);
+        UserAccount actor = currentUser(authentication);
+        UUID org=actor.organizationId;
+        if (actor.id != null && actor.id.equals(id)) {
+            if (!input.active()) throw new ResponseStatusException(HttpStatus.CONFLICT,"The current user cannot deactivate their own account");
+            if (input.roleId()==null) throw new ResponseStatusException(HttpStatus.CONFLICT,"The current user cannot remove their own role");
+        }
         UserAccount user=users.findById(id).filter(value->org.equals(value.organizationId)).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found"));
         user.email=input.email().trim().toLowerCase(Locale.ROOT); user.firstName=input.firstName().trim(); user.lastName=input.lastName().trim(); user.active=input.active();
         if(input.password()!=null&&!input.password().isBlank()) user.passwordHash=passwordEncoder.encode(input.password());
@@ -77,7 +82,7 @@ public class InternalAccessAdminController {
     @GetMapping("/permissions") @PreAuthorize("hasAuthority('permission.read')")
     public List<PermissionItem> listPermissions(){ return jdbc.query("select code from permissions order by code",(rs,row)->new PermissionItem(rs.getString("code"))); }
 
-    private void assignRole(UUID org,UUID userId,UUID roleId){ jdbc.update("delete from organization_members where organization_id=? and user_id=?",org,userId); UUID validated=validateRole(org,roleId); if(validated!=null) jdbc.update("insert into organization_members (id,organization_id,user_id,role_id) values (?,?,?,?)",UUID.randomUUID(),org,userId,validated); }
+    private void assignRole(UUID org,UUID userId,UUID roleId){ UUID validated=validateRole(org,roleId); jdbc.update("delete from organization_members where organization_id=? and user_id=?",org,userId); if(validated!=null) jdbc.update("insert into organization_members (id,organization_id,user_id,role_id) values (?,?,?,?)",UUID.randomUUID(),org,userId,validated); }
     private UUID validateRole(UUID org,UUID roleId){ if(roleId==null)return null; ensureRole(org,roleId); return roleId; }
     private void ensureRole(UUID org,UUID roleId){ Integer count=jdbc.queryForObject("select count(*) from roles where id=? and organization_id=?",Integer.class,roleId,org); if(count==null||count==0) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Role does not belong to organization"); }
     private void replaceRolePermissions(UUID org,UUID roleId,Set<String> codes){ ensureRole(org,roleId); if(codes==null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Permission codes are required"); List<Map<String,Object>> rows=codes.isEmpty()?List.of():jdbc.queryForList("select id,code from permissions where code in ("+String.join(",",Collections.nCopies(codes.size(),"?"))+")",codes.toArray()); if(rows.size()!=codes.size()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Unknown permission code"); jdbc.update("delete from role_permissions where role_id=?",roleId); for(Map<String,Object> row:rows) jdbc.update("insert into role_permissions (id,role_id,permission_id) values (?,?,?)",UUID.randomUUID(),roleId,row.get("id")); }
@@ -88,7 +93,8 @@ public class InternalAccessAdminController {
         return jdbc.query(sql,rs->{if(!rs.next())throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found"); return new UserItem(rs.getObject("id",UUID.class),rs.getString("email"),rs.getString("first_name"),rs.getString("last_name"),rs.getBoolean("active"),rs.getObject("created_at",OffsetDateTime.class),rs.getObject("role_id",UUID.class),rs.getString("role_name"));},org,id);
     }
     private RoleItem roleItem(UUID id,String name){ List<String> permissions=jdbc.query("select p.code from role_permissions rp join permissions p on p.id=rp.permission_id where rp.role_id=? order by p.code",(rs,row)->rs.getString(1),id); return new RoleItem(id,name,permissions); }
-    private UUID organizationId(Authentication authentication){ if(authentication==null||!(authentication.getPrincipal() instanceof UserAccount user)||user.organizationId==null) throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Organization context required"); return user.organizationId; }
+    private UserAccount currentUser(Authentication authentication){ if(authentication==null||!(authentication.getPrincipal() instanceof UserAccount user)||user.organizationId==null) throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Organization context required"); return user; }
+    private UUID organizationId(Authentication authentication){ return currentUser(authentication).organizationId; }
 
     public record UserItem(UUID id,String email,String firstName,String lastName,boolean active,OffsetDateTime createdAt,UUID roleId,String roleName){}
     public record RoleItem(UUID id,String name,List<String> permissionCodes){}
