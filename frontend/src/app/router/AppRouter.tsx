@@ -12,6 +12,7 @@ import { CourseSettingsPage } from '../../features/courses/CourseSettingsPage'
 import { SpaceSettingsPage } from '../../features/spaces/SpaceSettingsPage'
 import { SpaceExperienceSettingsPage } from '../../features/spaces/SpaceExperienceSettingsPage'
 import { SpaceScenesSettingsPage } from '../../features/spaces/SpaceScenesSettingsPage'
+import { SpaceHotspotsSettingsPage } from '../../features/spaces/SpaceHotspotsSettingsPage'
 import { ManualBookingPage } from '../../features/operations/ManualBookingPage'
 import { AccessSettingsPage } from '../../features/admin/AccessSettingsPage'
 import { GeneralSettingsPage } from '../../features/admin/GeneralSettingsPage'
@@ -98,6 +99,7 @@ export function AppRouter() {
       <Route path="/app/configuracoes/layouts" element={guarded('space.read', <SpaceExperienceSettingsPage />)} />
       <Route path="/app/configuracoes/recursos" element={guarded('space.read', <SpaceExperienceSettingsPage />)} />
       <Route path="/app/configuracoes/cenas" element={guarded('space.read', <SpaceScenesSettingsPage />)} />
+      <Route path="/app/configuracoes/hotspots" element={guarded('space.read', <SpaceHotspotsSettingsPage />)} />
       <Route path="/app/configuracoes/utilizadores" element={guarded('user.read', <AccessSettingsPage />)} />
       <Route path="/app/configuracoes/funcoes" element={guarded('role.read', <AccessSettingsPage />)} />
       <Route path="/app/configuracoes/permissoes" element={guarded('permission.read', <AccessSettingsPage />)} />
