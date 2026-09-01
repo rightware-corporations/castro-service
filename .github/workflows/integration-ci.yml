@@ -90,6 +90,8 @@ jobs:
       CASTROS_IT_DATABASE_URL: jdbc:postgresql://localhost:5432/castros_it
       CASTROS_IT_DATABASE_USERNAME: castros
       CASTROS_IT_DATABASE_PASSWORD: castros
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: '4'
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: '0'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
