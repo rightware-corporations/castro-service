@@ -9,6 +9,8 @@ Status:
 
 ## P0 — Stability, integration and contracts
 - [x] Frontend and Spring backend integrated in one repository
+- [~] Frontend isolated into explicit `frontend/` deployable workspace
+- [~] Frontend architecture rules documented (`docs/frontend-architecture.md`)
 - [x] Frontend CI: lint, typecheck, tests, build
 - [x] Backend CI: Maven verify
 - [x] PostgreSQL + Flyway migrations
@@ -22,6 +24,8 @@ Status:
 - [x] Frontend route-level permission guard / no-access state
 - [x] Preserve intended internal route through login
 - [x] Distinguish unauthenticated session from backend/session validation failure
+- [ ] Migrate remaining generic `pages/` ownership into domain features
+- [ ] Move feature-specific global CSS into owning feature modules where practical
 - [ ] Targeted regression suite covering all critical functional domains
 - [ ] Full multi-organization isolation integration suite
 
