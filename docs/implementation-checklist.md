@@ -3,13 +3,15 @@
 This document is the source of truth for functional completion. Nothing is considered delivered merely because a shell or route exists.
 
 Status:
-- `[x]` implemented and previously validated by CI
+- `[x]` implemented and validated by CI / merged evidence
 - `[ ]` still required
 - `[~]` implemented on the current branch/PR and awaiting a green gate or merge
 
 Evidence baseline:
 - PR #16 merged into `main` at `1701bc2a2880591147010d263d5621fb5641784a` after Integration CI run #185 (`33507644988`) completed with Backend, Frontend and PostgreSQL integration gates green on exact tested head `c9258ee2b7cc20abc116ec1722cd7672ee6d73f4`.
-- PR #17 (`feature/production-readiness-consolidation`) is the active production-readiness/governance consolidation. Items marked `[~]` below must not be promoted to `[x]` until its exact head is green and merged.
+- PR #19 replaced the Draft PR #17 without changing code and merged the 13-commit production-readiness/governance consolidation into `main` at `b7c7a60bd56616173209f19b08385aec9fc5b5e5` after Integration CI run #196 passed all three gates on exact head `e7b000e3476814d82e3c0148a4b3ed6cdf4b0364`.
+- Integration CI run #197 (`33517754323`) then passed Backend, Frontend and PostgreSQL integration gates again on the exact post-merge `main` commit `b7c7a60bd56616173209f19b08385aec9fc5b5e5`.
+- Repository ruleset `Protect main` (ID `22020960`) is active for the default branch and requires pull requests, an up-to-date branch, the three mandatory CI checks, merge commits only, and blocks force-push/deletion with no bypass actors.
 
 ## P0 — Stability, integration and contracts
 - [x] Frontend and Spring backend integrated in one repository
@@ -145,7 +147,7 @@ Evidence baseline:
 - [x] Permission catalog backend
 - [x] Permission matrix through role editing
 - [x] Access-admin organization-isolation integration tests
-- [~] Prevent dangerous self-lockout by self-deactivation, role removal, weak-role reassignment or stripping own management permissions
+- [x] Prevent dangerous self-lockout by self-deactivation, role removal, weak-role reassignment or stripping own management permissions
 
 ### General/settings/content
 - [x] Organization general settings backend
@@ -186,20 +188,20 @@ Evidence baseline:
 
 ### Production infrastructure
 - [x] Production-grade shared JDBC session store via Spring Session
-- [~] Persistent rate limiting / abuse controls with regression coverage
+- [x] Persistent rate limiting / abuse controls with regression coverage
 - [ ] External secrets-management/deployment validation in the real production environment
-- [~] HTTPS secure-cookie configuration validation
-- [~] Production CORS allowed-origin validation
-- [~] Environment-specific fail-closed production configuration validation
-- [~] Health/readiness deployment checks with explicit database readiness behavior
-- [ ] Secure initial administrator provisioning regression test
-- [~] Remove any need for hardcoded production credentials and reject default database credentials in production
+- [x] HTTPS secure-cookie configuration validation
+- [x] Production CORS allowed-origin validation
+- [x] Environment-specific fail-closed production configuration validation
+- [x] Health/readiness deployment checks with explicit database readiness behavior
+- [x] Secure initial administrator provisioning regression test
+- [x] Remove any need for hardcoded production credentials and reject default database credentials in production
 
 ### Reliability/audit
 - [ ] Outbox/event delivery wiring where operational mutations require it
 - [x] Audit wiring for privileged mutations
 - [ ] Idempotency review for all retry-sensitive mutations
-- [~] Database indexes/query review for operational scale
+- [x] Database indexes/query review for operational scale
 
 ## P5 — Responsive, accessibility and visual delivery
 ### Required responsive matrix
@@ -270,7 +272,7 @@ Evidence baseline:
 - [ ] Smoke test every implemented Operations/Admin route
 - [x] Verify migrations from an empty PostgreSQL database through mandatory PostgreSQL CI
 - [x] Verify backend/frontend production build artifacts through CI quality gates
-- [ ] Final CI green on `main` after the production-readiness merge
-- [~] Final security/configuration audit for implemented production controls
+- [x] Final CI green on `main` after the production-readiness merge
+- [x] Final security/configuration audit for implemented production controls
 - [ ] Final Castro content/facts audit
 - [ ] Final implementation checklist review: no unaccounted projected item
