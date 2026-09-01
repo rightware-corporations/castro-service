@@ -4,11 +4,15 @@ import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.*;
 
 @Entity @Table(name="users")
-public class UserAccount implements UserDetails {
+public class UserAccount implements UserDetails, Serializable {
+    @Serial private static final long serialVersionUID = 1L;
+
     @Id @GeneratedValue(strategy=GenerationType.UUID) public UUID id;
     @Column(nullable=false) public UUID organizationId;
     @Column(nullable=false, unique=true) public String email;

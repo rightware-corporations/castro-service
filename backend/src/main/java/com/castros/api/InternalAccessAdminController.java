@@ -1,5 +1,6 @@
 package com.castros.api;
 
+import com.castros.shared.security.SessionRevocationService;
 import com.castros.user.UserAccount;
 import com.castros.user.UserRepository;
 import jakarta.validation.Valid;
@@ -26,9 +27,10 @@ public class InternalAccessAdminController {
     private final JdbcTemplate jdbc;
     private final UserRepository users;
     private final PasswordEncoder passwordEncoder;
+    private final SessionRevocationService sessions;
 
-    public InternalAccessAdminController(JdbcTemplate jdbc, UserRepository users, PasswordEncoder passwordEncoder) {
-        this.jdbc = jdbc; this.users = users; this.passwordEncoder = passwordEncoder;
+    public InternalAccessAdminController(JdbcTemplate jdbc, UserRepository users, PasswordEncoder passwordEncoder, SessionRevocationService sessions) {
+        this.jdbc = jdbc; this.users = users; this.passwordEncoder = passwordEncoder; this.sessions = sessions;
     }
 
     @GetMapping("/users") @PreAuthorize("hasAuthority('user.read')")
@@ -61,10 +63,16 @@ public class InternalAccessAdminController {
             if (input.roleId()==null) throw new ResponseStatusException(HttpStatus.CONFLICT,"The current user cannot remove their own role");
         }
         UserAccount user=users.findById(id).filter(value->org.equals(value.organizationId)).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found"));
+        String previousEmail=user.email;
         user.email=input.email().trim().toLowerCase(Locale.ROOT); user.firstName=input.firstName().trim(); user.lastName=input.lastName().trim(); user.active=input.active();
         if(input.password()!=null&&!input.password().isBlank()) user.passwordHash=passwordEncoder.encode(input.password());
         try { users.saveAndFlush(user); } catch(DataIntegrityViolationException ex){ throw new ResponseStatusException(HttpStatus.CONFLICT,"Email already exists"); }
-        assignRole(org,id,input.roleId()); return userItem(org,id);
+        assignRole(org,id,input.roleId());
+        if (actor.id == null || !actor.id.equals(id)) {
+            sessions.revokePrincipal(previousEmail);
+            if (!previousEmail.equalsIgnoreCase(user.email)) sessions.revokePrincipal(user.email);
+        }
+        return userItem(org,id);
     }
 
     @GetMapping("/roles") @PreAuthorize("hasAuthority('role.read')")
@@ -74,7 +82,14 @@ public class InternalAccessAdminController {
     public RoleItem createRole(@Valid @RequestBody RoleInput input,Authentication authentication){ UUID org=organizationId(authentication),id=UUID.randomUUID(); try{jdbc.update("insert into roles (id,organization_id,name) values (?,?,?)",id,org,input.name().trim());}catch(DataIntegrityViolationException ex){throw new ResponseStatusException(HttpStatus.CONFLICT,"Role name already exists");} replaceRolePermissions(org,id,input.permissionCodes()); return roleItem(id,input.name().trim()); }
 
     @PutMapping("/roles/{id}") @PreAuthorize("hasAuthority('role.manage')") @Transactional
-    public RoleItem updateRole(@PathVariable UUID id,@Valid @RequestBody RoleInput input,Authentication authentication){ UUID org=organizationId(authentication); ensureRole(org,id); try{jdbc.update("update roles set name=? where id=? and organization_id=?",input.name().trim(),id,org);}catch(DataIntegrityViolationException ex){throw new ResponseStatusException(HttpStatus.CONFLICT,"Role name already exists");} replaceRolePermissions(org,id,input.permissionCodes()); return roleItem(id,input.name().trim()); }
+    public RoleItem updateRole(@PathVariable UUID id,@Valid @RequestBody RoleInput input,Authentication authentication){
+        UUID org=organizationId(authentication); ensureRole(org,id);
+        List<String> affectedPrincipals=jdbc.query("select u.email from users u join organization_members om on om.user_id=u.id and om.organization_id=u.organization_id where om.organization_id=? and om.role_id=?",(rs,row)->rs.getString(1),org,id);
+        try{jdbc.update("update roles set name=? where id=? and organization_id=?",input.name().trim(),id,org);}catch(DataIntegrityViolationException ex){throw new ResponseStatusException(HttpStatus.CONFLICT,"Role name already exists");}
+        replaceRolePermissions(org,id,input.permissionCodes());
+        sessions.revokePrincipals(affectedPrincipals);
+        return roleItem(id,input.name().trim());
+    }
 
     @DeleteMapping("/roles/{id}") @PreAuthorize("hasAuthority('role.manage')") @ResponseStatus(HttpStatus.NO_CONTENT) @Transactional
     public void deleteRole(@PathVariable UUID id,Authentication authentication){ UUID org=organizationId(authentication); ensureRole(org,id); Integer members=jdbc.queryForObject("select count(*) from organization_members where organization_id=? and role_id=?",Integer.class,org,id); if(members!=null&&members>0) throw new ResponseStatusException(HttpStatus.CONFLICT,"Role is assigned to users"); jdbc.update("delete from role_permissions where role_id=?",id); jdbc.update("delete from roles where id=? and organization_id=?",id,org); }
