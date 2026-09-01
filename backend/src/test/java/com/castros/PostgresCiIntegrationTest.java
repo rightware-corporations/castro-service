@@ -27,11 +27,14 @@ class PostgresCiIntegrationTest {
     void cleanPostgresAppliesCurrentSchemaAndCriticalTables() {
         Integer migrations = jdbc.queryForObject("select count(*) from flyway_schema_history where success=true", Integer.class);
         assertNotNull(migrations);
-        assertTrue(migrations >= 13, "Expected all current Flyway migrations to be applied");
+        assertTrue(migrations >= 14, "Expected all current Flyway migrations to be applied");
         assertNotNull(jdbc.queryForObject("select to_regclass('public.audit_events')", String.class));
         assertNotNull(jdbc.queryForObject("select to_regclass('public.space_scenes')", String.class));
         assertNotNull(jdbc.queryForObject("select to_regclass('public.space_hotspots')", String.class));
         assertNotNull(jdbc.queryForObject("select to_regclass('public.space_resources')", String.class));
+        assertNotNull(jdbc.queryForObject("select to_regclass('public.spring_session')", String.class));
+        assertNotNull(jdbc.queryForObject("select to_regclass('public.spring_session_attributes')", String.class));
+        assertNotNull(jdbc.queryForObject("select to_regclass('public.request_rate_limits')", String.class));
     }
 
     private static String env(String key, String fallback) {
