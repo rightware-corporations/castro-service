@@ -1,34 +1,55 @@
 package com.castros.api;
 
+import com.castros.shared.config.AppProperties;
+import com.castros.shared.exception.ProblemDetailResponse;
+import com.castros.shared.security.DatabaseRateLimiter;
 import com.castros.user.UserAccount;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
-import org.springframework.security.authentication.*;
-import org.springframework.security.core.*;
-import org.springframework.security.core.context.*;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
-import org.springframework.security.web.context.SecurityContextRepository;
-import org.springframework.security.web.csrf.CsrfToken;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import com.castros.shared.exception.ProblemDetailResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
+import java.util.Locale;
 
 @RestController @RequestMapping("/api/v1/auth")
 public class AuthController {
-    private final AuthenticationManager authenticationManager; private final SecurityContextRepository contextRepository;
-    public AuthController(AuthenticationManager authenticationManager,SecurityContextRepository contextRepository){this.authenticationManager=authenticationManager;this.contextRepository=contextRepository;}
+    private final AuthenticationManager authenticationManager;
+    private final SecurityContextRepository contextRepository;
+    private final DatabaseRateLimiter rateLimiter;
+    private final AppProperties properties;
+
+    public AuthController(AuthenticationManager authenticationManager,SecurityContextRepository contextRepository,DatabaseRateLimiter rateLimiter,AppProperties properties){
+        this.authenticationManager=authenticationManager;this.contextRepository=contextRepository;this.rateLimiter=rateLimiter;this.properties=properties;
+    }
 
     @PostMapping("/login")
-    @ApiResponses({@ApiResponse(responseCode="200", description="Session established"), @ApiResponse(responseCode="400", content=@Content(schema=@Schema(implementation=ProblemDetailResponse.class))), @ApiResponse(responseCode="401", content=@Content(schema=@Schema(implementation=ProblemDetailResponse.class)))})
+    @ApiResponses({@ApiResponse(responseCode="200", description="Session established"), @ApiResponse(responseCode="400", content=@Content(schema=@Schema(implementation=ProblemDetailResponse.class))), @ApiResponse(responseCode="401", content=@Content(schema=@Schema(implementation=ProblemDetailResponse.class))), @ApiResponse(responseCode="429", content=@Content(schema=@Schema(implementation=ProblemDetailResponse.class)))})
     public AuthLoginResponse login(@Valid @RequestBody LoginInput input,HttpServletRequest request,HttpServletResponse response){
-        Authentication auth=authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(input.email(),input.password()));
+        String normalizedEmail=input.email().trim().toLowerCase(Locale.ROOT);
+        if(!rateLimiter.allow("login-account",normalizedEmail,properties.getLoginRateLimitPerMinute())){
+            response.setHeader("Retry-After","60");
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Too many login attempts");
+        }
+        Authentication auth=authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(normalizedEmail,input.password()));
         request.getSession(true);
         request.changeSessionId();
         SecurityContext context=SecurityContextHolder.createEmptyContext();context.setAuthentication(auth);SecurityContextHolder.setContext(context);contextRepository.saveContext(context,request,response);
