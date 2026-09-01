@@ -74,7 +74,7 @@ describe('public booking flow', () => {
 
     const { user } = renderBooking('/reservar/SPACE/space-1/data?people=8&purpose=meeting&duration=60&date=2026-09-15')
 
-    expect(screen.getByLabelText('Data')).toHaveValue('2026-09-15')
+    expect(screen.getByLabelText(/^Data/)).toHaveValue('2026-09-15')
     expect(screen.getByLabelText(/Duração prevista/)).toHaveValue(60)
 
     await user.click(screen.getByRole('button', { name: /Ver horários/i }))
@@ -90,10 +90,10 @@ describe('public booking flow', () => {
     await user.click(availableSlot)
     await user.click(screen.getByRole('button', { name: /Continuar/i }))
 
-    await user.type(screen.getByLabelText('Nome'), 'Ana')
-    await user.type(screen.getByLabelText('Apelido'), 'Silva')
-    await user.type(screen.getByLabelText('Email'), 'ana@example.com')
-    expect(screen.getByLabelText('Participantes')).toHaveValue(8)
+    await user.type(screen.getByLabelText(/^Nome/), 'Ana')
+    await user.type(screen.getByLabelText(/^Apelido/), 'Silva')
+    await user.type(screen.getByLabelText(/^Email/), 'ana@example.com')
+    expect(screen.getByLabelText(/^Participantes/)).toHaveValue(8)
 
     await user.click(screen.getByRole('button', { name: /Rever pedido/i }))
     expect(screen.getByText('Confirme antes de enviar.')).toBeInTheDocument()
@@ -154,7 +154,7 @@ describe('public booking flow', () => {
     const submit = screen.getByRole('button', { name: /Enviar pedido de reserva/i })
 
     await user.click(submit)
-    expect(await screen.findByRole('alert')).toHaveTextContent('Horário indisponível.')
+    expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível enviar o pedido de reserva. Tente novamente.')
     await waitFor(() => expect(apiMocks.createBooking).toHaveBeenCalledTimes(1))
 
     const firstKey = apiMocks.createBooking.mock.calls[0][1]?.idempotencyKey
