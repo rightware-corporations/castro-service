@@ -135,7 +135,7 @@ describe('public booking flow', () => {
     }))
 
     apiMocks.createBooking
-      .mockRejectedValueOnce(new ApiError('Horário indisponível.', { code: 'AVAILABILITY_CONFLICT' }))
+      .mockRejectedValueOnce(new ApiError('Horário indisponível.'))
       .mockResolvedValueOnce({
         id: 'booking-2',
         reference: 'CASTRO-002',
