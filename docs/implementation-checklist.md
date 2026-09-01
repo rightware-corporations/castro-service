@@ -7,10 +7,14 @@ Status:
 - `[ ]` still required
 - `[~]` implemented on the current branch/PR and awaiting a green gate or merge
 
+Evidence baseline:
+- PR #16 merged into `main` at `1701bc2a2880591147010d263d5621fb5641784a` after Integration CI run #185 (`33507644988`) completed with Backend, Frontend and PostgreSQL integration gates green on exact tested head `c9258ee2b7cc20abc116ec1722cd7672ee6d73f4`.
+- PR #17 (`feature/production-readiness-consolidation`) is the active production-readiness/governance consolidation. Items marked `[~]` below must not be promoted to `[x]` until its exact head is green and merged.
+
 ## P0 — Stability, integration and contracts
 - [x] Frontend and Spring backend integrated in one repository
-- [~] Frontend isolated into explicit `frontend/` deployable workspace
-- [~] Frontend architecture rules documented (`docs/frontend-architecture.md`)
+- [x] Frontend isolated into explicit `frontend/` deployable workspace
+- [x] Frontend architecture rules documented (`docs/frontend-architecture.md`)
 - [x] Frontend CI: lint, typecheck, tests, build
 - [x] Backend CI: Maven verify
 - [x] PostgreSQL + Flyway migrations
@@ -27,7 +31,7 @@ Status:
 - [ ] Migrate remaining generic `pages/` ownership into domain features
 - [ ] Move feature-specific global CSS into owning feature modules where practical
 - [ ] Targeted regression suite covering all critical functional domains
-- [ ] Full multi-organization isolation integration suite
+- [x] Full multi-organization isolation integration suite for implemented Operations/Admin domains
 
 ## P1 — Public product
 ### Navigation and discovery
@@ -49,10 +53,10 @@ Status:
 - [x] Shareable purpose/participants configuration state
 - [x] Configuration carried into booking context
 - [ ] Approved real photography/media integration
-- [ ] 360 scenes management and display
-- [ ] Hotspots management and display
-- [~] Layout configurations administration
-- [~] Space resources/amenities administration
+- [x] 360 scenes management and display foundation
+- [x] Hotspots management and display foundation
+- [x] Layout configurations administration
+- [x] Space resources/amenities administration
 - [ ] Public display of approved layouts/resources
 - [ ] V2 scene/layout switching where supported by real assets
 - [ ] Evaluate Three.js/R3F only if the actual spatial requirement justifies it
@@ -98,9 +102,9 @@ Status:
 - [x] Customers list
 - [x] Customer detail/history foundation
 - [x] Calendar populated from real bookings
-- [ ] Server-side pagination for requests/bookings/customers
-- [ ] Server-side search/filter contracts
-- [ ] Operational count queries instead of loading full collections for summaries
+- [x] Server-side pagination for requests/bookings/customers
+- [x] Server-side search/filter contracts
+- [x] Operational count queries instead of loading full collections for summaries
 
 ### Follow-up and work management
 - [x] Tasks/follow-up domain model
@@ -131,7 +135,7 @@ Status:
 - [x] Blocked periods backend/UI
 - [x] Resource selector using real catalog entries
 - [ ] Availability CRUD regression tests
-- [ ] Conflict/edge-case tests for buffers, notice and max advance
+- [x] Conflict/edge-case tests for buffers, notice and max advance
 
 ### Access administration
 - [x] Users backend
@@ -140,8 +144,8 @@ Status:
 - [x] Roles UI
 - [x] Permission catalog backend
 - [x] Permission matrix through role editing
-- [ ] Access-admin integration tests
-- [ ] Prevent/handle dangerous self-lockout scenarios where appropriate
+- [x] Access-admin organization-isolation integration tests
+- [~] Prevent dangerous self-lockout by self-deactivation, role removal, weak-role reassignment or stripping own management permissions
 
 ### General/settings/content
 - [x] Organization general settings backend
@@ -153,48 +157,49 @@ Status:
 - [ ] Remaining organization settings only when real requirements are known
 
 ### Space administration expansion
-- [~] Space layouts domain/API/UI
-- [~] Space resources/amenities domain/API/UI
-- [ ] Space scenes domain/API/UI
-- [ ] Scene hotspots domain/API/UI
+- [x] Space layouts domain/API/UI
+- [x] Space resources/amenities domain/API/UI
+- [x] Space scenes domain/API/UI
+- [x] Scene hotspots domain/API/UI
 - [ ] Availability linkage to layouts/resources where required
 
 ### Audit
-- [ ] Audit event model
-- [ ] Audit persistence
-- [ ] Audit read API protected by `audit.read`
-- [ ] Audit trail UI
+- [x] Audit event model
+- [x] Audit persistence
+- [x] Audit read API protected by `audit.read`
+- [x] Audit trail UI
 
 ## P4 — Security and production readiness
 ### Authorization and organization isolation
 - [x] Granular permission catalog
 - [x] Organization-scoped implemented Operations/Admin reads
 - [x] Organization-scoped manual booking resource validation
-- [ ] Two-organization integration fixtures
-- [ ] Prove cross-org isolation for requests
-- [ ] Prove cross-org isolation for bookings
-- [ ] Prove cross-org isolation for customers
-- [ ] Prove cross-org isolation for catalog administration
-- [ ] Prove cross-org isolation for availability administration
-- [ ] Prove cross-org isolation for users/roles/settings
-- [ ] Database-level organization-membership integrity hardening
+- [x] Two-organization integration fixtures
+- [x] Prove cross-org isolation for requests
+- [x] Prove cross-org isolation for bookings
+- [x] Prove cross-org isolation for customers
+- [x] Prove cross-org isolation for catalog administration
+- [x] Prove cross-org isolation for availability administration
+- [x] Prove cross-org isolation for users/roles/settings
+- [x] Prove cross-org isolation for content/space experience/audit domains
+- [x] Database-level organization-membership integrity hardening
 
 ### Production infrastructure
-- [ ] Production-grade shared session store
-- [ ] Rate limiting / abuse controls
-- [ ] Secrets management/deployment validation
-- [ ] HTTPS secure-cookie configuration validation
-- [ ] Production CORS allowed-origin validation
-- [ ] Environment-specific safe configuration defaults
-- [ ] Health/readiness deployment checks
-- [ ] Secure initial administrator provisioning
-- [ ] Remove any need for hardcoded production credentials
+- [x] Production-grade shared JDBC session store via Spring Session
+- [~] Persistent rate limiting / abuse controls with regression coverage
+- [ ] External secrets-management/deployment validation in the real production environment
+- [~] HTTPS secure-cookie configuration validation
+- [~] Production CORS allowed-origin validation
+- [~] Environment-specific fail-closed production configuration validation
+- [~] Health/readiness deployment checks with explicit database readiness behavior
+- [ ] Secure initial administrator provisioning regression test
+- [~] Remove any need for hardcoded production credentials and reject default database credentials in production
 
 ### Reliability/audit
 - [ ] Outbox/event delivery wiring where operational mutations require it
-- [ ] Audit wiring for privileged mutations
+- [x] Audit wiring for privileged mutations
 - [ ] Idempotency review for all retry-sensitive mutations
-- [ ] Database indexes/query review for operational scale
+- [~] Database indexes/query review for operational scale
 
 ## P5 — Responsive, accessibility and visual delivery
 ### Required responsive matrix
@@ -260,12 +265,12 @@ Status:
 - [ ] Screen-reader status/error announcements
 
 ## P6 — Final validation and delivery
-- [ ] Run PostgreSQL + Spring backend + frontend together locally
+- [ ] Run PostgreSQL + Spring backend + frontend together locally or in an equivalent production-like composed environment
 - [ ] Smoke test every public route
 - [ ] Smoke test every implemented Operations/Admin route
-- [ ] Verify migrations from an empty PostgreSQL database
-- [ ] Verify production build artifacts
-- [ ] Final CI green on main
-- [ ] Final security/configuration audit
+- [x] Verify migrations from an empty PostgreSQL database through mandatory PostgreSQL CI
+- [x] Verify backend/frontend production build artifacts through CI quality gates
+- [ ] Final CI green on `main` after the production-readiness merge
+- [~] Final security/configuration audit for implemented production controls
 - [ ] Final Castro content/facts audit
 - [ ] Final implementation checklist review: no unaccounted projected item

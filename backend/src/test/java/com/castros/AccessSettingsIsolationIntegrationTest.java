@@ -82,6 +82,39 @@ class AccessSettingsIsolationIntegrationTest {
     }
 
     @Test
+    void currentAdministratorCannotMoveToWeakRoleOrStripOwnRoleManagement() throws Exception {
+        UUID org = seedOrganization("access-self-lockout");
+        UserAccount actor = seedUser(org, "admin");
+        UUID adminRole = seedRole(org, "Administrator");
+        UUID weakRole = seedRole(org, "Viewer");
+        assignRole(org, actor.id, adminRole);
+        grant(adminRole, "user.manage");
+        grant(adminRole, "role.manage");
+        grant(weakRole, "user.read");
+
+        mvc.perform(put("/api/v1/operations/access/users/{id}", actor.id)
+                .with(as(actor, "user.manage", "role.manage")).with(csrf())
+                .contentType("application/json")
+                .content("{\"email\":\"" + actor.email + "\",\"firstName\":\"Admin\",\"lastName\":\"User\",\"active\":true,\"roleId\":\"" + weakRole + "\"}"))
+            .andExpect(status().isConflict());
+
+        UUID retainedRole = jdbc.queryForObject("select role_id from organization_members where organization_id=? and user_id=?", UUID.class, org, actor.id);
+        assertEquals(adminRole, retainedRole);
+
+        mvc.perform(put("/api/v1/operations/access/roles/{id}", adminRole)
+                .with(as(actor, "role.manage")).with(csrf())
+                .contentType("application/json")
+                .content("{\"name\":\"Administrator\",\"permissionCodes\":[\"user.manage\"]}"))
+            .andExpect(status().isConflict());
+
+        Integer retainedPermissions = jdbc.queryForObject("""
+            select count(*) from role_permissions rp join permissions p on p.id=rp.permission_id
+            where rp.role_id=? and p.code in ('user.manage','role.manage')
+            """, Integer.class, adminRole);
+        assertEquals(2, retainedPermissions);
+    }
+
+    @Test
     void accessAndSettingsRequireAuthorities() throws Exception {
         UserAccount actor = seedUser(seedOrganization("access-auth"), "actor");
         mvc.perform(get("/api/v1/operations/access/users").with(as(actor))).andExpect(status().isForbidden());
@@ -101,6 +134,15 @@ class AccessSettingsIsolationIntegrationTest {
     }
     private UUID seedRole(UUID org, String name) {
         UUID id = UUID.randomUUID(); jdbc.update("insert into roles(id,organization_id,name) values (?,?,?)", id, org, name + " " + id); return id;
+    }
+    private void assignRole(UUID org, UUID userId, UUID roleId) {
+        jdbc.update("insert into organization_members(id,organization_id,user_id,role_id) values (?,?,?,?)", UUID.randomUUID(), org, userId, roleId);
+    }
+    private void grant(UUID roleId, String permissionCode) {
+        jdbc.update("""
+            insert into role_permissions(id,role_id,permission_id)
+            select ?,?,id from permissions where code=?
+            """, UUID.randomUUID(), roleId, permissionCode);
     }
     private RequestPostProcessor as(UserAccount user, String... permissions) {
         user.withPermissionCodes(Set.of(permissions));

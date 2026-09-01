@@ -3,15 +3,25 @@ name: Integration CI
 on:
   push:
     branches:
+      - main
       - integration/castros-platform
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: integration-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   frontend:
     name: Frontend quality gates
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: frontend
@@ -38,6 +48,7 @@ jobs:
   backend:
     name: Backend quality gates
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: backend
@@ -56,6 +67,7 @@ jobs:
   postgres-integration:
     name: PostgreSQL integration gates
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     services:
       postgres:
         image: postgres:16
@@ -78,6 +90,8 @@ jobs:
       CASTROS_IT_DATABASE_URL: jdbc:postgresql://localhost:5432/castros_it
       CASTROS_IT_DATABASE_USERNAME: castros
       CASTROS_IT_DATABASE_PASSWORD: castros
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: '4'
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: '0'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -89,3 +103,24 @@ jobs:
           cache: maven
       - name: Run mandatory PostgreSQL security and regression suite
         run: ./mvnw -B '-Dtest=*IntegrationTest' test
+      - name: Print PostgreSQL test reports on failure
+        if: failure()
+        run: |
+          echo "::group::Surefire reports"
+          if [ -d target/surefire-reports ]; then
+            find target/surefire-reports -maxdepth 1 -type f \( -name '*.txt' -o -name '*.xml' \) -print0 | sort -z | while IFS= read -r -d '' file; do
+              echo "===== $file ====="
+              cat "$file"
+            done
+          else
+            echo "No Surefire reports found."
+          fi
+          echo "::endgroup::"
+      - name: Upload PostgreSQL test reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: postgres-surefire-reports
+          path: backend/target/surefire-reports/
+          if-no-files-found: warn
+          retention-days: 7

@@ -23,6 +23,8 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/v1/operations/access")
 public class InternalAccessAdminController {
+    private static final Set<String> SELF_ADMIN_REQUIRED_PERMISSIONS = Set.of("user.manage", "role.manage");
+
     private final JdbcTemplate jdbc;
     private final UserRepository users;
     private final PasswordEncoder passwordEncoder;
@@ -59,6 +61,7 @@ public class InternalAccessAdminController {
         if (actor.id != null && actor.id.equals(id)) {
             if (!input.active()) throw new ResponseStatusException(HttpStatus.CONFLICT,"The current user cannot deactivate their own account");
             if (input.roleId()==null) throw new ResponseStatusException(HttpStatus.CONFLICT,"The current user cannot remove their own role");
+            ensureRolePreservesAdministrativeAccess(org, input.roleId());
         }
         UserAccount user=users.findById(id).filter(value->org.equals(value.organizationId)).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found"));
         user.email=input.email().trim().toLowerCase(Locale.ROOT); user.firstName=input.firstName().trim(); user.lastName=input.lastName().trim(); user.active=input.active();
@@ -74,7 +77,14 @@ public class InternalAccessAdminController {
     public RoleItem createRole(@Valid @RequestBody RoleInput input,Authentication authentication){ UUID org=organizationId(authentication),id=UUID.randomUUID(); try{jdbc.update("insert into roles (id,organization_id,name) values (?,?,?)",id,org,input.name().trim());}catch(DataIntegrityViolationException ex){throw new ResponseStatusException(HttpStatus.CONFLICT,"Role name already exists");} replaceRolePermissions(org,id,input.permissionCodes()); return roleItem(id,input.name().trim()); }
 
     @PutMapping("/roles/{id}") @PreAuthorize("hasAuthority('role.manage')") @Transactional
-    public RoleItem updateRole(@PathVariable UUID id,@Valid @RequestBody RoleInput input,Authentication authentication){ UUID org=organizationId(authentication); ensureRole(org,id); try{jdbc.update("update roles set name=? where id=? and organization_id=?",input.name().trim(),id,org);}catch(DataIntegrityViolationException ex){throw new ResponseStatusException(HttpStatus.CONFLICT,"Role name already exists");} replaceRolePermissions(org,id,input.permissionCodes()); return roleItem(id,input.name().trim()); }
+    public RoleItem updateRole(@PathVariable UUID id,@Valid @RequestBody RoleInput input,Authentication authentication){
+        UserAccount actor=currentUser(authentication); UUID org=actor.organizationId; ensureRole(org,id);
+        if(actor.id!=null && isUsersCurrentRole(org,actor.id,id) && !input.permissionCodes().containsAll(SELF_ADMIN_REQUIRED_PERMISSIONS)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"The current user's role must retain user.manage and role.manage");
+        }
+        try{jdbc.update("update roles set name=? where id=? and organization_id=?",input.name().trim(),id,org);}catch(DataIntegrityViolationException ex){throw new ResponseStatusException(HttpStatus.CONFLICT,"Role name already exists");}
+        replaceRolePermissions(org,id,input.permissionCodes()); return roleItem(id,input.name().trim());
+    }
 
     @DeleteMapping("/roles/{id}") @PreAuthorize("hasAuthority('role.manage')") @ResponseStatus(HttpStatus.NO_CONTENT) @Transactional
     public void deleteRole(@PathVariable UUID id,Authentication authentication){ UUID org=organizationId(authentication); ensureRole(org,id); Integer members=jdbc.queryForObject("select count(*) from organization_members where organization_id=? and role_id=?",Integer.class,org,id); if(members!=null&&members>0) throw new ResponseStatusException(HttpStatus.CONFLICT,"Role is assigned to users"); jdbc.update("delete from role_permissions where role_id=?",id); jdbc.update("delete from roles where id=? and organization_id=?",id,org); }
@@ -85,6 +95,20 @@ public class InternalAccessAdminController {
     private void assignRole(UUID org,UUID userId,UUID roleId){ UUID validated=validateRole(org,roleId); jdbc.update("delete from organization_members where organization_id=? and user_id=?",org,userId); if(validated!=null) jdbc.update("insert into organization_members (id,organization_id,user_id,role_id) values (?,?,?,?)",UUID.randomUUID(),org,userId,validated); }
     private UUID validateRole(UUID org,UUID roleId){ if(roleId==null)return null; ensureRole(org,roleId); return roleId; }
     private void ensureRole(UUID org,UUID roleId){ Integer count=jdbc.queryForObject("select count(*) from roles where id=? and organization_id=?",Integer.class,roleId,org); if(count==null||count==0) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Role does not belong to organization"); }
+    private void ensureRolePreservesAdministrativeAccess(UUID org,UUID roleId){
+        ensureRole(org,roleId);
+        Integer count=jdbc.queryForObject("""
+            select count(distinct p.code)
+            from role_permissions rp join permissions p on p.id=rp.permission_id
+            join roles r on r.id=rp.role_id
+            where r.id=? and r.organization_id=? and p.code in ('user.manage','role.manage')
+            """,Integer.class,roleId,org);
+        if(count==null||count<SELF_ADMIN_REQUIRED_PERMISSIONS.size()) throw new ResponseStatusException(HttpStatus.CONFLICT,"The current user's role must retain user.manage and role.manage");
+    }
+    private boolean isUsersCurrentRole(UUID org,UUID userId,UUID roleId){
+        Integer count=jdbc.queryForObject("select count(*) from organization_members where organization_id=? and user_id=? and role_id=?",Integer.class,org,userId,roleId);
+        return count!=null&&count>0;
+    }
     private void replaceRolePermissions(UUID org,UUID roleId,Set<String> codes){ ensureRole(org,roleId); if(codes==null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Permission codes are required"); List<Map<String,Object>> rows=codes.isEmpty()?List.of():jdbc.queryForList("select id,code from permissions where code in ("+String.join(",",Collections.nCopies(codes.size(),"?"))+")",codes.toArray()); if(rows.size()!=codes.size()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Unknown permission code"); jdbc.update("delete from role_permissions where role_id=?",roleId); for(Map<String,Object> row:rows) jdbc.update("insert into role_permissions (id,role_id,permission_id) values (?,?,?)",UUID.randomUUID(),roleId,row.get("id")); }
     private UserItem userItem(UUID org,UUID id){
         String sql = "select u.id,u.email,u.first_name,u.last_name,u.active,u.created_at,r.id role_id,r.name role_name " +
