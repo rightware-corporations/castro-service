@@ -10,6 +10,7 @@ import { AvailabilitySettingsPage } from '../../pages/operations/AvailabilitySet
 import { ServiceSettingsPage } from '../../pages/operations/ServiceSettingsPage'
 import { CourseSettingsPage } from '../../pages/operations/CourseSettingsPage'
 import { SpaceSettingsPage } from '../../pages/operations/SpaceSettingsPage'
+import { SpaceExperienceSettingsPage } from '../../pages/operations/SpaceExperienceSettingsPage'
 import { ManualBookingPage } from '../../pages/operations/ManualBookingPage'
 import { AccessSettingsPage } from '../../pages/operations/AccessSettingsPage'
 import { GeneralSettingsPage } from '../../pages/operations/GeneralSettingsPage'
@@ -34,7 +35,7 @@ const permissionRoutes: ReadonlyArray<readonly [string, Permission]> = [
   ['/app/clientes', 'customer.read'], ['/app/clientes/:id', 'customer.read'],
   ['/app/calendario', 'booking.read'],
   ['/app/espacos', 'space.read'], ['/app/servicos', 'service.read'], ['/app/formacao', 'course.read'],
-  ['/app/configuracoes', 'settings.read'], ['/app/configuracoes/layouts', 'space.read'], ['/app/configuracoes/recursos', 'space.read'],
+  ['/app/configuracoes', 'settings.read'],
 ]
 
 function OperationsGuard() {
@@ -93,6 +94,8 @@ export function AppRouter() {
       <Route path="/app/configuracoes/servicos" element={guarded('service.read', <ServiceSettingsPage />)} />
       <Route path="/app/configuracoes/formacao" element={guarded('course.read', <CourseSettingsPage />)} />
       <Route path="/app/configuracoes/espacos" element={guarded('space.read', <SpaceSettingsPage />)} />
+      <Route path="/app/configuracoes/layouts" element={guarded('space.read', <SpaceExperienceSettingsPage />)} />
+      <Route path="/app/configuracoes/recursos" element={guarded('space.read', <SpaceExperienceSettingsPage />)} />
       <Route path="/app/configuracoes/utilizadores" element={guarded('user.read', <AccessSettingsPage />)} />
       <Route path="/app/configuracoes/funcoes" element={guarded('role.read', <AccessSettingsPage />)} />
       <Route path="/app/configuracoes/permissoes" element={guarded('permission.read', <AccessSettingsPage />)} />
