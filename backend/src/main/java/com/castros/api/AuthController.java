@@ -29,6 +29,8 @@ public class AuthController {
     @ApiResponses({@ApiResponse(responseCode="200", description="Session established"), @ApiResponse(responseCode="400", content=@Content(schema=@Schema(implementation=ProblemDetailResponse.class))), @ApiResponse(responseCode="401", content=@Content(schema=@Schema(implementation=ProblemDetailResponse.class)))})
     public AuthLoginResponse login(@Valid @RequestBody LoginInput input,HttpServletRequest request,HttpServletResponse response){
         Authentication auth=authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(input.email(),input.password()));
+        request.getSession(true);
+        request.changeSessionId();
         SecurityContext context=SecurityContextHolder.createEmptyContext();context.setAuthentication(auth);SecurityContextHolder.setContext(context);contextRepository.saveContext(context,request,response);
         UserAccount user=(UserAccount)auth.getPrincipal();
         return new AuthLoginResponse(user.email, true, user.organizationId, user.firstName, user.lastName, permissions(auth));

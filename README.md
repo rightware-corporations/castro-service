@@ -57,6 +57,35 @@ cd backend
 ./mvnw -B clean verify
 ```
 
+### Production security configuration
+
+Production must explicitly opt into the hardened configuration. The application fails fast when `PRODUCTION_MODE=true` and unsafe defaults remain.
+
+Required production environment values include:
+
+```text
+PRODUCTION_MODE=true
+DATABASE_URL=jdbc:postgresql://...
+DATABASE_USERNAME=...
+DATABASE_PASSWORD=<non-default secret>
+ALLOWED_ORIGINS=https://<approved-frontend-origin>
+SESSION_COOKIE_SECURE=true
+SPRINGDOC_ENABLED=false
+AVAILABILITY_DEVELOPMENT_FALLBACK=false
+```
+
+Optional security controls:
+
+```text
+SESSION_TIMEOUT=30m
+LOGIN_RATE_LIMIT_PER_MINUTE=10
+PUBLIC_MUTATION_RATE_LIMIT_PER_MINUTE=30
+TRUST_PROXY_HEADERS=false
+FORWARD_HEADERS_STRATEGY=none
+```
+
+Only enable proxy-header trust when the application is behind an explicitly controlled reverse proxy that overwrites incoming forwarding headers. Sessions and rate-limit counters are stored in PostgreSQL so they remain effective across multiple backend instances. HTTP Basic and form login are disabled; browser authentication uses the session/CSRF contract.
+
 ## Frontend architecture
 
 ```text
@@ -82,9 +111,10 @@ Missing Castro-specific business information must not be fabricated. Unconfirmed
 
 ## CI
 
-Pull requests targeting `main` run two independent quality gates:
+Pull requests targeting `main` run three quality gates:
 
 - frontend: `npm ci`, lint, typecheck, tests and production build from `frontend/`;
-- backend: Maven clean verify from `backend/`.
+- backend: Maven clean verify from `backend/`;
+- PostgreSQL integration: clean Flyway migration plus database-backed isolation/integrity tests.
 
 The implementation completion source of truth is `docs/implementation-checklist.md`.
