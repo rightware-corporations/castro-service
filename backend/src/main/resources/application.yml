@@ -18,7 +18,13 @@ spring:
       table-name: SPRING_SESSION
 management:
   endpoints.web.exposure.include: health,readiness
-  endpoint.health.probes.enabled: true
+  endpoint:
+    health:
+      probes.enabled: true
+      show-details: never
+      group:
+        readiness.include: readinessState,db
+        liveness.include: livenessState
 springdoc:
   api-docs:
     enabled: ${SPRINGDOC_ENABLED:true}
@@ -35,6 +41,7 @@ castros:
   login-rate-limit-per-minute: ${LOGIN_RATE_LIMIT_PER_MINUTE:10}
   public-mutation-rate-limit-per-minute: ${PUBLIC_MUTATION_RATE_LIMIT_PER_MINUTE:30}
 server:
+  shutdown: graceful
   forward-headers-strategy: ${FORWARD_HEADERS_STRATEGY:none}
   servlet:
     session:
