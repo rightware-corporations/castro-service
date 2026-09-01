@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.server.ResponseStatusException;
@@ -59,11 +60,16 @@ class OrganizationIsolationIntegrationTest {
         jdbc.update("insert into space_scenes(id,space_id,panorama_url,title,initial_yaw,initial_pitch,sort_order) values (?,?,?,?,0,0,0)",
             UUID.randomUUID(), spaceB, "https://example.invalid/panorama.jpg", "Isolation scene");
 
-        UserAccount actor = new UserAccount(orgA, "actor-" + suffix() + "@example.invalid", "unused", "Actor", "A");
+        UserAccount actor = new UserAccount(orgA, "actor-" + suffix() + "@example.invalid", "unused", "Actor", "A")
+            .withPermissionCodes(java.util.Set.of("space.read"));
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(actor, null, actor.getAuthorities());
-
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> scenes.list(spaceB, authentication));
-        assertEquals(404, exception.getStatusCode().value());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        try {
+            ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> scenes.list(spaceB, authentication));
+            assertEquals(404, exception.getStatusCode().value());
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
     }
 
     private UUID organization(String prefix) {
