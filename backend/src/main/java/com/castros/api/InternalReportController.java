@@ -78,16 +78,16 @@ public class InternalReportController {
               union all
               select created_at,'TASK' kind from tasks where organization_id=? and created_at>=? and created_at<?
             )
-            select to_char((created_at at time zone 'UTC')::date,'YYYY-MM-DD') day,
+            select to_char((created_at at time zone 'UTC')::date,'YYYY-MM-DD') as activity_day,
                    count(*) filter (where kind='REQUEST') requests,
                    count(*) filter (where kind='BOOKING') bookings,
                    count(*) filter (where kind='CUSTOMER') customers,
                    count(*) filter (where kind='TASK') tasks
             from activity
-            group by day
-            order by day
+            group by (created_at at time zone 'UTC')::date
+            order by (created_at at time zone 'UTC')::date
             """, (rs,row) -> new DailyActivity(
-                rs.getString("day"), rs.getLong("requests"), rs.getLong("bookings"), rs.getLong("customers"), rs.getLong("tasks")
+                rs.getString("activity_day"), rs.getLong("requests"), rs.getLong("bookings"), rs.getLong("customers"), rs.getLong("tasks")
             ), org,from,to, org,from,to, org,from,to, org,from,to);
     }
 
