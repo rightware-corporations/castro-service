@@ -52,3 +52,40 @@ jobs:
           cache: maven
       - name: Verify
         run: ./mvnw -B clean verify
+
+  postgres-integration:
+    name: PostgreSQL integration gates
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: castros_it
+          POSTGRES_USER: castros
+          POSTGRES_PASSWORD: castros
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U castros -d castros_it"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      CASTROS_RUN_POSTGRES_IT: 'true'
+      CASTROS_IT_DATABASE_URL: jdbc:postgresql://localhost:5432/castros_it
+      CASTROS_IT_DATABASE_USERNAME: castros
+      CASTROS_IT_DATABASE_PASSWORD: castros
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Java 26
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '26'
+          cache: maven
+      - name: Run PostgreSQL integration tests
+        run: ./mvnw -B -Dtest=PostgresCiIntegrationTest,OrganizationIsolationIntegrationTest test
