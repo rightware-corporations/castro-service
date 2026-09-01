@@ -87,5 +87,5 @@ jobs:
           distribution: temurin
           java-version: '26'
           cache: maven
-      - name: Run PostgreSQL integration tests
-        run: ./mvnw -B -Dtest=PostgresCiIntegrationTest,OrganizationIsolationIntegrationTest test
+      - name: Run mandatory PostgreSQL security and regression suite
+        run: ./mvnw -B '-Dtest=*IntegrationTest' test
