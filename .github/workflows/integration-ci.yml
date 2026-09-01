@@ -101,3 +101,24 @@ jobs:
           cache: maven
       - name: Run mandatory PostgreSQL security and regression suite
         run: ./mvnw -B '-Dtest=*IntegrationTest' test
+      - name: Print PostgreSQL test reports on failure
+        if: failure()
+        run: |
+          echo "::group::Surefire reports"
+          if [ -d target/surefire-reports ]; then
+            find target/surefire-reports -maxdepth 1 -type f \( -name '*.txt' -o -name '*.xml' \) -print0 | sort -z | while IFS= read -r -d '' file; do
+              echo "===== $file ====="
+              cat "$file"
+            done
+          else
+            echo "No Surefire reports found."
+          fi
+          echo "::endgroup::"
+      - name: Upload PostgreSQL test reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: postgres-surefire-reports
+          path: backend/target/surefire-reports/
+          if-no-files-found: warn
+          retention-days: 7
