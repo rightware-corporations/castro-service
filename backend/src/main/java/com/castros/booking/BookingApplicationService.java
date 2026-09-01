@@ -40,8 +40,7 @@ public class BookingApplicationService {
 
     @Transactional
     public Booking create(BookingRequest request, ZoneId zone, String idempotencyKey) {
-        UUID org = organizations.findAll().stream().filter(o -> o.active).findFirst().map(o -> o.id)
-                .orElseThrow(() -> new ApiException("RESOURCE_NOT_FOUND", "No active organization is configured.", HttpStatus.NOT_FOUND));
+        UUID org = resolvePublicOrganization(request);
         return createForOrganization(org, request, zone, idempotencyKey, "PUBLIC_BOOKING");
     }
 
@@ -75,6 +74,34 @@ public class BookingApplicationService {
 
     public Booking findPublic(String reference) {
         return bookings.findByReference(reference).orElseThrow(() -> new ApiException("RESOURCE_NOT_FOUND", "Booking not found.", HttpStatus.NOT_FOUND));
+    }
+
+    private UUID resolvePublicOrganization(BookingRequest request) {
+        if (request.bookableType() == BookableType.CONSULTATION) {
+            throw new ApiException("BOOKING_BOOKABLE_TYPE_UNSUPPORTED", "Consultations must be represented by a SERVICE booking.", HttpStatus.BAD_REQUEST);
+        }
+        if (request.bookableType() == BookableType.SERVICE) {
+            return services.findById(request.bookableId())
+                .filter(service -> service.active && service.bookingEnabled)
+                .map(service -> service.organizationId)
+                .orElseThrow(this::bookableInactive);
+        }
+        if (request.bookableType() == BookableType.SPACE) {
+            return spaces.findById(request.bookableId())
+                .filter(space -> space.active)
+                .map(space -> space.organizationId)
+                .orElseThrow(this::bookableInactive);
+        }
+        return organizations.findAll().stream()
+            .filter(organization -> organization.active)
+            .filter(organization -> courseSessions.findByOrganizationIdAndId(organization.id, request.bookableId()).filter(session -> session.active).isPresent())
+            .map(organization -> organization.id)
+            .findFirst()
+            .orElseThrow(this::bookableInactive);
+    }
+
+    private ApiException bookableInactive() {
+        return new ApiException("BOOKABLE_INACTIVE", "The requested resource is not available for booking.", HttpStatus.CONFLICT);
     }
 
     private void validateResource(UUID organizationId, BookableType type, UUID id) {
