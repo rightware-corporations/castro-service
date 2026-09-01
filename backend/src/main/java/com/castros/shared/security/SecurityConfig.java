@@ -22,6 +22,7 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
 
 @Configuration
 @EnableMethodSecurity
@@ -58,11 +59,12 @@ public class SecurityConfig {
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 .sessionFixation(fixation -> fixation.changeSessionId()))
-            .headers(headers -> headers
-                .frameOptions(frame -> frame.deny())
-                .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER))
-                .permissionsPolicy(policy -> policy.policy("camera=(), microphone=(), geolocation=(), payment=()"))
-                .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).preload(true).maxAgeInSeconds(31536000)))
+            .headers(headers -> {
+                headers.frameOptions(frame -> frame.deny());
+                headers.referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER));
+                headers.addHeaderWriter(new StaticHeadersWriter("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()"));
+                headers.httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).preload(true).maxAgeInSeconds(31536000));
+            })
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/public/**", "/api/v1/auth/login", "/api/v1/auth/logout", "/api/v1/auth/csrf", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/health", "/actuator/readiness").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/services/**", "/api/v1/courses/**", "/api/v1/spaces/**", "/api/v1/availability").permitAll()
