@@ -1,5 +1,6 @@
 package com.castros.api;
 
+import com.castros.audit.AuditEventService;
 import com.castros.user.UserAccount;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -29,8 +30,9 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @RequestMapping("/api/v1/operations/spaces/{spaceId}/scenes")
 public class InternalSpaceSceneAdminController {
     private final JdbcTemplate jdbc;
+    private final AuditEventService audit;
 
-    public InternalSpaceSceneAdminController(JdbcTemplate jdbc) { this.jdbc = jdbc; }
+    public InternalSpaceSceneAdminController(JdbcTemplate jdbc, AuditEventService audit) { this.jdbc = jdbc; this.audit = audit; }
 
     @GetMapping
     @PreAuthorize("hasAuthority('space.read')")
@@ -50,6 +52,7 @@ public class InternalSpaceSceneAdminController {
         UUID id = UUID.randomUUID();
         jdbc.update("insert into space_scenes(id,space_id,panorama_url,title,initial_yaw,initial_pitch,sort_order) values (?,?,?,?,?,?,?)",
             id, spaceId, input.panoramaUrl().trim(), clean(input.title()), input.initialYaw(), input.initialPitch(), input.sortOrder());
+        audit.record(authentication, "CREATE", "SPACE_SCENE", id, "spaceId=" + spaceId);
         return get(spaceId, id);
     }
 
@@ -62,6 +65,7 @@ public class InternalSpaceSceneAdminController {
             input.panoramaUrl().trim(), clean(input.title()), input.initialYaw(), input.initialPitch(), input.sortOrder(), id, spaceId) == 0) {
             throw new ResponseStatusException(NOT_FOUND, "Scene not found");
         }
+        audit.record(authentication, "UPDATE", "SPACE_SCENE", id, "spaceId=" + spaceId);
         return get(spaceId, id);
     }
 
@@ -73,6 +77,7 @@ public class InternalSpaceSceneAdminController {
         Long refs = jdbc.queryForObject("select count(*) from space_hotspots where scene_id=? or target_scene_id=?", Long.class, id, id);
         if (refs != null && refs > 0) throw new ResponseStatusException(CONFLICT, "Scene is referenced by hotspots");
         if (jdbc.update("delete from space_scenes where id=? and space_id=?", id, spaceId) == 0) throw new ResponseStatusException(NOT_FOUND, "Scene not found");
+        audit.record(authentication, "DELETE", "SPACE_SCENE", id, "spaceId=" + spaceId);
     }
 
     private SceneItem get(UUID spaceId, UUID id) {

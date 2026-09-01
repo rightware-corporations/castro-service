@@ -7,6 +7,7 @@ import { AuthPage } from '../../pages/auth/AuthPages'
 import { NotFound } from '../../pages/NotFound'
 import { OperationsFoundationPage } from '../../features/operations/OperationsFoundationPage'
 import { AvailabilitySettingsPage } from '../../features/admin/AvailabilitySettingsPage'
+import { AuditSettingsPage } from '../../features/admin/AuditSettingsPage'
 import { ServiceSettingsPage } from '../../features/services/ServiceSettingsPage'
 import { CourseSettingsPage } from '../../features/courses/CourseSettingsPage'
 import { SpaceSettingsPage } from '../../features/spaces/SpaceSettingsPage'
@@ -105,6 +106,7 @@ export function AppRouter() {
       <Route path="/app/configuracoes/permissoes" element={guarded('permission.read', <AccessSettingsPage />)} />
       <Route path="/app/configuracoes/geral" element={guarded('settings.read', <GeneralSettingsPage />)} />
       <Route path="/app/configuracoes/conteudo" element={guarded('content.read', <ContentSettingsPage />)} />
+      <Route path="/app/configuracoes/auditoria" element={guarded('audit.read', <AuditSettingsPage />)} />
       {permissionRoutes.map(([path, permission]) => <Route key={path} path={path} element={guarded(permission, <OperationsFoundationPage />)} />)}
     </Route>
   </Routes>

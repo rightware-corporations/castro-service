@@ -1,5 +1,6 @@
 package com.castros.api;
 
+import com.castros.audit.AuditEventService;
 import com.castros.user.UserAccount;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -29,8 +30,9 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @RequestMapping("/api/v1/operations/spaces/{spaceId}/scenes/{sceneId}/hotspots")
 public class InternalSpaceHotspotAdminController {
     private final JdbcTemplate jdbc;
+    private final AuditEventService audit;
 
-    public InternalSpaceHotspotAdminController(JdbcTemplate jdbc) { this.jdbc = jdbc; }
+    public InternalSpaceHotspotAdminController(JdbcTemplate jdbc, AuditEventService audit) { this.jdbc = jdbc; this.audit = audit; }
 
     @GetMapping
     @PreAuthorize("hasAuthority('space.read')")
@@ -50,6 +52,7 @@ public class InternalSpaceHotspotAdminController {
         UUID id = UUID.randomUUID();
         jdbc.update("insert into space_hotspots(id,scene_id,title,description,yaw,pitch,type,target_scene_id,amenity_id) values (?,?,?,?,?,?,?,?,?)",
             id, sceneId, input.title().trim(), clean(input.description()), input.yaw(), input.pitch(), normalizeType(input.type()), input.targetSceneId(), input.resourceId());
+        audit.record(authentication, "CREATE", "SPACE_HOTSPOT", id, "spaceId=" + spaceId + ";sceneId=" + sceneId);
         return get(sceneId,id);
     }
 
@@ -62,6 +65,7 @@ public class InternalSpaceHotspotAdminController {
             input.title().trim(), clean(input.description()), input.yaw(), input.pitch(), normalizeType(input.type()), input.targetSceneId(), input.resourceId(), id, sceneId) == 0) {
             throw new ResponseStatusException(NOT_FOUND, "Hotspot not found");
         }
+        audit.record(authentication, "UPDATE", "SPACE_HOTSPOT", id, "spaceId=" + spaceId + ";sceneId=" + sceneId);
         return get(sceneId,id);
     }
 
@@ -71,6 +75,7 @@ public class InternalSpaceHotspotAdminController {
     public void delete(@PathVariable UUID spaceId, @PathVariable UUID sceneId, @PathVariable UUID id, Authentication authentication) {
         requireScene(organizationId(authentication), spaceId, sceneId);
         if (jdbc.update("delete from space_hotspots where id=? and scene_id=?", id, sceneId) == 0) throw new ResponseStatusException(NOT_FOUND, "Hotspot not found");
+        audit.record(authentication, "DELETE", "SPACE_HOTSPOT", id, "spaceId=" + spaceId + ";sceneId=" + sceneId);
     }
 
     private void validateLinks(UUID org, UUID spaceId, HotspotInput input) {
