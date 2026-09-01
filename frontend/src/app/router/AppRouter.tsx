@@ -5,18 +5,22 @@ import { useApi, useCan, useSession, useSessionError, useSessionReady } from '..
 import type { Permission } from '../../domain'
 import { AuthPage } from '../../pages/auth/AuthPages'
 import { NotFound } from '../../pages/NotFound'
-import { OperationsFoundationPage } from '../../pages/operations/OperationsFoundationPage'
-import { AvailabilitySettingsPage } from '../../pages/operations/AvailabilitySettingsPage'
-import { ServiceSettingsPage } from '../../pages/operations/ServiceSettingsPage'
-import { CourseSettingsPage } from '../../pages/operations/CourseSettingsPage'
-import { SpaceSettingsPage } from '../../pages/operations/SpaceSettingsPage'
-import { ManualBookingPage } from '../../pages/operations/ManualBookingPage'
-import { AccessSettingsPage } from '../../pages/operations/AccessSettingsPage'
-import { GeneralSettingsPage } from '../../pages/operations/GeneralSettingsPage'
-import { ContentSettingsPage } from '../../pages/operations/ContentSettingsPage'
-import { TasksPage } from '../../pages/operations/TasksPage'
-import { NotificationsPage } from '../../pages/operations/NotificationsPage'
-import { ReportsPage } from '../../pages/operations/ReportsPage'
+import { OperationsFoundationPage } from '../../features/operations/OperationsFoundationPage'
+import { AvailabilitySettingsPage } from '../../features/admin/AvailabilitySettingsPage'
+import { AuditSettingsPage } from '../../features/admin/AuditSettingsPage'
+import { ServiceSettingsPage } from '../../features/services/ServiceSettingsPage'
+import { CourseSettingsPage } from '../../features/courses/CourseSettingsPage'
+import { SpaceSettingsPage } from '../../features/spaces/SpaceSettingsPage'
+import { SpaceExperienceSettingsPage } from '../../features/spaces/SpaceExperienceSettingsPage'
+import { SpaceScenesSettingsPage } from '../../features/spaces/SpaceScenesSettingsPage'
+import { SpaceHotspotsSettingsPage } from '../../features/spaces/SpaceHotspotsSettingsPage'
+import { ManualBookingPage } from '../../features/operations/ManualBookingPage'
+import { AccessSettingsPage } from '../../features/admin/AccessSettingsPage'
+import { GeneralSettingsPage } from '../../features/admin/GeneralSettingsPage'
+import { ContentSettingsPage } from '../../features/admin/ContentSettingsPage'
+import { TasksPage } from '../../features/operations/TasksPage'
+import { NotificationsPage } from '../../features/operations/NotificationsPage'
+import { ReportsPage } from '../../features/operations/ReportsPage'
 import { ComponentLab } from '../../pages/dev/ComponentLab'
 import { HomePublic } from '../../features/home/components/HomePublic'
 import { ServicesCatalog, ServiceDetail } from '../../features/services/components/ServicesPublic'
@@ -34,7 +38,7 @@ const permissionRoutes: ReadonlyArray<readonly [string, Permission]> = [
   ['/app/clientes', 'customer.read'], ['/app/clientes/:id', 'customer.read'],
   ['/app/calendario', 'booking.read'],
   ['/app/espacos', 'space.read'], ['/app/servicos', 'service.read'], ['/app/formacao', 'course.read'],
-  ['/app/configuracoes', 'settings.read'], ['/app/configuracoes/layouts', 'space.read'], ['/app/configuracoes/recursos', 'space.read'],
+  ['/app/configuracoes', 'settings.read'],
 ]
 
 function OperationsGuard() {
@@ -93,11 +97,16 @@ export function AppRouter() {
       <Route path="/app/configuracoes/servicos" element={guarded('service.read', <ServiceSettingsPage />)} />
       <Route path="/app/configuracoes/formacao" element={guarded('course.read', <CourseSettingsPage />)} />
       <Route path="/app/configuracoes/espacos" element={guarded('space.read', <SpaceSettingsPage />)} />
+      <Route path="/app/configuracoes/layouts" element={guarded('space.read', <SpaceExperienceSettingsPage />)} />
+      <Route path="/app/configuracoes/recursos" element={guarded('space.read', <SpaceExperienceSettingsPage />)} />
+      <Route path="/app/configuracoes/cenas" element={guarded('space.read', <SpaceScenesSettingsPage />)} />
+      <Route path="/app/configuracoes/hotspots" element={guarded('space.read', <SpaceHotspotsSettingsPage />)} />
       <Route path="/app/configuracoes/utilizadores" element={guarded('user.read', <AccessSettingsPage />)} />
       <Route path="/app/configuracoes/funcoes" element={guarded('role.read', <AccessSettingsPage />)} />
       <Route path="/app/configuracoes/permissoes" element={guarded('permission.read', <AccessSettingsPage />)} />
       <Route path="/app/configuracoes/geral" element={guarded('settings.read', <GeneralSettingsPage />)} />
       <Route path="/app/configuracoes/conteudo" element={guarded('content.read', <ContentSettingsPage />)} />
+      <Route path="/app/configuracoes/auditoria" element={guarded('audit.read', <AuditSettingsPage />)} />
       {permissionRoutes.map(([path, permission]) => <Route key={path} path={path} element={guarded(permission, <OperationsFoundationPage />)} />)}
     </Route>
   </Routes>

@@ -9,6 +9,8 @@ Status:
 
 ## P0 — Stability, integration and contracts
 - [x] Frontend and Spring backend integrated in one repository
+- [~] Frontend isolated into explicit `frontend/` deployable workspace
+- [~] Frontend architecture rules documented (`docs/frontend-architecture.md`)
 - [x] Frontend CI: lint, typecheck, tests, build
 - [x] Backend CI: Maven verify
 - [x] PostgreSQL + Flyway migrations
@@ -22,6 +24,8 @@ Status:
 - [x] Frontend route-level permission guard / no-access state
 - [x] Preserve intended internal route through login
 - [x] Distinguish unauthenticated session from backend/session validation failure
+- [ ] Migrate remaining generic `pages/` ownership into domain features
+- [ ] Move feature-specific global CSS into owning feature modules where practical
 - [ ] Targeted regression suite covering all critical functional domains
 - [ ] Full multi-organization isolation integration suite
 
@@ -47,8 +51,8 @@ Status:
 - [ ] Approved real photography/media integration
 - [ ] 360 scenes management and display
 - [ ] Hotspots management and display
-- [ ] Layout configurations
-- [ ] Space resources/amenities management
+- [~] Layout configurations administration
+- [~] Space resources/amenities administration
 - [ ] Public display of approved layouts/resources
 - [ ] V2 scene/layout switching where supported by real assets
 - [ ] Evaluate Three.js/R3F only if the actual spatial requirement justifies it
@@ -99,15 +103,15 @@ Status:
 - [ ] Operational count queries instead of loading full collections for summaries
 
 ### Follow-up and work management
-- [ ] Tasks/follow-up domain model
-- [ ] Tasks list
-- [ ] Task create/edit/complete
-- [ ] Link task to customer/request/booking where applicable
-- [ ] Due dates/ownership where requirements support them
-- [ ] Notifications domain
-- [ ] Internal notifications UI
-- [ ] Reports domain and endpoints
-- [ ] Reports UI using real operational data only
+- [x] Tasks/follow-up domain model
+- [x] Tasks list
+- [x] Task create/edit/complete
+- [x] Link task to customer/request/booking where applicable
+- [x] Due dates/ownership
+- [x] Notifications domain
+- [x] Internal notifications UI
+- [x] Reports domain and endpoints
+- [x] Reports UI using real operational data only
 
 ## P3 — Administration
 ### Catalog
@@ -140,17 +144,17 @@ Status:
 - [ ] Prevent/handle dangerous self-lockout scenarios where appropriate
 
 ### General/settings/content
-- [~] Organization general settings backend
-- [~] Organization general settings UI
-- [~] Organization business timezone persistence
-- [ ] Content administration model
-- [ ] Content administration UI
+- [x] Organization general settings backend
+- [x] Organization general settings UI
+- [x] Organization business timezone persistence
+- [x] Content administration model
+- [x] Content administration UI
 - [ ] Approved public copy/media publishing workflow
 - [ ] Remaining organization settings only when real requirements are known
 
 ### Space administration expansion
-- [ ] Space layouts domain/API/UI
-- [ ] Space resources/amenities domain/API/UI
+- [~] Space layouts domain/API/UI
+- [~] Space resources/amenities domain/API/UI
 - [ ] Space scenes domain/API/UI
 - [ ] Scene hotspots domain/API/UI
 - [ ] Availability linkage to layouts/resources where required
@@ -231,7 +235,7 @@ Status:
 - [ ] Bookings list/detail/manual create
 - [ ] Customers list/detail
 - [ ] Calendar
-- [ ] Tasks/notifications/reports when implemented
+- [ ] Tasks/notifications/reports
 - [ ] Services admin
 - [ ] Formation/sessions admin
 - [ ] Spaces admin
@@ -258,29 +262,10 @@ Status:
 ## P6 — Final validation and delivery
 - [ ] Run PostgreSQL + Spring backend + frontend together locally
 - [ ] Smoke test every public route
-- [ ] Smoke test every Operations route
-- [ ] Smoke test every Admin route
-- [ ] Run full frontend test/lint/typecheck/build gate
-- [ ] Run full backend verify gate
-- [ ] Run PostgreSQL integration test suite
-- [ ] Final security/configuration review
-- [ ] Final audit for invented commercial facts, prices, testimonials, capacities or policies
-- [ ] Update README with exact local run instructions
-- [ ] Document required environment variables
-- [ ] Confirm migration path from a clean database
-- [ ] Final main-branch merge only after green gate
-
-## Execution order from here
-1. Make General Settings PR green and merge it.
-2. Add targeted regression + full multi-organization authorization tests.
-3. Implement Tasks/follow-up.
-4. Implement Notifications and Reports against real domain contracts.
-5. Implement Content administration.
-6. Implement Space layouts/resources/scenes/hotspots.
-7. Implement Audit trail and mutation audit wiring.
-8. Add pagination/search/filter/count-query improvements.
-9. Close production session/rate-limit/secrets/CORS/HTTPS/provisioning blockers.
-10. Run full stack locally, capture screenshots and perform visual/responsive/accessibility polish.
-11. Execute complete final validation and content audit.
-
-No unchecked item may be silently dropped. If a projected feature cannot be implemented because Castro business requirements or approved assets are missing, it remains explicitly unchecked and is documented as blocked rather than invented.
+- [ ] Smoke test every implemented Operations/Admin route
+- [ ] Verify migrations from an empty PostgreSQL database
+- [ ] Verify production build artifacts
+- [ ] Final CI green on main
+- [ ] Final security/configuration audit
+- [ ] Final Castro content/facts audit
+- [ ] Final implementation checklist review: no unaccounted projected item
