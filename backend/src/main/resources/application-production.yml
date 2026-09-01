@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+  session:
+    timeout: ${SESSION_TIMEOUT:30m}
+    jdbc:
+      initialize-schema: never
+      table-name: SPRING_SESSION
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+castros:
+  production-mode: true
+  allowed-origins: ${ALLOWED_ORIGINS}
+  availability-development-fallback: false
+  trust-proxy-headers: ${TRUST_PROXY_HEADERS:false}
+server:
+  forward-headers-strategy: ${FORWARD_HEADERS_STRATEGY:native}
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: true

@@ -41,18 +41,27 @@ public class InitialAdministratorProvisioner implements ApplicationRunner {
 
         Integer existingUser = jdbc.queryForObject("select count(*) from users where lower(email)=lower(?)", Integer.class, email);
         if (existingUser != null && existingUser > 0) {
-            throw new IllegalStateException("Bootstrap administrator already exists; remove BOOTSTRAP_ADMIN_ENABLED and BOOTSTRAP_ADMIN_PASSWORD from the deployment environment");
+            throw unsafe("bootstrap administrator already exists");
         }
 
         UUID organizationId = jdbc.query("select id from organizations where slug=?", rs -> rs.next() ? rs.getObject(1, UUID.class) : null, organizationSlug);
         if (organizationId == null) {
             organizationId = UUID.randomUUID();
             jdbc.update("insert into organizations(id,name,slug,active,created_at) values (?,?,?,?,?)", organizationId, organizationName, organizationSlug, true, OffsetDateTime.now());
+        } else {
+            Integer members = jdbc.queryForObject("select count(*) from users where organization_id=?", Integer.class, organizationId);
+            if (members != null && members > 0) {
+                throw unsafe("bootstrap is only allowed for an organization with no users");
+            }
+        }
+
+        Integer bootstrapRoles = jdbc.queryForObject("select count(*) from roles where organization_id=? and name=?", Integer.class, organizationId, "Bootstrap Administrator");
+        if (bootstrapRoles != null && bootstrapRoles > 0) {
+            throw unsafe("bootstrap administrator role already exists");
         }
 
         UUID roleId = UUID.randomUUID();
-        String roleName = "Bootstrap Administrator";
-        jdbc.update("insert into roles(id,organization_id,name) values (?,?,?)", roleId, organizationId, roleName);
+        jdbc.update("insert into roles(id,organization_id,name) values (?,?,?)", roleId, organizationId, "Bootstrap Administrator");
         jdbc.update("""
             insert into role_permissions(id,role_id,permission_id)
             select gen_random_uuid(), ?, id from permissions
@@ -68,7 +77,11 @@ public class InitialAdministratorProvisioner implements ApplicationRunner {
 
     private String required(String key) {
         String value = environment.getProperty(key);
-        if (value == null || value.isBlank()) throw new IllegalStateException(key + " is required when BOOTSTRAP_ADMIN_ENABLED=true");
+        if (value == null || value.isBlank()) throw unsafe(key + " is required when BOOTSTRAP_ADMIN_ENABLED=true");
         return value.trim();
+    }
+
+    private IllegalStateException unsafe(String reason) {
+        return new IllegalStateException("Unsafe bootstrap configuration: " + reason + ". Disable BOOTSTRAP_ADMIN_ENABLED and remove BOOTSTRAP_ADMIN_PASSWORD after one-time provisioning.");
     }
 }
