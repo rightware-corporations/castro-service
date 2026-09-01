@@ -35,7 +35,7 @@ castros:
   login-rate-limit-per-minute: ${LOGIN_RATE_LIMIT_PER_MINUTE:10}
   public-mutation-rate-limit-per-minute: ${PUBLIC_MUTATION_RATE_LIMIT_PER_MINUTE:30}
 server:
-  forward-headers-strategy: framework
+  forward-headers-strategy: ${FORWARD_HEADERS_STRATEGY:none}
   servlet:
     session:
       cookie:
