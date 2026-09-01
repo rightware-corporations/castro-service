@@ -3,15 +3,25 @@ name: Integration CI
 on:
   push:
     branches:
+      - main
       - integration/castros-platform
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: integration-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   frontend:
     name: Frontend quality gates
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: frontend
@@ -38,6 +48,7 @@ jobs:
   backend:
     name: Backend quality gates
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: backend
@@ -56,6 +67,7 @@ jobs:
   postgres-integration:
     name: PostgreSQL integration gates
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     services:
       postgres:
         image: postgres:16
