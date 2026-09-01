@@ -6,6 +6,7 @@ import type { Permission } from '../../domain'
 import { AuthPage } from '../../pages/auth/AuthPages'
 import { NotFound } from '../../pages/NotFound'
 import { OperationsFoundationPage } from '../../features/operations/OperationsFoundationPage'
+import { BookingsPagedPage, CustomersPagedPage, RequestsPagedPage } from '../../features/operations/PagedOperationsPages'
 import { AvailabilitySettingsPage } from '../../features/admin/AvailabilitySettingsPage'
 import { AuditSettingsPage } from '../../features/admin/AuditSettingsPage'
 import { ServiceSettingsPage } from '../../features/services/ServiceSettingsPage'
@@ -33,9 +34,9 @@ import { ErrorState, LoadingState } from '../../design-system/patterns/feedback-
 
 const permissionRoutes: ReadonlyArray<readonly [string, Permission]> = [
   ['/app/dashboard', 'dashboard.read'],
-  ['/app/pedidos', 'request.read'], ['/app/pedidos/:id', 'request.read'],
-  ['/app/reservas', 'booking.read'], ['/app/reservas/:id', 'booking.read'],
-  ['/app/clientes', 'customer.read'], ['/app/clientes/:id', 'customer.read'],
+  ['/app/pedidos/:id', 'request.read'],
+  ['/app/reservas/:id', 'booking.read'],
+  ['/app/clientes/:id', 'customer.read'],
   ['/app/calendario', 'booking.read'],
   ['/app/espacos', 'space.read'], ['/app/servicos', 'service.read'], ['/app/formacao', 'course.read'],
   ['/app/configuracoes', 'settings.read'],
@@ -89,6 +90,9 @@ export function AppRouter() {
       <Route path="/reset-password" element={<AuthPage kind="reset" />} />
     </Route>
     <Route element={<OperationsGuard />}>
+      <Route path="/app/pedidos" element={guarded('request.read', <RequestsPagedPage />)} />
+      <Route path="/app/reservas" element={guarded('booking.read', <BookingsPagedPage />)} />
+      <Route path="/app/clientes" element={guarded('customer.read', <CustomersPagedPage />)} />
       <Route path="/app/reservas/nova" element={guarded('booking.create', <ManualBookingPage />)} />
       <Route path="/app/tarefas" element={guarded('task.read', <TasksPage />)} />
       <Route path="/app/notificacoes" element={guarded('notification.read', <NotificationsPage />)} />
