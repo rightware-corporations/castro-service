@@ -1,5 +1,6 @@
 package com.castros.api;
 
+import com.castros.shared.security.PasswordPolicy;
 import com.castros.user.UserAccount;
 import com.castros.user.UserRepository;
 import jakarta.validation.Valid;
@@ -26,9 +27,10 @@ public class InternalAccessAdminController {
     private final JdbcTemplate jdbc;
     private final UserRepository users;
     private final PasswordEncoder passwordEncoder;
+    private final PasswordPolicy passwordPolicy;
 
-    public InternalAccessAdminController(JdbcTemplate jdbc, UserRepository users, PasswordEncoder passwordEncoder) {
-        this.jdbc = jdbc; this.users = users; this.passwordEncoder = passwordEncoder;
+    public InternalAccessAdminController(JdbcTemplate jdbc, UserRepository users, PasswordEncoder passwordEncoder, PasswordPolicy passwordPolicy) {
+        this.jdbc = jdbc; this.users = users; this.passwordEncoder = passwordEncoder; this.passwordPolicy = passwordPolicy;
     }
 
     @GetMapping("/users") @PreAuthorize("hasAuthority('user.read')")
@@ -45,7 +47,9 @@ public class InternalAccessAdminController {
     @PostMapping("/users") @PreAuthorize("hasAuthority('user.manage')") @Transactional
     public UserItem createUser(@Valid @RequestBody CreateUserInput input, Authentication authentication) {
         UUID org = organizationId(authentication); UUID roleId = validateRole(org,input.roleId());
-        UserAccount user = new UserAccount(org,input.email().trim().toLowerCase(Locale.ROOT),passwordEncoder.encode(input.password()),input.firstName().trim(),input.lastName().trim());
+        String email = input.email().trim().toLowerCase(Locale.ROOT);
+        validatePassword(input.password(), email);
+        UserAccount user = new UserAccount(org,email,passwordEncoder.encode(input.password()),input.firstName().trim(),input.lastName().trim());
         user.active=input.active();
         try { user=users.saveAndFlush(user); } catch (DataIntegrityViolationException ex) { throw new ResponseStatusException(HttpStatus.CONFLICT,"Email already exists"); }
         if (roleId!=null) jdbc.update("insert into organization_members (id,organization_id,user_id,role_id) values (?,?,?,?)",UUID.randomUUID(),org,user.id,roleId);
@@ -61,8 +65,9 @@ public class InternalAccessAdminController {
             if (input.roleId()==null) throw new ResponseStatusException(HttpStatus.CONFLICT,"The current user cannot remove their own role");
         }
         UserAccount user=users.findById(id).filter(value->org.equals(value.organizationId)).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found"));
-        user.email=input.email().trim().toLowerCase(Locale.ROOT); user.firstName=input.firstName().trim(); user.lastName=input.lastName().trim(); user.active=input.active();
-        if(input.password()!=null&&!input.password().isBlank()) user.passwordHash=passwordEncoder.encode(input.password());
+        String email=input.email().trim().toLowerCase(Locale.ROOT);
+        user.email=email; user.firstName=input.firstName().trim(); user.lastName=input.lastName().trim(); user.active=input.active();
+        if(input.password()!=null&&!input.password().isBlank()) { validatePassword(input.password(), email); user.passwordHash=passwordEncoder.encode(input.password()); }
         try { users.saveAndFlush(user); } catch(DataIntegrityViolationException ex){ throw new ResponseStatusException(HttpStatus.CONFLICT,"Email already exists"); }
         assignRole(org,id,input.roleId()); return userItem(org,id);
     }
@@ -95,11 +100,12 @@ public class InternalAccessAdminController {
     private RoleItem roleItem(UUID id,String name){ List<String> permissions=jdbc.query("select p.code from role_permissions rp join permissions p on p.id=rp.permission_id where rp.role_id=? order by p.code",(rs,row)->rs.getString(1),id); return new RoleItem(id,name,permissions); }
     private UserAccount currentUser(Authentication authentication){ if(authentication==null||!(authentication.getPrincipal() instanceof UserAccount user)||user.organizationId==null) throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Organization context required"); return user; }
     private UUID organizationId(Authentication authentication){ return currentUser(authentication).organizationId; }
+    private void validatePassword(String password,String email){ try{passwordPolicy.validate(password,email);}catch(IllegalArgumentException ex){throw new ResponseStatusException(HttpStatus.BAD_REQUEST,ex.getMessage());} }
 
     public record UserItem(UUID id,String email,String firstName,String lastName,boolean active,OffsetDateTime createdAt,UUID roleId,String roleName){}
     public record RoleItem(UUID id,String name,List<String> permissionCodes){}
     public record PermissionItem(String code){}
-    public record CreateUserInput(@Email @NotBlank String email,@NotBlank @Size(min=8,max=200) String password,@NotBlank String firstName,@NotBlank String lastName,boolean active,UUID roleId){}
-    public record UpdateUserInput(@Email @NotBlank String email,@Size(min=8,max=200) String password,@NotBlank String firstName,@NotBlank String lastName,boolean active,UUID roleId){}
+    public record CreateUserInput(@Email @NotBlank String email,@NotBlank @Size(min=12,max=200) String password,@NotBlank String firstName,@NotBlank String lastName,boolean active,UUID roleId){}
+    public record UpdateUserInput(@Email @NotBlank String email,@Size(min=12,max=200) String password,@NotBlank String firstName,@NotBlank String lastName,boolean active,UUID roleId){}
     public record RoleInput(@NotBlank @Size(max=80) String name,@NotNull Set<String> permissionCodes){}
 }
