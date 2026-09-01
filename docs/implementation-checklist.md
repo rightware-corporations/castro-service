@@ -11,6 +11,8 @@ Evidence baseline:
 - PR #16 merged into `main` at `1701bc2a2880591147010d263d5621fb5641784a` after Integration CI run #185 (`33507644988`) completed with Backend, Frontend and PostgreSQL integration gates green on exact tested head `c9258ee2b7cc20abc116ec1722cd7672ee6d73f4`.
 - PR #19 replaced the Draft PR #17 without changing code and merged the 13-commit production-readiness/governance consolidation into `main` at `b7c7a60bd56616173209f19b08385aec9fc5b5e5` after Integration CI run #196 passed all three gates on exact head `e7b000e3476814d82e3c0148a4b3ed6cdf4b0364`.
 - Integration CI run #197 (`33517754323`) then passed Backend, Frontend and PostgreSQL integration gates again on the exact post-merge `main` commit `b7c7a60bd56616173209f19b08385aec9fc5b5e5`.
+- PR #20 reconciled repository governance/checklist evidence and merged into `main` at `9c569896b167adf9a75cfae5d89fd0614731f4f5`; post-merge Integration CI run #199 passed all three gates on that exact `main` commit.
+- PR #21 added the full public booking-flow regression and PostgreSQL-backed availability CRUD regression suite. Integration CI run #203 passed all three gates on exact PR head `9d216ce45c24d2c6d089b02dc8394ca26656c080`; the PR merged into `main` at `1eeaf6790ab3240dc88bd09fa21acd6960455d1f`, and post-merge Integration CI run #204 passed all three gates again on that exact `main` commit.
 - Repository ruleset `Protect main` (ID `22020960`) is active for the default branch and requires pull requests, an up-to-date branch, the three mandatory CI checks, merge commits only, and blocks force-push/deletion with no bypass actors.
 
 ## P0 — Stability, integration and contracts
@@ -77,7 +79,7 @@ Evidence baseline:
 - [x] Service duration seeding
 - [x] Course session fixed date/duration specialization
 - [x] Space purpose/participants carried into booking
-- [~] Dedicated full booking-flow component/integration tests
+- [x] Dedicated full booking-flow component/integration tests
 - [ ] Final booking error-state audit
 - [ ] Final booking responsive/accessibility audit
 
@@ -136,7 +138,7 @@ Evidence baseline:
 - [x] Exceptions backend/UI
 - [x] Blocked periods backend/UI
 - [x] Resource selector using real catalog entries
-- [~] Availability CRUD regression tests
+- [x] Availability CRUD regression tests
 - [x] Conflict/edge-case tests for buffers, notice and max advance
 
 ### Access administration
