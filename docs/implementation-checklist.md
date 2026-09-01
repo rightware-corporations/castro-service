@@ -77,7 +77,7 @@ Evidence baseline:
 - [x] Service duration seeding
 - [x] Course session fixed date/duration specialization
 - [x] Space purpose/participants carried into booking
-- [ ] Dedicated full booking-flow component/integration tests
+- [~] Dedicated full booking-flow component/integration tests
 - [ ] Final booking error-state audit
 - [ ] Final booking responsive/accessibility audit
 
@@ -136,7 +136,7 @@ Evidence baseline:
 - [x] Exceptions backend/UI
 - [x] Blocked periods backend/UI
 - [x] Resource selector using real catalog entries
-- [ ] Availability CRUD regression tests
+- [~] Availability CRUD regression tests
 - [x] Conflict/edge-case tests for buffers, notice and max advance
 
 ### Access administration
