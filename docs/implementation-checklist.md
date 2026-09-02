@@ -14,6 +14,7 @@ Evidence baseline:
 - PR #20 reconciled repository governance/checklist evidence and merged into `main` at `9c569896b167adf9a75cfae5d89fd0614731f4f5`; post-merge Integration CI run #199 passed all three gates on that exact `main` commit.
 - PR #21 added the full public booking-flow regression and PostgreSQL-backed availability CRUD regression suite. Integration CI run #203 passed all three gates on exact PR head `9d216ce45c24d2c6d089b02dc8394ca26656c080`; the PR merged into `main` at `1eeaf6790ab3240dc88bd09fa21acd6960455d1f`, and post-merge Integration CI run #204 passed all three gates again on that exact `main` commit.
 - PR #23 added the final public booking error-state regression audit. Integration CI run #207 (`33660436908`) passed Backend, Frontend and PostgreSQL integration gates on exact PR head `c1364dcc52568e1744716b205e2017acbdaf2c3d`; the PR merged into `main` at `ca41e9b7348694caae54f3dad688a7aa7bfe5af8`, and post-merge Integration CI run #208 (`33660585834`) passed all three gates again on that exact `main` commit.
+- PR #25 added the final public navigation regression audit for the real router, public shell and Spaces destinations. Integration CI run #211 (`33661420217`) passed all three gates on exact PR head `f9ed78badf01d5658011f8efd129c7f21c638b13`; the PR merged into `main` at `2fe52a5f771d7ec281815a6dd9b09c0cfc229c12`, and post-merge Integration CI run #212 (`33661591195`) passed all three gates again on that exact `main` commit.
 - Repository ruleset `Protect main` (ID `22020960`) is active for the default branch and requires pull requests, an up-to-date branch, the three mandatory CI checks, merge commits only, and blocks force-push/deletion with no bypass actors.
 
 ## P0 — Stability, integration and contracts
@@ -50,7 +51,7 @@ Evidence baseline:
 - [x] Spaces catalog
 - [x] Space detail
 - [x] Contact page
-- [ ] Final public navigation audit
+- [x] Final public navigation audit
 
 ### Space experience
 - [x] Space explorer shell based on truthful media state
