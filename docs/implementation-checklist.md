@@ -13,6 +13,7 @@ Evidence baseline:
 - Integration CI run #197 (`33517754323`) then passed Backend, Frontend and PostgreSQL integration gates again on the exact post-merge `main` commit `b7c7a60bd56616173209f19b08385aec9fc5b5e5`.
 - PR #20 reconciled repository governance/checklist evidence and merged into `main` at `9c569896b167adf9a75cfae5d89fd0614731f4f5`; post-merge Integration CI run #199 passed all three gates on that exact `main` commit.
 - PR #21 added the full public booking-flow regression and PostgreSQL-backed availability CRUD regression suite. Integration CI run #203 passed all three gates on exact PR head `9d216ce45c24d2c6d089b02dc8394ca26656c080`; the PR merged into `main` at `1eeaf6790ab3240dc88bd09fa21acd6960455d1f`, and post-merge Integration CI run #204 passed all three gates again on that exact `main` commit.
+- PR #23 added the final public booking error-state regression audit. Integration CI run #207 (`33660436908`) passed Backend, Frontend and PostgreSQL integration gates on exact PR head `c1364dcc52568e1744716b205e2017acbdaf2c3d`; the PR merged into `main` at `ca41e9b7348694caae54f3dad688a7aa7bfe5af8`, and post-merge Integration CI run #208 (`33660585834`) passed all three gates again on that exact `main` commit.
 - Repository ruleset `Protect main` (ID `22020960`) is active for the default branch and requires pull requests, an up-to-date branch, the three mandatory CI checks, merge commits only, and blocks force-push/deletion with no bypass actors.
 
 ## P0 — Stability, integration and contracts
@@ -80,7 +81,7 @@ Evidence baseline:
 - [x] Course session fixed date/duration specialization
 - [x] Space purpose/participants carried into booking
 - [x] Dedicated full booking-flow component/integration tests
-- [ ] Final booking error-state audit
+- [x] Final booking error-state audit
 - [ ] Final booking responsive/accessibility audit
 
 ### Public quality states
