@@ -1,5 +1,6 @@
 package com.castros.api;
 
+import com.castros.platform.PlatformPrincipal;
 import com.castros.shared.config.AppProperties;
 import com.castros.shared.exception.ProblemDetailResponse;
 import com.castros.shared.security.DatabaseRateLimiter;
@@ -100,7 +101,13 @@ public class AuthController {
     @SecurityRequirement(name = "sessionCookie")
     @ApiResponses({@ApiResponse(responseCode = "200", description = "Current session"), @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ProblemDetailResponse.class)))})
     public AuthMeResponse me(Authentication auth) {
-        UserAccount user = (UserAccount) auth.getPrincipal();
+        Object principal = auth.getPrincipal();
+        if (principal instanceof PlatformPrincipal platform) {
+            return new AuthMeResponse(platform.email(), true, null, platform.firstName(), platform.lastName(), null, permissions(auth));
+        }
+        if (!(principal instanceof UserAccount user)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unsupported session principal");
+        }
         return new AuthMeResponse(user.email, true, user.organizationId, user.firstName, user.lastName, experience(user), permissions(auth));
     }
 

@@ -30,7 +30,10 @@ public class UserAccount implements UserDetails {
     }
 
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return permissionCodes.stream().sorted().map(SimpleGrantedAuthority::new).toList();
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("tenant.user"));
+        permissionCodes.stream().sorted().map(SimpleGrantedAuthority::new).forEach(authorities::add);
+        return List.copyOf(authorities);
     }
     public String getPassword() { return passwordHash; }
     public String getUsername() { return email; }
