@@ -12,6 +12,7 @@ import './styles/operations-data.css'
 import './styles/availability-admin.css'
 import './styles/catalog-admin.css'
 import './styles/access-admin.css'
+import './styles/owner-executive.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
