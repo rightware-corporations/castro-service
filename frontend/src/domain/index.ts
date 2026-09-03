@@ -5,6 +5,8 @@ export function isPublicBookableType(value: string): value is BookingTarget {
   return publicBookableTypes.includes(value as BookingTarget)
 }
 
+export type OrganizationExperience = 'OPERATIONS' | 'OWNER'
+
 export type Permission =
   | 'dashboard.read'
   | 'customer.read'
@@ -52,6 +54,7 @@ export type AuthSession = {
   username?: string
   displayName?: string
   organizationId?: string
+  experienceType?: OrganizationExperience
   permissions?: string[]
 }
 

@@ -1,11 +1,11 @@
-import type { AuthSession, BookingTarget, Collection } from '../../domain'
+import type { AuthSession, BookingTarget, Collection, OrganizationExperience } from '../../domain'
 
 export type BookableType = BookingTarget
 export type PublicConfigDto = { businessTimezone: string }
 export type ServiceDto = { id: string; name: string; slug: string; description?: string | null; durationMinutes?: number | null; bookingEnabled?: boolean | null }
 export type CourseDto = { id: string; name: string; slug: string; description?: string | null }
 export type CsrfTokenResponse = { token: string; headerName?: string; parameterName?: string }
-export type AuthSessionDto = { email: string; authenticated: boolean; organizationId?: string; firstName?: string; lastName?: string; permissions?: string[] }
+export type AuthSessionDto = { email: string; authenticated: boolean; organizationId?: string; firstName?: string; lastName?: string; experienceType?: OrganizationExperience; permissions?: string[] }
 export type CourseSessionDto = { id: string; startAt: string; endAt: string }
 export type CourseSessionResponse = CourseSessionDto
 export type SpaceDto = { id: string; name: string; slug: string; description?: string | null; location?: string | null; capacityMin?: number | null; capacityMax?: number | null }
@@ -53,8 +53,8 @@ export type AdminCourseSessionDto = { id: string; courseId: string; startAt: str
 export type AdminCourseSessionInputDto = Omit<AdminCourseSessionDto, 'id' | 'courseId'>
 export type AdminSpaceDto = { id: string; name: string; slug: string; description?: string | null; location?: string | null; capacityMin?: number | null; capacityMax?: number | null; sizeSquareMeters?: number | null; active: boolean }
 export type AdminSpaceInputDto = Omit<AdminSpaceDto, 'id'>
-export type AdminUserDto = { id: string; email: string; firstName: string; lastName: string; active: boolean; createdAt: string; roleId?: string | null; roleName?: string | null }
-export type CreateAdminUserDto = { email: string; password: string; firstName: string; lastName: string; active: boolean; roleId?: string | null }
+export type AdminUserDto = { id: string; email: string; firstName: string; lastName: string; active: boolean; createdAt: string; roleId?: string | null; roleName?: string | null; experienceType: OrganizationExperience }
+export type CreateAdminUserDto = { email: string; password: string; firstName: string; lastName: string; active: boolean; roleId?: string | null; experienceType: OrganizationExperience }
 export type UpdateAdminUserDto = Omit<CreateAdminUserDto, 'password'> & { password?: string }
 export type AdminRoleDto = { id: string; name: string; permissionCodes: string[] }
 export type AdminRoleInputDto = { name: string; permissionCodes: string[] }

@@ -24,6 +24,7 @@ import java.util.*;
 @RequestMapping("/api/v1/operations/access")
 public class InternalAccessAdminController {
     private static final Set<String> SELF_ADMIN_REQUIRED_PERMISSIONS = Set.of("user.manage", "role.manage");
+    private static final Set<String> ORGANIZATION_EXPERIENCES = Set.of("OPERATIONS", "OWNER");
 
     private final JdbcTemplate jdbc;
     private final UserRepository users;
@@ -37,20 +38,22 @@ public class InternalAccessAdminController {
     public List<UserItem> listUsers(Authentication authentication) {
         UUID org = organizationId(authentication);
         return jdbc.query("""
-            select u.id,u.email,u.first_name,u.last_name,u.active,u.created_at,r.id as role_id,r.name as role_name
+            select u.id,u.email,u.first_name,u.last_name,u.active,u.created_at,r.id as role_id,r.name as role_name,
+                   coalesce(om.experience_type,'OPERATIONS') as experience_type
             from users u left join organization_members om on om.user_id=u.id and om.organization_id=u.organization_id
             left join roles r on r.id=om.role_id and r.organization_id=u.organization_id
             where u.organization_id=? order by u.first_name,u.last_name,u.email
-            """, (rs,row) -> new UserItem(rs.getObject("id",UUID.class),rs.getString("email"),rs.getString("first_name"),rs.getString("last_name"),rs.getBoolean("active"),rs.getObject("created_at",OffsetDateTime.class),rs.getObject("role_id",UUID.class),rs.getString("role_name")), org);
+            """, (rs,row) -> new UserItem(rs.getObject("id",UUID.class),rs.getString("email"),rs.getString("first_name"),rs.getString("last_name"),rs.getBoolean("active"),rs.getObject("created_at",OffsetDateTime.class),rs.getObject("role_id",UUID.class),rs.getString("role_name"),rs.getString("experience_type")), org);
     }
 
     @PostMapping("/users") @PreAuthorize("hasAuthority('user.manage')") @Transactional
     public UserItem createUser(@Valid @RequestBody CreateUserInput input, Authentication authentication) {
         UUID org = organizationId(authentication); UUID roleId = validateRole(org,input.roleId());
+        String experienceType = normalizeExperience(input.experienceType(), "OPERATIONS");
         UserAccount user = new UserAccount(org,input.email().trim().toLowerCase(Locale.ROOT),passwordEncoder.encode(input.password()),input.firstName().trim(),input.lastName().trim());
         user.active=input.active();
         try { user=users.saveAndFlush(user); } catch (DataIntegrityViolationException ex) { throw new ResponseStatusException(HttpStatus.CONFLICT,"Email already exists"); }
-        if (roleId!=null) jdbc.update("insert into organization_members (id,organization_id,user_id,role_id) values (?,?,?,?)",UUID.randomUUID(),org,user.id,roleId);
+        if (roleId!=null) jdbc.update("insert into organization_members (id,organization_id,user_id,role_id,experience_type) values (?,?,?,?,?)",UUID.randomUUID(),org,user.id,roleId,experienceType);
         return userItem(org,user.id);
     }
 
@@ -58,16 +61,19 @@ public class InternalAccessAdminController {
     public UserItem updateUser(@PathVariable UUID id,@Valid @RequestBody UpdateUserInput input,Authentication authentication) {
         UserAccount actor = currentUser(authentication);
         UUID org=actor.organizationId;
+        String currentExperience = users.findExperienceType(id, org).orElse("OPERATIONS");
+        String experienceType = normalizeExperience(input.experienceType(), currentExperience);
         if (actor.id != null && actor.id.equals(id)) {
             if (!input.active()) throw new ResponseStatusException(HttpStatus.CONFLICT,"The current user cannot deactivate their own account");
             if (input.roleId()==null) throw new ResponseStatusException(HttpStatus.CONFLICT,"The current user cannot remove their own role");
             ensureRolePreservesAdministrativeAccess(org, input.roleId());
+            if (!Objects.equals(currentExperience, experienceType)) throw new ResponseStatusException(HttpStatus.CONFLICT,"The current user cannot change their own experience");
         }
         UserAccount user=users.findById(id).filter(value->org.equals(value.organizationId)).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found"));
         user.email=input.email().trim().toLowerCase(Locale.ROOT); user.firstName=input.firstName().trim(); user.lastName=input.lastName().trim(); user.active=input.active();
         if(input.password()!=null&&!input.password().isBlank()) user.passwordHash=passwordEncoder.encode(input.password());
         try { users.saveAndFlush(user); } catch(DataIntegrityViolationException ex){ throw new ResponseStatusException(HttpStatus.CONFLICT,"Email already exists"); }
-        assignRole(org,id,input.roleId()); return userItem(org,id);
+        assignRole(org,id,input.roleId(),experienceType); return userItem(org,id);
     }
 
     @GetMapping("/roles") @PreAuthorize("hasAuthority('role.read')")
@@ -92,7 +98,7 @@ public class InternalAccessAdminController {
     @GetMapping("/permissions") @PreAuthorize("hasAuthority('permission.read')")
     public List<PermissionItem> listPermissions(){ return jdbc.query("select code from permissions order by code",(rs,row)->new PermissionItem(rs.getString("code"))); }
 
-    private void assignRole(UUID org,UUID userId,UUID roleId){ UUID validated=validateRole(org,roleId); jdbc.update("delete from organization_members where organization_id=? and user_id=?",org,userId); if(validated!=null) jdbc.update("insert into organization_members (id,organization_id,user_id,role_id) values (?,?,?,?)",UUID.randomUUID(),org,userId,validated); }
+    private void assignRole(UUID org,UUID userId,UUID roleId,String experienceType){ UUID validated=validateRole(org,roleId); jdbc.update("delete from organization_members where organization_id=? and user_id=?",org,userId); if(validated!=null) jdbc.update("insert into organization_members (id,organization_id,user_id,role_id,experience_type) values (?,?,?,?,?)",UUID.randomUUID(),org,userId,validated,experienceType); }
     private UUID validateRole(UUID org,UUID roleId){ if(roleId==null)return null; ensureRole(org,roleId); return roleId; }
     private void ensureRole(UUID org,UUID roleId){ Integer count=jdbc.queryForObject("select count(*) from roles where id=? and organization_id=?",Integer.class,roleId,org); if(count==null||count==0) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Role does not belong to organization"); }
     private void ensureRolePreservesAdministrativeAccess(UUID org,UUID roleId){
@@ -110,20 +116,25 @@ public class InternalAccessAdminController {
         return count!=null&&count>0;
     }
     private void replaceRolePermissions(UUID org,UUID roleId,Set<String> codes){ ensureRole(org,roleId); if(codes==null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Permission codes are required"); List<Map<String,Object>> rows=codes.isEmpty()?List.of():jdbc.queryForList("select id,code from permissions where code in ("+String.join(",",Collections.nCopies(codes.size(),"?"))+")",codes.toArray()); if(rows.size()!=codes.size()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Unknown permission code"); jdbc.update("delete from role_permissions where role_id=?",roleId); for(Map<String,Object> row:rows) jdbc.update("insert into role_permissions (id,role_id,permission_id) values (?,?,?)",UUID.randomUUID(),roleId,row.get("id")); }
+    private String normalizeExperience(String value,String fallback){
+        String normalized=value==null||value.isBlank()?fallback:value.trim().toUpperCase(Locale.ROOT);
+        if(!ORGANIZATION_EXPERIENCES.contains(normalized)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Unknown organization experience");
+        return normalized;
+    }
     private UserItem userItem(UUID org,UUID id){
-        String sql = "select u.id,u.email,u.first_name,u.last_name,u.active,u.created_at,r.id role_id,r.name role_name " +
+        String sql = "select u.id,u.email,u.first_name,u.last_name,u.active,u.created_at,r.id role_id,r.name role_name,coalesce(om.experience_type,'OPERATIONS') experience_type " +
             "from users u left join organization_members om on om.user_id=u.id and om.organization_id=u.organization_id " +
             "left join roles r on r.id=om.role_id where u.organization_id=? and u.id=?";
-        return jdbc.query(sql,rs->{if(!rs.next())throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found"); return new UserItem(rs.getObject("id",UUID.class),rs.getString("email"),rs.getString("first_name"),rs.getString("last_name"),rs.getBoolean("active"),rs.getObject("created_at",OffsetDateTime.class),rs.getObject("role_id",UUID.class),rs.getString("role_name"));},org,id);
+        return jdbc.query(sql,rs->{if(!rs.next())throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found"); return new UserItem(rs.getObject("id",UUID.class),rs.getString("email"),rs.getString("first_name"),rs.getString("last_name"),rs.getBoolean("active"),rs.getObject("created_at",OffsetDateTime.class),rs.getObject("role_id",UUID.class),rs.getString("role_name"),rs.getString("experience_type"));},org,id);
     }
     private RoleItem roleItem(UUID id,String name){ List<String> permissions=jdbc.query("select p.code from role_permissions rp join permissions p on p.id=rp.permission_id where rp.role_id=? order by p.code",(rs,row)->rs.getString(1),id); return new RoleItem(id,name,permissions); }
     private UserAccount currentUser(Authentication authentication){ if(authentication==null||!(authentication.getPrincipal() instanceof UserAccount user)||user.organizationId==null) throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Organization context required"); return user; }
     private UUID organizationId(Authentication authentication){ return currentUser(authentication).organizationId; }
 
-    public record UserItem(UUID id,String email,String firstName,String lastName,boolean active,OffsetDateTime createdAt,UUID roleId,String roleName){}
+    public record UserItem(UUID id,String email,String firstName,String lastName,boolean active,OffsetDateTime createdAt,UUID roleId,String roleName,String experienceType){}
     public record RoleItem(UUID id,String name,List<String> permissionCodes){}
     public record PermissionItem(String code){}
-    public record CreateUserInput(@Email @NotBlank String email,@NotBlank @Size(min=8,max=200) String password,@NotBlank String firstName,@NotBlank String lastName,boolean active,UUID roleId){}
-    public record UpdateUserInput(@Email @NotBlank String email,@Size(min=8,max=200) String password,@NotBlank String firstName,@NotBlank String lastName,boolean active,UUID roleId){}
+    public record CreateUserInput(@Email @NotBlank String email,@NotBlank @Size(min=8,max=200) String password,@NotBlank String firstName,@NotBlank String lastName,boolean active,UUID roleId,String experienceType){}
+    public record UpdateUserInput(@Email @NotBlank String email,@Size(min=8,max=200) String password,@NotBlank String firstName,@NotBlank String lastName,boolean active,UUID roleId,String experienceType){}
     public record RoleInput(@NotBlank @Size(max=80) String name,@NotNull Set<String> permissionCodes){}
 }

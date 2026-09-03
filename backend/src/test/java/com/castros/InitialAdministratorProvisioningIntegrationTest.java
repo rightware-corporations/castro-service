@@ -34,7 +34,7 @@ class InitialAdministratorProvisioningIntegrationTest {
     }
 
     @Test
-    void bootstrapCreatesExactlyOneFullyPrivilegedAdministratorAndCannotBeReplayed() throws Exception {
+    void bootstrapCreatesExactlyOneFullyPrivilegedOwnerAndCannotBeReplayed() throws Exception {
         String suffix = UUID.randomUUID().toString();
         String slug = "bootstrap-" + suffix;
         String email = "initial-" + suffix + "@example.test";
@@ -59,6 +59,8 @@ class InitialAdministratorProvisioningIntegrationTest {
 
         Integer membershipCount = jdbc.queryForObject("select count(*) from organization_members where organization_id=? and user_id=?", Integer.class, organizationId, userId);
         assertEquals(1, membershipCount);
+        String experience = jdbc.queryForObject("select experience_type from organization_members where organization_id=? and user_id=?", String.class, organizationId, userId);
+        assertEquals("OWNER", experience);
 
         Integer grantedPermissions = jdbc.queryForObject("""
             select count(*) from organization_members om

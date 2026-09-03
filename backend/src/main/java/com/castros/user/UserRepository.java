@@ -17,4 +17,11 @@ public interface UserRepository extends JpaRepository<UserAccount, UUID> {
         order by p.code
         """, nativeQuery = true)
     List<String> findPermissionCodes(@Param("userId") UUID userId, @Param("organizationId") UUID organizationId);
+
+    @Query(value = """
+        select om.experience_type
+        from organization_members om
+        where om.user_id = :userId and om.organization_id = :organizationId
+        """, nativeQuery = true)
+    Optional<String> findExperienceType(@Param("userId") UUID userId, @Param("organizationId") UUID organizationId);
 }
