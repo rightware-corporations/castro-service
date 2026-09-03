@@ -26,6 +26,9 @@ import { ReportsPage } from '../../features/operations/ReportsPage'
 import { OwnerLayout } from '../../features/owner/OwnerLayout'
 import { OwnerDashboardPage } from '../../features/owner/OwnerDashboardPage'
 import { OwnerActivityPage, OwnerAgendaPage, OwnerCustomersPage } from '../../features/owner/OwnerOverviewPages'
+import { PlatformDashboardPage } from '../../features/platform/PlatformDashboardPage'
+import { PlatformLayout } from '../../features/platform/PlatformLayout'
+import { PlatformLoginPage } from '../../features/platform/PlatformLoginPage'
 import { ComponentLab } from '../../pages/dev/ComponentLab'
 import { HomePublic } from '../../features/home/components/HomePublic'
 import { ServicesCatalog, ServiceDetail } from '../../features/services/components/ServicesPublic'
@@ -45,12 +48,15 @@ const permissionRoutes: ReadonlyArray<readonly [string, Permission]> = [
   ['/app/configuracoes', 'settings.read'],
 ]
 
+const isPlatformSession = (permissions?: string[]) => permissions?.includes('platform.admin') === true
+
 function OperationsGuard() {
   const api = useApi(); const session = useSession(); const ready = useSessionReady(); const sessionError = useSessionError(); const location = useLocation()
   if (api.kind === 'mock' && import.meta.env.DEV) return <OperationsLayout />
   if (!ready) return <main className="operations-auth-loading"><LoadingState label="A validar sessão." /></main>
   if (sessionError) return <main className="operations-auth-loading"><ErrorState title="Não foi possível validar a sessão." /></main>
   if (!session?.authenticated) return <Navigate to="/login" state={{ from: `${location.pathname}${location.search}` }} replace />
+  if (isPlatformSession(session.permissions)) return <Navigate to="/platform" replace />
   if (session.experienceType === 'OWNER') return <Navigate to="/owner" replace />
   return <OperationsLayout />
 }
@@ -61,8 +67,18 @@ function OwnerGuard() {
   if (!ready) return <main className="operations-auth-loading"><LoadingState label="A validar sessão." /></main>
   if (sessionError) return <main className="operations-auth-loading"><ErrorState title="Não foi possível validar a sessão." /></main>
   if (!session?.authenticated) return <Navigate to="/login" state={{ from: `${location.pathname}${location.search}` }} replace />
+  if (isPlatformSession(session.permissions)) return <Navigate to="/platform" replace />
   if (session.experienceType !== 'OWNER') return <Navigate to="/app/dashboard" replace />
   return <OwnerLayout />
+}
+
+function PlatformGuard() {
+  const session = useSession(); const ready = useSessionReady(); const sessionError = useSessionError(); const location = useLocation()
+  if (!ready) return <main className="operations-auth-loading"><LoadingState label="A validar sessão de plataforma." /></main>
+  if (sessionError) return <main className="operations-auth-loading"><ErrorState title="Não foi possível validar a sessão de plataforma." /></main>
+  if (!session?.authenticated) return <Navigate to="/platform/login" state={{ from: `${location.pathname}${location.search}` }} replace />
+  if (!isPlatformSession(session.permissions)) return <Navigate to={session.experienceType === 'OWNER' ? '/owner' : '/app/dashboard'} replace />
+  return <PlatformLayout />
 }
 
 function RequirePermission({ permission, children }: { permission: Permission; children: ReactNode }) {
@@ -102,6 +118,10 @@ export function AppRouter() {
       <Route path="/login" element={<AuthPage kind="login" />} />
       <Route path="/forgot-password" element={<AuthPage kind="forgot" />} />
       <Route path="/reset-password" element={<AuthPage kind="reset" />} />
+    </Route>
+    <Route path="/platform/login" element={<PlatformLoginPage />} />
+    <Route element={<PlatformGuard />}>
+      <Route path="/platform" element={<PlatformDashboardPage />} />
     </Route>
     <Route element={<OwnerGuard />}>
       <Route path="/owner" element={guarded('dashboard.read', <OwnerDashboardPage />)} />

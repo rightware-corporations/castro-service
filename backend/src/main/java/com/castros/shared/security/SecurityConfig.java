@@ -75,10 +75,12 @@ public class SecurityConfig {
                 }
             })
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/public/**", "/api/v1/auth/login", "/api/v1/auth/logout", "/api/v1/auth/csrf", "/api/v1/system/health", "/api/v1/system/readiness", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/health", "/actuator/health/**").permitAll()
+                .requestMatchers("/api/v1/public/**", "/api/v1/auth/login", "/api/v1/auth/logout", "/api/v1/auth/csrf", "/api/v1/system/health", "/api/v1/system/readiness", "/api/v1/platform/auth/login", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/health", "/actuator/health/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/services/**", "/api/v1/courses/**", "/api/v1/spaces/**", "/api/v1/availability").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/bookings/*").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/bookings", "/api/v1/requests").permitAll()
+                .requestMatchers("/api/v1/platform/**").hasAuthority("platform.admin")
+                .requestMatchers("/api/v1/operations/**").hasAuthority("tenant.user")
                 .anyRequest().authenticated());
         return http.build();
     }
