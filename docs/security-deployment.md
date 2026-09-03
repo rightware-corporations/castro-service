@@ -19,9 +19,9 @@ AVAILABILITY_DEVELOPMENT_FALLBACK=false
 
 Rate limits and browser sessions are PostgreSQL-backed so multiple backend instances share the same protection state.
 
-## One-time initial administrator provisioning
+## One-time organization owner provisioning
 
-The application never ships a fixed production administrator or hardcoded production password. A clean deployment can explicitly enable one-time provisioning with deployment secrets:
+The application never ships a fixed production administrator or hardcoded production password. A clean deployment can explicitly enable one-time organization provisioning with deployment secrets:
 
 ```text
 BOOTSTRAP_ADMIN_ENABLED=true
@@ -33,9 +33,27 @@ BOOTSTRAP_ADMIN_FIRST_NAME=<first name>
 BOOTSTRAP_ADMIN_LAST_NAME=<last name>
 ```
 
-The bootstrap operation creates or reuses the organization identified by the supplied slug, creates an administrator role containing the current permission catalog, hashes the password with the configured BCrypt encoder, creates the administrator, and assigns that role.
+The bootstrap operation creates or reuses the organization identified by the supplied slug, creates an administrator role containing the current permission catalog, hashes the password with the configured BCrypt encoder, creates the administrator, assigns the role and assigns the `OWNER` experience.
 
 After the first successful start, remove at minimum `BOOTSTRAP_ADMIN_ENABLED` and `BOOTSTRAP_ADMIN_PASSWORD` from the deployment environment before restarting. If the supplied administrator already exists while bootstrap remains enabled, startup fails instead of silently reusing the bootstrap secret.
+
+## One-time RIGHTWARE platform administrator provisioning
+
+The RIGHTWARE Super Admin is not a Castro’s organization user and is not assigned an organization role. Its credentials are stored in the separate `platform_administrators` security boundary.
+
+Provision the first platform administrator only through deployment secrets:
+
+```text
+BOOTSTRAP_PLATFORM_ADMIN_ENABLED=true
+BOOTSTRAP_PLATFORM_ADMIN_EMAIL=<RIGHTWARE administrator email>
+BOOTSTRAP_PLATFORM_ADMIN_PASSWORD=<strong secret, 12+ characters>
+BOOTSTRAP_PLATFORM_ADMIN_FIRST_NAME=<first name>
+BOOTSTRAP_PLATFORM_ADMIN_LAST_NAME=<last name>
+```
+
+The one-time bootstrap hashes the password with the same BCrypt policy used by tenant accounts, refuses an email that is already a tenant user, creates the platform administrator and writes a platform audit event. It refuses replay once a platform administrator exists.
+
+After the successful provisioning start, remove `BOOTSTRAP_PLATFORM_ADMIN_ENABLED` and `BOOTSTRAP_PLATFORM_ADMIN_PASSWORD` before restarting. The platform login route is `/platform/login`; the authenticated control plane is `/platform` and receives only the `platform.admin` authority. It does not receive tenant operational permissions.
 
 ## Reverse proxy trust
 
