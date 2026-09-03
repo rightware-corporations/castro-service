@@ -8,7 +8,8 @@ import { ErrorState, LoadingState } from '../../design-system/patterns/feedback-
 export function OwnerAgendaPage() {
   const api = useApi(); const can = useCan()
   const query = useQuery({ queryKey:['owner','agenda'], queryFn:()=>api.operations.listBookings(), enabled:can('booking.read') })
-  const items = useMemo(() => (query.data?.items ?? []).filter(item=>new Date(item.endAt).getTime()>=Date.now()).sort((a,b)=>new Date(a.startAt).getTime()-new Date(b.startAt).getTime()),[query.data])
+  const now = query.dataUpdatedAt
+  const items = useMemo(() => (query.data?.items ?? []).filter(item=>!now||new Date(item.endAt).getTime()>=now).sort((a,b)=>new Date(a.startAt).getTime()-new Date(b.startAt).getTime()),[query.data,now])
   return <OwnerPage eyebrow="AGENDA" title="Próxima atividade" description="Leitura executiva das reservas futuras da Castro’s.">
     {query.isLoading?<LoadingState label="A carregar agenda."/>:query.isError?<ErrorState title="Não foi possível carregar a agenda."/>:items.length?<div className="owner-table"><div className="owner-table__head"><span>Data</span><span>Reserva</span><span>Cliente</span><span>Tipo</span><span>Estado</span></div>{items.map(item=><BookingRow key={item.id} item={item}/>)}</div>:<OwnerEmpty icon={CalendarDays} title="Sem atividade futura." text="Não existem reservas futuras para mostrar neste momento."/>}
   </OwnerPage>
