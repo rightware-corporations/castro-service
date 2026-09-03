@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { CalendarDays, Inbox, UsersRound } from 'lucide-react'
 import { useApi, useCan } from '../../app/providers/AppProviders'
@@ -36,7 +36,7 @@ export function OwnerCustomersPage(){
   </OwnerPage>
 }
 
-function OwnerPage({eyebrow,title,description,children}:{eyebrow:string;title:string;description:string;children:React.ReactNode}){return <section className="owner-page"><header className="owner-page__hero"><span>{eyebrow}</span><h1>{title}</h1><p>{description}</p></header>{children}</section>}
+function OwnerPage({eyebrow,title,description,children}:{eyebrow:string;title:string;description:string;children:ReactNode}){return <section className="owner-page"><header className="owner-page__hero"><span>{eyebrow}</span><h1>{title}</h1><p>{description}</p></header>{children}</section>}
 function BookingRow({item}:{item:OperationsBookingItemDto}){return <article className="owner-table__row"><span>{formatDateTime(item.startAt)}</span><strong>{item.reference}</strong><span>{personName(item)}</span><span>{item.bookableType.replaceAll('_',' ')}</span><span className={`owner-status owner-status--${item.status.toLowerCase()}`}>{translateStatus(item.status)}</span></article>}
 function BookingCompact({item}:{item:OperationsBookingItemDto}){return <article><div><strong>{item.reference}</strong><span>{personName(item)}</span></div><small>{formatDateTime(item.startAt)} · {translateStatus(item.status)}</small></article>}
 function RequestRow({item}:{item:OperationsRequestItemDto}){return <article><div><strong>{personName(item)}</strong><span>{item.type.replaceAll('_',' ')}</span></div><small>{translateStatus(item.status)} · {formatDateTime(item.createdAt)}</small></article>}
