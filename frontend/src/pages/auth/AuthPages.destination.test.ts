@@ -22,4 +22,11 @@ describe('authenticatedDestination', () => {
   it('does not preserve an owner route for an operations user', () => {
     expect(authenticatedDestination(session('OPERATIONS'), '/owner/clientes')).toBe('/app/dashboard')
   })
+
+  it('routes the RIGHTWARE platform administrator to the isolated control plane', () => {
+    const platform: AuthSession = { authenticated: true, permissions: ['platform.admin'] }
+    expect(authenticatedDestination(platform)).toBe('/platform')
+    expect(authenticatedDestination(platform, '/app/dashboard')).toBe('/platform')
+    expect(authenticatedDestination(platform, '/owner')).toBe('/platform')
+  })
 })
