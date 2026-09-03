@@ -19,9 +19,9 @@ export function OwnerDashboardPage() {
   const requests = useQuery({ queryKey: ['owner', 'requests'], queryFn: () => api.operations.listRequests(), enabled: can('request.read') })
   const report = useQuery({ queryKey: ['owner', 'report', range.from, range.to], queryFn: () => api.operations.getReport(range.from, range.to), enabled: can('report.read') })
 
-  const now = Date.now()
+  const now = bookings.dataUpdatedAt
   const upcoming = useMemo(() => (bookings.data?.items ?? [])
-    .filter((booking) => activeBookingStatuses.has(booking.status) && new Date(booking.startAt).getTime() >= now)
+    .filter((booking) => activeBookingStatuses.has(booking.status) && (!now || new Date(booking.startAt).getTime() >= now))
     .sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime())
     .slice(0, 5), [bookings.data, now])
   const openRequests = useMemo(() => (requests.data?.items ?? []).filter((request) => activeRequestStatuses.has(request.status)), [requests.data])
