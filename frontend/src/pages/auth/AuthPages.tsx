@@ -63,6 +63,7 @@ export function AuthPage({ kind }: { kind: AuthKind }) {
 }
 
 export function authenticatedDestination(session: AuthSession, from?: string) {
+  if (session.permissions?.includes('platform.admin')) return '/platform'
   if (session.experienceType === 'OWNER') return from?.startsWith('/owner') ? from : '/owner'
   return from?.startsWith('/app/') ? from : '/app/dashboard'
 }
