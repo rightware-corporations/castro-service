@@ -24,8 +24,20 @@ describe('public services', () => {
     expect(screen.getByRole('heading', { name: 'Não foi possível carregar os serviços.' })).toBeInTheDocument()
   })
 
+  it('renders detail loading state', () => {
+    render(<MemoryRouter><ServiceDetailView resource={{ isLoading: true, isError: false }} /></MemoryRouter>)
+    expect(screen.getByRole('status')).toHaveTextContent('A carregar serviço.')
+  })
+
+  it('renders detail API error with a safe return path', () => {
+    render(<MemoryRouter><ServiceDetailView resource={{ isLoading: false, isError: true }} /></MemoryRouter>)
+    expect(screen.getByRole('heading', { name: 'Não foi possível carregar este serviço.' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Voltar aos serviços' })).toHaveAttribute('href', '/servicos')
+  })
+
   it('renders a not-found detail state when no service is returned', () => {
     render(<MemoryRouter><ServiceDetailView resource={{ isLoading: false, isError: false }} /></MemoryRouter>)
     expect(screen.getByRole('heading', { name: 'Serviço não encontrado.' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Voltar aos serviços' })).toHaveAttribute('href', '/servicos')
   })
 })
