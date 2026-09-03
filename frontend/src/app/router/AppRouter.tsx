@@ -6,6 +6,7 @@ import type { Permission } from '../../domain'
 import { AuthPage } from '../../pages/auth/AuthPages'
 import { NotFound } from '../../pages/NotFound'
 import { OperationsFoundationPage } from '../../features/operations/OperationsFoundationPage'
+import { SecretaryDashboardPage } from '../../features/operations/SecretaryDashboardPage'
 import { BookingsPagedPage, CustomersPagedPage, RequestsPagedPage } from '../../features/operations/PagedOperationsPages'
 import { AvailabilitySettingsPage } from '../../features/admin/AvailabilitySettingsPage'
 import { AuditSettingsPage } from '../../features/admin/AuditSettingsPage'
@@ -36,7 +37,6 @@ import { DeferredPublicPage } from '../../pages/public/DeferredPublicPage'
 import { ErrorState, LoadingState } from '../../design-system/patterns/feedback-overlays'
 
 const permissionRoutes: ReadonlyArray<readonly [string, Permission]> = [
-  ['/app/dashboard', 'dashboard.read'],
   ['/app/pedidos/:id', 'request.read'],
   ['/app/reservas/:id', 'booking.read'],
   ['/app/clientes/:id', 'customer.read'],
@@ -111,6 +111,7 @@ export function AppRouter() {
       <Route path="/owner/relatorios" element={guarded('report.read', <ReportsPage />)} />
     </Route>
     <Route element={<OperationsGuard />}>
+      <Route path="/app/dashboard" element={guarded('dashboard.read', <SecretaryDashboardPage />)} />
       <Route path="/app/pedidos" element={guarded('request.read', <RequestsPagedPage />)} />
       <Route path="/app/reservas" element={guarded('booking.read', <BookingsPagedPage />)} />
       <Route path="/app/clientes" element={guarded('customer.read', <CustomersPagedPage />)} />
