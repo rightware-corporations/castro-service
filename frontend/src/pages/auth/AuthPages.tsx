@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 import { useApi } from '../../app/providers/AppProviders'
+import type { AuthSession } from '../../domain'
 
 type AuthKind = 'login' | 'forgot' | 'reset'
 type FormValues = { email?: string; password?: string; confirmation?: string }
@@ -42,8 +43,7 @@ export function AuthPage({ kind }: { kind: AuthKind }) {
       const session = await api.auth.login(values.email!, values.password!)
       queryClient.setQueryData(['auth', 'me'], session)
       const state = location.state as LoginLocationState | null
-      const destination = state?.from?.startsWith('/app/') ? state.from : '/app/dashboard'
-      navigate(destination, { replace: true })
+      navigate(authenticatedDestination(session, state?.from), { replace: true })
     } catch {
       setError('root', { message: 'Não foi possível iniciar sessão. Verifique as credenciais e tente novamente.' })
     }
@@ -60,4 +60,9 @@ export function AuthPage({ kind }: { kind: AuthKind }) {
     </form>
     {kind === 'login' ? <Link className="text-link auth-link" to="/forgot-password">Esqueci-me da palavra-passe <span aria-hidden="true">→</span></Link> : <Link className="text-link auth-link" to="/login">Voltar ao início de sessão <span aria-hidden="true">→</span></Link>}
   </div></section>
+}
+
+export function authenticatedDestination(session: AuthSession, from?: string) {
+  if (session.experienceType === 'OWNER') return from?.startsWith('/owner') ? from : '/owner'
+  return from?.startsWith('/app/') ? from : '/app/dashboard'
 }
