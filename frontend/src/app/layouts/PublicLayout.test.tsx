@@ -44,11 +44,23 @@ describe('public layout navigation', () => {
     }
   })
 
-  it('exposes an operable mobile menu toggle with accurate expanded state', async () => {
+  it('provides a skip link to a programmatically focusable main landmark', () => {
+    renderLayout()
+    const skipLink = screen.getByRole('link', { name: 'Saltar para o conteúdo principal' })
+    expect(skipLink).toHaveAttribute('href', '#main-content')
+    const main = screen.getByRole('main')
+    expect(main).toHaveAttribute('id', 'main-content')
+    expect(main).toHaveAttribute('tabindex', '-1')
+  })
+
+  it('exposes an operable mobile menu toggle with accurate expanded and control state', async () => {
     const { user } = renderLayout()
     const toggle = screen.getByRole('button', { name: 'Abrir menu' })
 
     expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(toggle).toHaveAttribute('aria-controls', 'public-primary-navigation')
+    expect(screen.getByRole('navigation', { name: 'Navegação principal' })).toHaveAttribute('id', 'public-primary-navigation')
+
     await user.click(toggle)
 
     expect(screen.getByRole('button', { name: 'Fechar menu' })).toHaveAttribute('aria-expanded', 'true')
