@@ -38,8 +38,31 @@ describe('public contact form', () => {
     await waitFor(() => expect(submitRequest).toHaveBeenCalledWith(expect.objectContaining({ firstName: 'Ana', lastName: 'Silva', email: 'ana@example.com', type: 'GENERAL' })))
   })
 
+  it('disables both submit actions while the request is pending', () => {
+    renderForm({ isPending: true })
+    screen.getAllByRole('button', { name: /Enviar pedido/ }).forEach((button) => expect(button).toBeDisabled())
+  })
+
   it('renders a typed API error without inventing a response promise', () => {
     renderForm({ error: new ApiError('Serviço indisponível.', { code: 'INTERNAL_ERROR' }) })
     expect(screen.getByText('Serviço indisponível.')).toBeInTheDocument()
+  })
+
+  it('renders a safe generic error for an unexpected non-API failure', () => {
+    renderForm({ error: new Error('socket detail that must not be exposed') })
+    expect(screen.getByRole('heading', { name: 'Não foi possível enviar o pedido.' })).toBeInTheDocument()
+    expect(screen.queryByText('socket detail that must not be exposed')).not.toBeInTheDocument()
+  })
+
+  it('renders backend validation state and maps field errors to the form', async () => {
+    renderForm({
+      error: new ApiError('Validation failed', {
+        code: 'VALIDATION_FAILED',
+        fieldErrors: { email: ['O email não foi aceite.'] },
+      }),
+    })
+
+    expect(screen.getByText('Verifique os dados.')).toBeInTheDocument()
+    expect(await screen.findByText('O email não foi aceite.')).toBeInTheDocument()
   })
 })
