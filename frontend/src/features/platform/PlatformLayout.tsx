@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { Link, Outlet, useNavigate } from 'react-router-dom'
 import { useApi, useSession } from '../../app/providers/AppProviders'
+import { SkipLink } from '../../design-system/patterns/navigation'
 
 export function PlatformLayout() {
   const api = useApi()
@@ -16,6 +17,7 @@ export function PlatformLayout() {
   }
 
   return <div className="platform-shell">
+    <SkipLink />
     <aside className="platform-sidebar">
       <div className="platform-sidebar__identity"><span>RIGHTWARE</span><strong>Platform Control</strong></div>
       <nav aria-label="Navegação de plataforma">
@@ -33,7 +35,7 @@ export function PlatformLayout() {
         <div><span>CASTRO’S SERVICES</span><strong>Platform administration</strong></div>
         <div className="platform-topbar__account"><span>{session?.displayName || 'Platform administrator'}</span><small>{session?.username}</small></div>
       </header>
-      <Outlet />
+      <div id="main-content" tabIndex={-1}><Outlet /></div>
     </div>
   </div>
 }

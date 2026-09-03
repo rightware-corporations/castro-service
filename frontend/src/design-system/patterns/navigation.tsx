@@ -1,6 +1,8 @@
 import { useState, type KeyboardEvent, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 
+export function SkipLink({ href = '#main-content', label = 'Saltar para o conteúdo principal' }: { href?: string; label?: string }) { return <a className="ds-skip-link" href={href}>{label}</a> }
+
 export function Breadcrumbs({ items }: { items: { label: string; href?: string }[] }) { return <nav className="ds-breadcrumbs" aria-label="Breadcrumbs">{items.map((item, index) => <span key={item.label}>{item.href ? <Link to={item.href}>{item.label}</Link> : <strong aria-current={index === items.length - 1 ? 'page' : undefined}>{item.label}</strong>}{index < items.length - 1 && <span aria-hidden="true">/</span>}</span>)}</nav> }
 
 export function Tabs({ items, initialId }: { items: { id: string; label: string; content: ReactNode }[]; initialId?: string }) {
