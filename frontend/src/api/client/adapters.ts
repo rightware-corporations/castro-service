@@ -16,7 +16,7 @@ import { serializeAvailabilityQuery } from './serialization'
 export interface ApiAdapter extends ApiPort { readonly kind: 'mock' | 'http' }
 const emptyCollection = <T>(): Collection<T> => ({ items: [], total: 0 })
 const toCollection = <T>(items: T[]): Collection<T> => ({ items, total: items.length })
-const mapSession = (dto: AuthSessionDto): AuthSession => ({ authenticated: dto.authenticated, username: dto.email, subject: dto.email, displayName: [dto.firstName, dto.lastName].filter(Boolean).join(' ') || dto.email, organizationId: dto.organizationId, permissions: dto.permissions ?? [] })
+const mapSession = (dto: AuthSessionDto): AuthSession => ({ authenticated: dto.authenticated, username: dto.email, subject: dto.email, displayName: [dto.firstName, dto.lastName].filter(Boolean).join(' ') || dto.email, organizationId: dto.organizationId, experienceType: dto.experienceType ?? 'OPERATIONS', permissions: dto.permissions ?? [] })
 
 const confirmedMockServices: ServiceDto[] = [
   { id: '10000000-0000-0000-0000-000000000001', slug: 'atendimento-ao-cliente', name: 'Atendimento ao Cliente', bookingEnabled: false },
@@ -30,7 +30,7 @@ export class MockApiAdapter implements ApiAdapter {
   readonly kind = 'mock' as const
   async getCsrf(): Promise<CsrfTokenResponse> { return { token: 'mock-csrf-token' } }
   async getSession(): Promise<AuthSession | null> { return null }
-  async login(email: string, password: string): Promise<AuthSession> { void password; return { authenticated: true, username: email, subject: email, displayName: email, permissions: [] } }
+  async login(email: string, password: string): Promise<AuthSession> { void password; return { authenticated: true, username: email, subject: email, displayName: email, experienceType: 'OPERATIONS', permissions: [] } }
   async logout(): Promise<void> { return undefined }
   async getConfig(): Promise<PublicConfigDto> { return { businessTimezone: 'Africa/Maputo' } }
   async listServices(): Promise<Collection<ServiceDto>> { return toCollection(confirmedMockServices) }
