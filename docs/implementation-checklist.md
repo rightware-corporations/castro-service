@@ -16,6 +16,7 @@ Evidence baseline:
 - PR #23 added the final public booking error-state regression audit. Integration CI run #207 (`33660436908`) passed Backend, Frontend and PostgreSQL integration gates on exact PR head `c1364dcc52568e1744716b205e2017acbdaf2c3d`; the PR merged into `main` at `ca41e9b7348694caae54f3dad688a7aa7bfe5af8`, and post-merge Integration CI run #208 (`33660585834`) passed all three gates again on that exact `main` commit.
 - PR #25 added the final public navigation regression audit for the real router, public shell and Spaces destinations. Integration CI run #211 (`33661420217`) passed all three gates on exact PR head `f9ed78badf01d5658011f8efd129c7f21c638b13`; the PR merged into `main` at `2fe52a5f771d7ec281815a6dd9b09c0cfc229c12`, and post-merge Integration CI run #212 (`33661591195`) passed all three gates again on that exact `main` commit.
 - PR #27 added the public 404 and deferred system-state regression audit. Integration CI run #215 (`33662224225`) passed all three gates on exact PR head `af55aeddbec605c3fbcb56571a5bae6ad553befc`; the PR merged into `main` at `37988b485ae5010251fffd0d58baa63a92677702`, and post-merge Integration CI run #216 (`33662383903`) passed all three gates again on that exact `main` commit.
+- PR #29 added the public Loading/Error/Empty quality-state regression audit across Services, Formation, Spaces, Homepage, Contact and Booking. Integration CI run #219 (`33762319293`) passed Backend, Frontend and PostgreSQL integration gates on exact PR head `b8e5d021400d03e808706a629c019a7aa664133a`; the PR merged into `main` at `a8bfbe9b3c3380ebabeb6158d48a972a77480379`, and post-merge Integration CI run #220 (`33762457298`) passed all three gates again on that exact `main` commit.
 - Repository ruleset `Protect main` (ID `22020960`) is active for the default branch and requires pull requests, an up-to-date branch, the three mandatory CI checks, merge commits only, and blocks force-push/deletion with no bypass actors.
 
 ## P0 — Stability, integration and contracts
@@ -87,9 +88,9 @@ Evidence baseline:
 - [ ] Final booking responsive/accessibility audit
 
 ### Public quality states
-- [ ] Loading-state audit across every public route
-- [ ] Error-state audit across every public route
-- [ ] Empty-state audit across every public route
+- [x] Loading-state audit across every public route
+- [x] Error-state audit across every public route
+- [x] Empty-state audit across every public route
 - [x] 404/system-state audit
 - [ ] Final content validation against Castro-approved facts
 
