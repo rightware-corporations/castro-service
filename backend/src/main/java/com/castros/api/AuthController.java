@@ -4,6 +4,7 @@ import com.castros.shared.config.AppProperties;
 import com.castros.shared.exception.ProblemDetailResponse;
 import com.castros.shared.security.DatabaseRateLimiter;
 import com.castros.user.UserAccount;
+import com.castros.user.UserRepository;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -42,15 +43,18 @@ public class AuthController {
     private final SecurityContextRepository contextRepository;
     private final DatabaseRateLimiter rateLimiter;
     private final AppProperties properties;
+    private final UserRepository users;
 
     public AuthController(AuthenticationManager authenticationManager,
                           SecurityContextRepository contextRepository,
                           DatabaseRateLimiter rateLimiter,
-                          AppProperties properties) {
+                          AppProperties properties,
+                          UserRepository users) {
         this.authenticationManager = authenticationManager;
         this.contextRepository = contextRepository;
         this.rateLimiter = rateLimiter;
         this.properties = properties;
+        this.users = users;
     }
 
     @PostMapping("/login")
@@ -78,7 +82,7 @@ public class AuthController {
         SecurityContextHolder.setContext(context);
         contextRepository.saveContext(context, request, response);
         UserAccount user = (UserAccount) auth.getPrincipal();
-        return new AuthLoginResponse(user.email, true, user.organizationId, user.firstName, user.lastName, permissions(auth));
+        return new AuthLoginResponse(user.email, true, user.organizationId, user.firstName, user.lastName, experience(user), permissions(auth));
     }
 
     @PostMapping("/logout")
@@ -97,7 +101,12 @@ public class AuthController {
     @ApiResponses({@ApiResponse(responseCode = "200", description = "Current session"), @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ProblemDetailResponse.class)))})
     public AuthMeResponse me(Authentication auth) {
         UserAccount user = (UserAccount) auth.getPrincipal();
-        return new AuthMeResponse(user.email, true, user.organizationId, user.firstName, user.lastName, permissions(auth));
+        return new AuthMeResponse(user.email, true, user.organizationId, user.firstName, user.lastName, experience(user), permissions(auth));
+    }
+
+    private String experience(UserAccount user) {
+        if (user.id == null || user.organizationId == null) return "OPERATIONS";
+        return users.findExperienceType(user.id, user.organizationId).orElse("OPERATIONS");
     }
 
     private List<String> permissions(Authentication auth) { return auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).sorted().toList(); }
