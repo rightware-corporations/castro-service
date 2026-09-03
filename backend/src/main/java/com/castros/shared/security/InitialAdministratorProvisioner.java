@@ -72,7 +72,7 @@ public class InitialAdministratorProvisioner implements ApplicationRunner {
             insert into users(id,organization_id,email,password_hash,first_name,last_name,active,created_at)
             values (?,?,?,?,?,?,true,?)
             """, userId, organizationId, email, encoder.encode(password), firstName, lastName, OffsetDateTime.now());
-        jdbc.update("insert into organization_members(id,organization_id,user_id,role_id) values (?,?,?,?)", UUID.randomUUID(), organizationId, userId, roleId);
+        jdbc.update("insert into organization_members(id,organization_id,user_id,role_id,experience_type) values (?,?,?,?,?)", UUID.randomUUID(), organizationId, userId, roleId, "OWNER");
     }
 
     private String required(String key) {
