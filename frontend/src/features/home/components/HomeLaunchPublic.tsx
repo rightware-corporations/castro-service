@@ -1,4 +1,4 @@
-import { ArrowRight, ArrowUpRight, BookOpenText, Building2, CalendarDays, CheckCircle2, GraduationCap, Handshake, MessageCircle, Mic2 } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, BookOpenText, Building2, CheckCircle2, GraduationCap, Handshake, MessageCircle, Mic2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useCourses } from '../../courses/hooks'
 import { useServices } from '../../services/hooks'
@@ -23,7 +23,7 @@ export function HomeLaunchPublic() {
             <Link className="ds-button ds-button--primary" to="/servicos">Explorar serviços <ArrowRight size={17} /></Link>
             <Link className="launch-text-link" to="/contacto">Falar com a Castro’s <ArrowUpRight size={16} /></Link>
           </div>
-          {featuredCourse && <Link className="launch-course-ribbon" to={`/formacao/${featuredCourse.slug}`}><span>AGORA NA CASTRO’S</span><strong>{featuredCourse.name}</strong><small>12 de Outubro de 2026 · Presencial · Inscrições abertas</small><ArrowUpRight size={18} /></Link>}
+          {featuredCourse && <Link className="launch-course-ribbon" to={`/formacao/${featuredCourse.slug}`}><span>AGORA NA CASTRO’S</span><strong>{featuredCourse.name}</strong><small>Inscrições abertas · {featuredCourse.modality ? humanize(featuredCourse.modality) : 'Formação'} · {featuredCourse.durationLabel || 'Ver detalhes'}</small><ArrowUpRight size={18} /></Link>}
         </div>
 
         <FounderPortrait compact={false} />
@@ -41,12 +41,12 @@ export function HomeLaunchPublic() {
 
     {featuredCourse && <section className="launch-featured-course">
       <div className="container launch-featured-course__grid">
-        <div className="launch-featured-course__intro"><span className="eyebrow eyebrow--light">CURSO EM DESTAQUE</span><h2>{featuredCourse.name}</h2><p>{featuredCourse.summary || 'Formação presencial para desenvolver comunicação, oratória, presença e confiança.'}</p><Link className="ds-button launch-featured-course__button" to={`/formacao/${featuredCourse.slug}`}>Ver programa e inscrever-me <ArrowRight size={17}/></Link></div>
+        <div className="launch-featured-course__intro"><span className="eyebrow eyebrow--light">CURSO EM DESTAQUE</span><h2>{featuredCourse.name}</h2><p>{featuredCourse.summary || 'Formação publicada pela Castro’s com inscrição gerida pelo sistema de formação.'}</p><Link className="ds-button launch-featured-course__button" to={`/formacao/${featuredCourse.slug}`}>Ver curso e inscrição <ArrowRight size={17}/></Link></div>
         <div className="launch-featured-course__facts">
-          <Fact icon={<CalendarDays size={18}/>} label="Início" value="12 de Outubro de 2026" />
-          <Fact icon={<Mic2 size={18}/>} label="Modalidade" value={featuredCourse.modality ? humanize(featuredCourse.modality) : 'Presencial'} />
-          <Fact icon={<BookOpenText size={18}/>} label="Duração" value={featuredCourse.durationLabel || '1 mês'} />
+          <Fact icon={<Mic2 size={18}/>} label="Modalidade" value={featuredCourse.modality ? humanize(featuredCourse.modality) : 'A confirmar'} />
+          <Fact icon={<BookOpenText size={18}/>} label="Duração" value={featuredCourse.durationLabel || 'A confirmar'} />
           <Fact icon={<CheckCircle2 size={18}/>} label="Investimento" value={formatInvestment(featuredCourse.investmentAmount, featuredCourse.investmentCurrency)} />
+          {featuredCourse.certificateIncluded && <Fact icon={<GraduationCap size={18}/>} label="Inclui" value="Inscrição e certificado" />}
           {featuredCourse.scheduleSummary && <div className="launch-featured-course__schedule"><span>HORÁRIOS</span><strong>{featuredCourse.scheduleSummary}</strong></div>}
         </div>
       </div>
