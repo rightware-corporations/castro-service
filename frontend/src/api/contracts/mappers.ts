@@ -33,14 +33,24 @@ export const mapCourseDto = (dto: CourseDto): Course => ({
   id: dto.id,
   slug: dto.slug,
   name: dto.name,
-  summary: dto.description ?? undefined,
+  summary: dto.shortDescription ?? dto.description ?? undefined,
   description: dto.description ?? undefined,
+  modality: dto.modality ?? undefined,
+  durationLabel: dto.durationLabel ?? undefined,
+  scheduleSummary: dto.scheduleSummary ?? undefined,
+  investmentAmount: dto.investmentAmount ?? undefined,
+  investmentCurrency: dto.investmentCurrency ?? undefined,
+  certificateIncluded: dto.certificateIncluded ?? undefined,
+  contactPhone: dto.contactPhone ?? undefined,
+  learningOutcomes: dto.learningOutcomes ?? [],
+  featured: dto.featured ?? false,
 })
 
 export const mapCourseSessionDto = (dto: CourseSessionDto): CourseSession => ({
   id: dto.id,
   startAt: dto.startAt,
   endAt: dto.endAt,
+  label: dto.label ?? undefined,
 })
 
 export const mapSpaceDto = (dto: SpaceDto): Space => {
