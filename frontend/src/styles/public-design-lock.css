@@ -1,0 +1,84 @@
+/*
+ * Castro's public design-system lock.
+ *
+ * The public experience must use one visual language across legacy V2 pages
+ * and the newer founder/course surfaces. Headings are editorial
+ * (Instrument Serif); body/UI remains Manrope. Keep this file loaded last so
+ * feature styles cannot silently drift away from the canonical tokens.
+ */
+
+.public-v2-shell {
+  background: var(--color-off-white);
+  color: var(--color-charcoal);
+  font-family: var(--font-ui);
+}
+
+.public-v2-shell :is(.launch-about, .launch-insights-page, .launch-course-detail) {
+  background: var(--public-paper, var(--color-off-white));
+  color: var(--color-charcoal);
+}
+
+.public-v2-shell :is(.launch-about, .launch-insights-page, .launch-course-detail) :is(h1, h2, h3) {
+  color: var(--color-deep-navy);
+  font-family: var(--font-editorial);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: -0.035em;
+}
+
+.public-v2-shell :is(.launch-about, .launch-insights-page, .launch-course-detail) :is(h1, h2, h3) em {
+  font-family: inherit;
+  font-weight: inherit;
+  font-style: italic;
+}
+
+.public-v2-shell :is(
+  .launch-about__founder,
+  .launch-course-detail__registration,
+  .launch-insights-page__course
+) {
+  background: var(--color-deep-navy);
+  color: var(--color-white);
+}
+
+.public-v2-shell :is(
+  .launch-about__founder,
+  .launch-course-detail__registration,
+  .launch-insights-page__course
+) :is(h1, h2, h3) {
+  color: var(--color-white);
+}
+
+.public-v2-shell :is(
+  .launch-featured-course__button,
+  .launch-final-cta__button,
+  .launch-course-detail__registration-button,
+  .launch-insights-page__button
+) {
+  background: var(--color-teal) !important;
+  color: var(--color-deep-navy) !important;
+}
+
+.public-v2-shell .launch-founder-portrait__placeholder {
+  background: var(--color-deep-navy);
+  color: var(--color-white);
+}
+
+.public-v2-shell .launch-founder-portrait__placeholder span {
+  color: var(--color-teal);
+  font-family: var(--font-editorial);
+  font-weight: var(--font-weight-regular);
+}
+
+/* Keep course cards on the same editorial hierarchy as the surrounding page. */
+.public-v2-shell .course-system-card__content h3 {
+  font-family: var(--font-editorial);
+  font-weight: var(--font-weight-regular);
+}
+
+/* Prevent accidental return of oversized UI-style headings on smaller screens. */
+@media (max-width: 767px) {
+  .public-v2-shell :is(.launch-about__hero, .launch-course-detail__hero, .launch-insights-page__hero) h1 {
+    font-size: clamp(3rem, 15vw, 4.75rem);
+    line-height: 0.94;
+  }
+}
