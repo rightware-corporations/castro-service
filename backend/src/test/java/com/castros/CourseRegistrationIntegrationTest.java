@@ -59,7 +59,7 @@ class CourseRegistrationIntegrationTest {
         OffsetDateTime startsAt = OffsetDateTime.now().plusDays(20).withSecond(0).withNano(0);
         OffsetDateTime endsAt = startsAt.plusHours(3);
         jdbc.update("insert into courses(id,organization_id,name,slug,description,active) values (?,?,?,?,?,true)",
-            courseId, organizationId, "Leadership", "leadership-" + courseId, "Training", true);
+            courseId, organizationId, "Leadership", "leadership-" + courseId, "Training");
         jdbc.update("insert into course_sessions(id,course_id,start_at,end_at,active) values (?,?,?,?,true)",
             sessionId, courseId, startsAt, endsAt);
 
@@ -125,7 +125,7 @@ class CourseRegistrationIntegrationTest {
         UUID sessionId = UUID.randomUUID();
         OffsetDateTime startsAt = OffsetDateTime.now().minusHours(2);
         jdbc.update("insert into courses(id,organization_id,name,slug,description,active) values (?,?,?,?,?,true)",
-            courseId, organizationId, "Past training", "past-training-" + courseId, "Past", true);
+            courseId, organizationId, "Past training", "past-training-" + courseId, "Past");
         jdbc.update("insert into course_sessions(id,course_id,start_at,end_at,active) values (?,?,?,?,true)",
             sessionId, courseId, startsAt, startsAt.plusHours(1));
 
