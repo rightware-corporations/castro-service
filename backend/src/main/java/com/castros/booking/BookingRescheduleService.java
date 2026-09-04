@@ -32,35 +32,27 @@ public class BookingRescheduleService {
         this.properties = properties;
     }
 
+    public AvailabilityService.AvailabilityResult slots(UUID organizationId, UUID bookingId, LocalDate date) {
+        Booking booking = editableBooking(organizationId, bookingId);
+        long duration = Duration.between(booking.startAt, booking.endAt).toMinutes();
+        if (duration <= 0 || duration > Integer.MAX_VALUE) {
+            throw new ApiException("VALIDATION_FAILED", "The booking has an invalid duration.", HttpStatus.CONFLICT);
+        }
+        validateBookable(organizationId, booking, duration);
+        return availability.slotsForReschedule(booking.bookableType, booking.bookableId, date, (int) duration, booking.id);
+    }
+
     @Transactional
     public Booking reschedule(UUID organizationId, UUID bookingId, LocalDate date, LocalTime startTime, LocalTime endTime) {
-        Booking booking = bookings.findByOrganizationIdAndId(organizationId, bookingId)
-            .orElseThrow(() -> new ApiException("RESOURCE_NOT_FOUND", "Booking not found.", HttpStatus.NOT_FOUND));
-        if (booking.status != BookingStatus.PENDING && booking.status != BookingStatus.CONFIRMED) {
-            throw new ApiException("VALIDATION_FAILED", "Only pending or confirmed bookings can be rescheduled.", HttpStatus.CONFLICT);
-        }
-        if (booking.bookableType == BookableType.COURSE_SESSION || booking.bookableType == BookableType.CONSULTATION) {
-            throw new ApiException("BOOKING_BOOKABLE_TYPE_UNSUPPORTED", "This booking type cannot be rescheduled with the slot engine.", HttpStatus.CONFLICT);
-        }
-
+        Booking booking = editableBooking(organizationId, bookingId);
         LocalDateTime localStart = LocalDateTime.of(date, startTime);
         LocalDateTime localEnd = LocalDateTime.of(date, endTime);
         if (!localStart.isBefore(localEnd)) {
             throw new ApiException("VALIDATION_FAILED", "The new end time must be after the start time.", HttpStatus.BAD_REQUEST);
         }
 
-        if (booking.bookableType == BookableType.SERVICE) {
-            ServiceEntity service = services.findByOrganizationIdAndId(organizationId, booking.bookableId)
-                .filter(value -> value.active && value.bookingEnabled)
-                .orElseThrow(() -> new ApiException("BOOKABLE_INACTIVE", "The service is not available for scheduling.", HttpStatus.CONFLICT));
-            if (service.durationMinutes == null || Duration.between(localStart, localEnd).toMinutes() != service.durationMinutes) {
-                throw new ApiException("VALIDATION_FAILED", "The new interval must match the configured service duration.", HttpStatus.BAD_REQUEST);
-            }
-        } else if (booking.bookableType == BookableType.SPACE) {
-            Space space = spaces.findByOrganizationIdAndId(organizationId, booking.bookableId)
-                .filter(value -> value.active && value.bookingEnabled)
-                .orElseThrow(() -> new ApiException("BOOKABLE_INACTIVE", "The space is not available for reservation.", HttpStatus.CONFLICT));
-        }
+        long requestedDuration = Duration.between(localStart, localEnd).toMinutes();
+        validateBookable(organizationId, booking, requestedDuration);
 
         ZoneId zone = ZoneId.of(properties.getBusinessTimezone());
         OffsetDateTime start = ZonedDateTime.of(date, startTime, zone).toOffsetDateTime();
@@ -74,6 +66,33 @@ public class BookingRescheduleService {
             return bookings.saveAndFlush(booking);
         } catch (DataIntegrityViolationException exception) {
             throw new ApiException("BOOKING_SLOT_UNAVAILABLE", "The selected time slot is no longer available.", HttpStatus.CONFLICT);
+        }
+    }
+
+    private Booking editableBooking(UUID organizationId, UUID bookingId) {
+        Booking booking = bookings.findByOrganizationIdAndId(organizationId, bookingId)
+            .orElseThrow(() -> new ApiException("RESOURCE_NOT_FOUND", "Booking not found.", HttpStatus.NOT_FOUND));
+        if (booking.status != BookingStatus.PENDING && booking.status != BookingStatus.CONFIRMED) {
+            throw new ApiException("VALIDATION_FAILED", "Only pending or confirmed bookings can be rescheduled.", HttpStatus.CONFLICT);
+        }
+        if (booking.bookableType == BookableType.COURSE_SESSION || booking.bookableType == BookableType.CONSULTATION) {
+            throw new ApiException("BOOKING_BOOKABLE_TYPE_UNSUPPORTED", "This booking type cannot be rescheduled with the slot engine.", HttpStatus.CONFLICT);
+        }
+        return booking;
+    }
+
+    private void validateBookable(UUID organizationId, Booking booking, long requestedDuration) {
+        if (booking.bookableType == BookableType.SERVICE) {
+            ServiceEntity service = services.findByOrganizationIdAndId(organizationId, booking.bookableId)
+                .filter(value -> value.active && value.bookingEnabled)
+                .orElseThrow(() -> new ApiException("BOOKABLE_INACTIVE", "The service is not available for scheduling.", HttpStatus.CONFLICT));
+            if (service.durationMinutes == null || requestedDuration != service.durationMinutes) {
+                throw new ApiException("VALIDATION_FAILED", "The new interval must match the configured service duration.", HttpStatus.BAD_REQUEST);
+            }
+        } else if (booking.bookableType == BookableType.SPACE) {
+            spaces.findByOrganizationIdAndId(organizationId, booking.bookableId)
+                .filter(value -> value.active && value.bookingEnabled)
+                .orElseThrow(() -> new ApiException("BOOKABLE_INACTIVE", "The space is not available for reservation.", HttpStatus.CONFLICT));
         }
     }
 }
