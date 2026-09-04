@@ -8,6 +8,7 @@ import com.castros.catalog.Space;
 import com.castros.catalog.SpaceRepository;
 import com.castros.customer.Customer;
 import com.castros.customer.CustomerRepository;
+import com.castros.notification.NotificationPublisher;
 import com.castros.organization.OrganizationRepository;
 import com.castros.shared.exception.ApiException;
 import jakarta.validation.Valid;
@@ -33,10 +34,11 @@ public class BookingApplicationService {
     private final SpaceRepository spaces;
     private final CourseSessionRepository courseSessions;
     private final AvailabilityService availability;
+    private final NotificationPublisher notifications;
 
     public BookingApplicationService(BookingRepository bookings, CustomerRepository customers, OrganizationRepository organizations,
                                      ServiceRepository services, SpaceRepository spaces, CourseSessionRepository courseSessions,
-                                     AvailabilityService availability) {
+                                     AvailabilityService availability, NotificationPublisher notifications) {
         this.bookings = bookings;
         this.customers = customers;
         this.organizations = organizations;
@@ -44,6 +46,7 @@ public class BookingApplicationService {
         this.spaces = spaces;
         this.courseSessions = courseSessions;
         this.availability = availability;
+        this.notifications = notifications;
     }
 
     @Transactional
@@ -79,7 +82,11 @@ public class BookingApplicationService {
         }
 
         try {
-            return bookings.saveAndFlush(booking);
+            Booking saved = bookings.saveAndFlush(booking);
+            notifications.publishToOperations(organizationId, "BOOKING_CREATED", "Nova marcação recebida",
+                saved.reference + " · " + customer.firstName + " · " + saved.startAt,
+                "BOOKING", saved.id);
+            return saved;
         } catch (DataIntegrityViolationException ex) {
             if (normalizedKey != null) {
                 Optional<Booking> prior = bookings.findByOrganizationIdAndIdempotencyKey(organizationId, normalizedKey);
@@ -95,8 +102,8 @@ public class BookingApplicationService {
     }
 
     private UUID resolvePublicOrganization(BookingRequest request) {
-        if (request.bookableType() == BookableType.CONSULTATION) {
-            throw new ApiException("BOOKING_BOOKABLE_TYPE_UNSUPPORTED", "Consultations must be represented by a SERVICE booking.", HttpStatus.BAD_REQUEST);
+        if (request.bookableType() == BookableType.CONSULTATION || request.bookableType() == BookableType.COURSE_SESSION) {
+            throw new ApiException("BOOKING_BOOKABLE_TYPE_UNSUPPORTED", "This resource uses a dedicated scheduling or registration flow.", HttpStatus.BAD_REQUEST);
         }
         if (request.bookableType() == BookableType.SERVICE) {
             return services.findById(request.bookableId())
@@ -110,12 +117,8 @@ public class BookingApplicationService {
                 .map(space -> space.organizationId)
                 .orElseThrow(this::bookableInactive);
         }
-        return organizations.findAll().stream()
-            .filter(organization -> organization.active)
-            .filter(organization -> courseSessions.findByOrganizationIdAndId(organization.id, request.bookableId()).filter(session -> session.active).isPresent())
-            .map(organization -> organization.id)
-            .findFirst()
-            .orElseThrow(this::bookableInactive);
+        return organizations.findAll().stream().filter(organization -> organization.active).map(organization -> organization.id)
+            .findFirst().orElseThrow(this::bookableInactive);
     }
 
     private ApiException bookableInactive() {
@@ -125,8 +128,8 @@ public class BookingApplicationService {
     private void validateResourceAndBusinessRules(UUID organizationId, BookingRequest request, ZoneId zone) {
         BookableType type = request.bookableType();
         UUID id = request.bookableId();
-        if (type == BookableType.CONSULTATION) {
-            throw new ApiException("BOOKING_BOOKABLE_TYPE_UNSUPPORTED", "Consultations must be represented by a SERVICE booking.", HttpStatus.BAD_REQUEST);
+        if (type == BookableType.CONSULTATION || type == BookableType.COURSE_SESSION) {
+            throw new ApiException("BOOKING_BOOKABLE_TYPE_UNSUPPORTED", "This resource uses a dedicated scheduling or registration flow.", HttpStatus.BAD_REQUEST);
         }
 
         LocalDateTime localStart = LocalDateTime.of(request.date(), request.startTime());
@@ -158,10 +161,6 @@ public class BookingApplicationService {
             if (space.capacityMax != null && request.participants() > space.capacityMax) {
                 throw new ApiException("VALIDATION_FAILED", "The number of participants exceeds the maximum capacity of the space.", HttpStatus.BAD_REQUEST);
             }
-        }
-
-        if (type == BookableType.COURSE_SESSION && courseSessions.findByOrganizationIdAndId(organizationId, id).filter(s -> s.active).isEmpty()) {
-            throw new ApiException("BOOKABLE_INACTIVE", "The course session is not available for booking.", HttpStatus.CONFLICT);
         }
 
         ZonedDateTime.of(request.date(), request.startTime(), zone);
