@@ -5,7 +5,6 @@ import com.castros.user.UserAccount;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
@@ -35,13 +34,13 @@ public class SpaceAdminController {
     public void deactivate(@PathVariable UUID id,Authentication authentication) { Space space=spaces.findByOrganizationIdAndId(organizationId(authentication),id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Space not found")); space.active=false; spaces.save(space); }
 
     private void ensureSlugAvailable(UUID organizationId,String slug,UUID currentId) { spaces.findByOrganizationIdAndSlug(organizationId,slug).ifPresent(existing -> { if(currentId==null || !existing.id.equals(currentId)) throw new ResponseStatusException(HttpStatus.CONFLICT,"Space slug already exists"); }); }
-    private void apply(Space space,SpaceInput input,UUID organizationId,String slug) { space.organizationId=organizationId; space.name=input.name().trim(); space.slug=slug; space.description=clean(input.description()); space.location=clean(input.location()); space.capacityMin=input.capacityMin(); space.capacityMax=input.capacityMax(); space.sizeSquareMeters=input.sizeSquareMeters(); space.bookingEnabled=input.bookingEnabled(); space.confirmationMode=input.confirmationMode(); space.active=input.active(); }
+    private void apply(Space space,SpaceInput input,UUID organizationId,String slug) { space.organizationId=organizationId; space.name=input.name().trim(); space.slug=slug; space.description=clean(input.description()); space.location=clean(input.location()); space.capacityMin=input.capacityMin(); space.capacityMax=input.capacityMax(); space.sizeSquareMeters=input.sizeSquareMeters(); space.bookingEnabled=input.bookingEnabled()==null||input.bookingEnabled(); space.confirmationMode=input.confirmationMode()==null?BookingConfirmationMode.MANUAL:input.confirmationMode(); space.active=input.active(); }
     private SpaceResponse toResponse(Space space) { return new SpaceResponse(space.id,space.name,space.slug,space.description,space.location,space.capacityMin,space.capacityMax,space.sizeSquareMeters,space.bookingEnabled,space.confirmationMode,space.active); }
     private static void validateCapacity(Integer min,Integer max) { if(min!=null && max!=null && min>max) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Minimum capacity cannot exceed maximum capacity"); }
     private static String clean(String value) { if(value==null)return null; String cleaned=value.trim(); return cleaned.isBlank()?null:cleaned; }
     private static String normalizeSlug(String value) { return value.trim().toLowerCase(Locale.ROOT); }
     private static UUID organizationId(Authentication authentication) { if(authentication==null || !(authentication.getPrincipal() instanceof UserAccount user) || user.organizationId==null) throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Organization context unavailable"); return user.organizationId; }
 
-    public record SpaceInput(@NotBlank String name,@NotBlank @Pattern(regexp="[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*") String slug,String description,String location,@Min(1) Integer capacityMin,@Min(1) Integer capacityMax,@Positive BigDecimal sizeSquareMeters,boolean bookingEnabled,@NotNull BookingConfirmationMode confirmationMode,boolean active) { }
+    public record SpaceInput(@NotBlank String name,@NotBlank @Pattern(regexp="[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*") String slug,String description,String location,@Min(1) Integer capacityMin,@Min(1) Integer capacityMax,@Positive BigDecimal sizeSquareMeters,Boolean bookingEnabled,BookingConfirmationMode confirmationMode,boolean active) { }
     public record SpaceResponse(UUID id,String name,String slug,String description,String location,Integer capacityMin,Integer capacityMax,BigDecimal sizeSquareMeters,boolean bookingEnabled,BookingConfirmationMode confirmationMode,boolean active) { }
 }
