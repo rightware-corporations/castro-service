@@ -1,5 +1,6 @@
 package com.castros.api;
 
+import com.castros.availability.AvailabilityService;
 import com.castros.booking.Booking;
 import com.castros.booking.BookingRescheduleService;
 import com.castros.user.UserAccount;
@@ -23,6 +24,13 @@ public class BookingScheduleAdminController {
 
     public BookingScheduleAdminController(BookingRescheduleService rescheduleService) {
         this.rescheduleService = rescheduleService;
+    }
+
+    @GetMapping("/{id}/schedule/slots")
+    @PreAuthorize("hasAuthority('booking.update')")
+    public AvailabilityService.AvailabilityResult slots(@PathVariable UUID id, @RequestParam LocalDate date,
+                                                        Authentication authentication) {
+        return rescheduleService.slots(organizationId(authentication), id, date);
     }
 
     @PatchMapping("/{id}/schedule")
