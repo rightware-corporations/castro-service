@@ -1,17 +1,18 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { Link, Outlet, useNavigate } from 'react-router-dom'
-import { useApi, useSession } from '../../app/providers/AppProviders'
 import { SkipLink } from '../../design-system/patterns/navigation'
+import { platformApi } from './platformApi'
+import { platformSessionQueryKey, usePlatformSession } from './platformSession'
 
 export function PlatformLayout() {
-  const api = useApi()
-  const session = useSession()
+  const { session } = usePlatformSession()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
 
   const logout = async () => {
-    try { await api.auth.logout() } finally {
-      queryClient.setQueryData(['auth', 'me'], null)
+    try { await platformApi.logout() } finally {
+      queryClient.setQueryData(platformSessionQueryKey, null)
+      queryClient.removeQueries({ queryKey: ['platform'] })
       navigate('/platform/login', { replace: true })
     }
   }

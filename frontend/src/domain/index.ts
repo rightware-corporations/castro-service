@@ -6,6 +6,7 @@ export function isPublicBookableType(value: string): value is BookingTarget {
 }
 
 export type OrganizationExperience = 'OPERATIONS' | 'OWNER'
+export type IdentityKind = 'TENANT' | 'PLATFORM'
 
 export type Permission =
   | 'dashboard.read'
@@ -50,6 +51,7 @@ export type PermissionSet = ReadonlySet<Permission>
 
 export type AuthSession = {
   authenticated: boolean
+  identityKind?: IdentityKind
   subject?: string
   username?: string
   displayName?: string

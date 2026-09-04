@@ -16,6 +16,7 @@ springdoc:
 castros:
   production-mode: true
   allowed-origins: ${ALLOWED_ORIGINS}
+  platform-allowed-origins: ${PLATFORM_ALLOWED_ORIGINS:}
   availability-development-fallback: false
   trust-proxy-headers: ${TRUST_PROXY_HEADERS:false}
 server:

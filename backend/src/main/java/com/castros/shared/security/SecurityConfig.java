@@ -1,5 +1,6 @@
 package com.castros.shared.security;
 
+import com.castros.platform.PlatformPrincipal;
 import com.castros.shared.config.AppProperties;
 import com.castros.user.UserAccount;
 import com.castros.user.UserRepository;
@@ -9,16 +10,20 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
@@ -75,13 +80,40 @@ public class SecurityConfig {
                 }
             })
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/public/**", "/api/v1/auth/login", "/api/v1/auth/logout", "/api/v1/auth/csrf", "/api/v1/system/health", "/api/v1/system/readiness", "/api/v1/platform/auth/login", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/health", "/actuator/health/**").permitAll()
+                .requestMatchers("/api/v1/public/**", "/api/v1/auth/login", "/api/v1/auth/csrf", "/api/v1/system/health", "/api/v1/system/readiness", "/api/v1/platform/auth/login", "/api/v1/platform/auth/csrf", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/actuator/health", "/actuator/health/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/services/**", "/api/v1/courses/**", "/api/v1/spaces/**", "/api/v1/availability").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/bookings/*").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/bookings", "/api/v1/requests", "/api/v1/course-sessions/*/registrations").permitAll()
-                .requestMatchers("/api/v1/platform/**").hasAuthority("platform.admin")
-                .requestMatchers("/api/v1/operations/**").hasAuthority("tenant.user")
+                .requestMatchers("/api/v1/platform/**").access(platformPrincipalBoundary())
+                .requestMatchers("/api/v1/operations/**", "/api/v1/auth/me", "/api/v1/auth/logout").access(tenantPrincipalBoundary())
                 .anyRequest().authenticated());
         return http.build();
+    }
+
+    private AuthorizationManager<RequestAuthorizationContext> platformPrincipalBoundary() {
+        return (authenticationSupplier, context) -> {
+            Authentication authentication = authenticationSupplier.get();
+            boolean allowed = authentication != null
+                && authentication.isAuthenticated()
+                && authentication.getPrincipal() instanceof PlatformPrincipal
+                && hasAuthority(authentication, "platform.admin");
+            return new AuthorizationDecision(allowed);
+        };
+    }
+
+    private AuthorizationManager<RequestAuthorizationContext> tenantPrincipalBoundary() {
+        return (authenticationSupplier, context) -> {
+            Authentication authentication = authenticationSupplier.get();
+            boolean allowed = authentication != null
+                && authentication.isAuthenticated()
+                && authentication.getPrincipal() instanceof UserAccount user
+                && user.organizationId != null
+                && hasAuthority(authentication, "tenant.user");
+            return new AuthorizationDecision(allowed);
+        };
+    }
+
+    private boolean hasAuthority(Authentication authentication, String authority) {
+        return authentication.getAuthorities().stream().anyMatch(granted -> authority.equals(granted.getAuthority()));
     }
 }
