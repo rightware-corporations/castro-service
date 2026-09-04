@@ -28,6 +28,10 @@ public class AvailabilityService {
         return slots(type, id, date, durationMinutes, null);
     }
 
+    public AvailabilityResult slotsForReschedule(BookableType type, UUID id, LocalDate date, int durationMinutes, UUID excludeBookingId) {
+        return slots(type, id, date, durationMinutes, excludeBookingId);
+    }
+
     private AvailabilityResult slots(BookableType type, UUID id, LocalDate date, int durationMinutes, UUID excludeBookingId) {
         if (durationMinutes <= 0) throw new ApiException("BOOKING_INVALID_TIME", "Duration must be positive.", HttpStatus.BAD_REQUEST);
         ZoneId zone = ZoneId.of(properties.getBusinessTimezone());
