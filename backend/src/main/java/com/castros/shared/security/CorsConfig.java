@@ -14,7 +14,18 @@ import java.util.List;
 public class CorsConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource(AppProperties properties) {
-        List<String> origins = Arrays.stream(properties.getAllowedOrigins())
+        List<String> tenantOrigins = normalizedOrigins(properties.getAllowedOrigins());
+        List<String> platformOrigins = normalizedOrigins(properties.getPlatformAllowedOrigins());
+        if (platformOrigins.isEmpty() && !properties.isProductionMode()) platformOrigins = tenantOrigins;
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/v1/platform/**", configuration(platformOrigins));
+        source.registerCorsConfiguration("/**", configuration(tenantOrigins));
+        return source;
+    }
+
+    private List<String> normalizedOrigins(String[] configured) {
+        return Arrays.stream(configured == null ? new String[0] : configured)
             .map(String::trim)
             .filter(value -> !value.isEmpty())
             .peek(value -> {
@@ -22,7 +33,9 @@ public class CorsConfig {
             })
             .distinct()
             .toList();
+    }
 
+    private CorsConfiguration configuration(List<String> origins) {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(origins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
@@ -30,9 +43,6 @@ public class CorsConfig {
         configuration.setExposedHeaders(List.of("Retry-After"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
+        return configuration;
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class AppProperties {
     private String businessTimezone = "Africa/Maputo";
     private String[] allowedOrigins = new String[0];
+    private String[] platformAllowedOrigins = new String[0];
     private boolean availabilityDevelopmentFallback = false;
     private boolean productionMode = false;
     private boolean trustProxyHeaders = false;
@@ -16,6 +17,8 @@ public class AppProperties {
     public void setBusinessTimezone(String value) { businessTimezone = value; }
     public String[] getAllowedOrigins() { return allowedOrigins; }
     public void setAllowedOrigins(String[] value) { allowedOrigins = value; }
+    public String[] getPlatformAllowedOrigins() { return platformAllowedOrigins; }
+    public void setPlatformAllowedOrigins(String[] value) { platformAllowedOrigins = value; }
     public boolean isAvailabilityDevelopmentFallback() { return availabilityDevelopmentFallback; }
     public void setAvailabilityDevelopmentFallback(boolean value) { availabilityDevelopmentFallback = value; }
     public boolean isProductionMode() { return productionMode; }
