@@ -1,7 +1,12 @@
 import type { BookingTarget } from './index'
 
+export type BookingConfirmationMode = 'MANUAL' | 'AUTOMATIC'
+
 export type PublicConfig = {
   businessTimezone: string
+  contactPhone?: string
+  whatsappNumber?: string
+  contactEmail?: string
 }
 
 export type Service = {
@@ -12,6 +17,7 @@ export type Service = {
   description?: string
   durationMinutes?: number
   bookingEnabled?: boolean
+  confirmationMode?: BookingConfirmationMode
 }
 
 export type Course = {
@@ -37,6 +43,8 @@ export type Space = {
   location?: string
   capacityMin?: number
   capacityMax?: number
+  bookingEnabled?: boolean
+  confirmationMode?: BookingConfirmationMode
 }
 
 export type AvailabilityStatus = 'available' | 'booked'

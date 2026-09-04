@@ -6,6 +6,8 @@ import { Breadcrumbs } from '../../../design-system/patterns/navigation'
 import { Badge } from '../../../design-system/primitives'
 import type { Service } from '../../../domain/models'
 import { bookingRoute } from '../../booking/routes'
+import { contactHref } from '../../contact/intent'
+import { PublicContactChannels } from '../../contact/PublicContactChannels'
 
 export type CollectionResource<T> = { isLoading: boolean; isError: boolean; data?: { items: T[] } }
 export type DetailResource<T> = { isLoading: boolean; isError: boolean; data?: T }
@@ -38,17 +40,17 @@ export function ServiceCollectionView({ resource }: { resource: CollectionResour
 
     <section className="services-v2-catalog">
       <div className="container services-v2-catalog__grid">
-        <div className="services-v2-catalog__heading"><span className="eyebrow eyebrow--light">CATÁLOGO</span><h2>Serviços publicados</h2><p>Quando um serviço estiver configurado no sistema, pode ser explorado individualmente e encaminhado para contacto ou reserva conforme o contrato disponível.</p></div>
+        <div className="services-v2-catalog__heading"><span className="eyebrow eyebrow--light">CATÁLOGO</span><h2>Serviços publicados</h2><p>Cada serviço pode ser configurado pela Castro’s como agendável ou apenas orientado a pedido. O website segue essa decisão automaticamente.</p></div>
         <div className="services-v2-catalog__content">
           {resource.isLoading && <LoadingState label="A carregar serviços." />}
           {resource.isError && <ErrorState title="Não foi possível carregar os serviços." />}
           {!resource.isLoading && !resource.isError && !resource.data?.items.length && <EmptyState title="Catálogo em preparação">A estrutura está pronta para receber os serviços publicados sem inventar informação comercial.</EmptyState>}
-          {resource.data?.items.length ? <div className="services-v2-list">{resource.data.items.map((service, index) => <article key={service.slug}><span className="services-v2-list__number">{String(index + 1).padStart(2, '0')}</span><div><h3>{service.name}</h3>{service.summary && <p>{service.summary}</p>}{service.bookingEnabled === true && <Badge tone="accent">Reservável</Badge>}</div><Link to={`/servicos/${service.slug}`} aria-label={`Ver ${service.name}`}><ArrowUpRight size={20} /></Link></article>)}</div> : null}
+          {resource.data?.items.length ? <div className="services-v2-list">{resource.data.items.map((service, index) => <article key={service.slug}><span className="services-v2-list__number">{String(index + 1).padStart(2, '0')}</span><div><h3>{service.name}</h3>{service.summary && <p>{service.summary}</p>}{service.bookingEnabled === true && <Badge tone="accent">Agendamento online</Badge>}</div><Link to={`/servicos/${service.slug}`} aria-label={`Ver ${service.name}`}><ArrowUpRight size={20} /></Link></article>)}</div> : null}
         </div>
       </div>
     </section>
 
-    <section className="container services-v2-close"><div><span className="eyebrow">CONVERSA INICIAL</span><h2>Nem todos os desafios começam com um serviço pronto.</h2></div><div><p>Se a necessidade ainda não cabe numa categoria, comece pelo contexto. O pedido de contacto permite indicar o tipo de conversa e explicar o que precisa de ser compreendido.</p><Link className="ds-button ds-button--primary" to="/contacto">Partilhar o contexto <ArrowRight size={17} /></Link></div></section>
+    <section className="container services-v2-close"><div><span className="eyebrow">CONVERSA INICIAL</span><h2>Nem todos os desafios começam com um serviço pronto.</h2></div><div><p>Se a necessidade ainda não cabe numa categoria, comece pelo contexto. A nossa equipa recebe o pedido e pode encaminhá-lo sem o obrigar a escolher novamente uma área.</p><Link className="ds-button ds-button--primary" to={contactHref({ type: 'CONSULTATION', sourceType: 'GENERAL', cta: 'SERVICES_GENERAL_CONTACT' })}>Partilhar o contexto <ArrowRight size={17} /></Link></div></section>
   </div>
 }
 
@@ -64,11 +66,15 @@ export function ServiceDetailView({ resource }: { resource: DetailResource<Servi
   const service = resource.data
   const bookingBase = bookingRoute('SERVICE', service.id, 'selection')
   const bookingHref = service.durationMinutes && service.durationMinutes > 0 ? `${bookingBase}?duration=${service.durationMinutes}` : bookingBase
+  const contact = contactHref({ type: 'CONSULTATION', sourceType: 'SERVICE', entityId: service.id, cta: 'SERVICE_CONTACT', message: `Gostaria de falar sobre ${service.name}.` })
+  const schedulingReady = service.bookingEnabled === true && Boolean(service.durationMinutes && service.durationMinutes > 0)
+  const manualConfirmation = service.confirmationMode !== 'AUTOMATIC'
+
   return <div className="service-detail-v2">
     <section className="container public-v2-page"><Breadcrumbs items={[{ label: 'Serviços', href: '/servicos' }, { label: service.name }]} /><ServicesIntro detail />
       <div className="service-detail-v2__grid">
-        <div className="service-detail-v2__main"><span className="eyebrow">SERVIÇO</span><h2>{service.name}</h2><p className="service-detail-v2__description">{service.description ?? service.summary ?? 'Conteúdo detalhado pendente de publicação.'}</p>{service.durationMinutes !== undefined && <p className="metadata"><Clock3 size={16} />{service.durationMinutes} minutos</p>}{service.bookingEnabled === true && <Alert tone="info" title="Este serviço pode seguir para reserva">A disponibilidade final é sempre calculada pelo backend antes da confirmação.</Alert>}</div>
-        <aside className="service-detail-v2__aside"><div className="service-detail-v2__art" aria-hidden="true"><span>CASTRO’S</span><strong>{service.name}</strong><i /><i /><i /></div><div className="service-detail-v2__action"><span className="eyebrow">PRÓXIMO PASSO</span><h3>{service.bookingEnabled === true ? 'Escolha entre reservar ou conversar primeiro.' : 'Quer conversar sobre este serviço?'}</h3>{service.bookingEnabled === true ? <Link className="ds-button ds-button--primary" to={bookingHref}>Ver disponibilidade <ArrowRight size={16} /></Link> : null}<Link className={service.bookingEnabled === true ? 'text-link' : 'ds-button ds-button--primary'} to="/contacto">Falar connosco {service.bookingEnabled !== true ? <ArrowRight size={16} /> : null}</Link></div></aside>
+        <div className="service-detail-v2__main"><span className="eyebrow">SERVIÇO</span><h2>{service.name}</h2><p className="service-detail-v2__description">{service.description ?? service.summary ?? 'Conteúdo detalhado pendente de publicação.'}</p>{service.durationMinutes !== undefined && <p className="metadata"><Clock3 size={16} />{service.durationMinutes} minutos</p>}{schedulingReady && <Alert tone="info" title="Agendamento online disponível">Escolha uma data e um horário livre. {manualConfirmation ? 'A marcação fica pendente até confirmação da Castro’s.' : 'A marcação pode ser confirmada automaticamente se o slot continuar disponível.'}</Alert>}</div>
+        <aside className="service-detail-v2__aside"><div className="service-detail-v2__art" aria-hidden="true"><span>CASTRO’S</span><strong>{service.name}</strong><i /><i /><i /></div><div className="service-detail-v2__action"><span className="eyebrow">PRÓXIMO PASSO</span><h3>{schedulingReady ? 'Quer agendar uma conversa ou esclarecer algo primeiro?' : 'Quer conversar sobre este serviço?'}</h3>{schedulingReady ? <Link className="ds-button ds-button--primary" to={bookingHref}>Agendar uma conversa <ArrowRight size={16} /></Link> : null}<Link className={schedulingReady ? 'text-link' : 'ds-button ds-button--primary'} to={contact}>Falar com a Castro’s {schedulingReady ? null : <ArrowRight size={16} />}</Link><PublicContactChannels contextMessage={`Olá. Estou no website da Castro’s Services e gostaria de esclarecer uma questão sobre ${service.name}.`} contactHref={contact} /></div></aside>
       </div>
     </section>
   </div>

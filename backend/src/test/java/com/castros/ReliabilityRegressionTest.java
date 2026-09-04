@@ -13,12 +13,12 @@ import com.castros.catalog.CourseSessionRepository;
 import com.castros.catalog.ServiceRepository;
 import com.castros.catalog.SpaceRepository;
 import com.castros.customer.CustomerRepository;
+import com.castros.notification.NotificationPublisher;
 import com.castros.organization.OrganizationRepository;
 import com.castros.shared.config.AppProperties;
 import com.castros.shared.exception.ApiException;
 import org.junit.jupiter.api.Test;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -48,7 +48,8 @@ class ReliabilityRegressionTest {
         SpaceRepository spaces = mock(SpaceRepository.class);
         CourseSessionRepository sessions = mock(CourseSessionRepository.class);
         AvailabilityService availability = mock(AvailabilityService.class);
-        BookingApplicationService application = new BookingApplicationService(bookings, customers, organizations, services, spaces, sessions, availability);
+        NotificationPublisher notifications = mock(NotificationPublisher.class);
+        BookingApplicationService application = new BookingApplicationService(bookings, customers, organizations, services, spaces, sessions, availability, notifications);
 
         UUID org = UUID.randomUUID();
         UUID resource = UUID.randomUUID();
@@ -71,7 +72,8 @@ class ReliabilityRegressionTest {
         SpaceRepository spaces = mock(SpaceRepository.class);
         CourseSessionRepository sessions = mock(CourseSessionRepository.class);
         AvailabilityService availability = mock(AvailabilityService.class);
-        BookingApplicationService application = new BookingApplicationService(bookings, customers, organizations, services, spaces, sessions, availability);
+        NotificationPublisher notifications = mock(NotificationPublisher.class);
+        BookingApplicationService application = new BookingApplicationService(bookings, customers, organizations, services, spaces, sessions, availability, notifications);
 
         assertThrows(ApiException.class, () -> application.createForOrganization(UUID.randomUUID(), request(UUID.randomUUID(), LocalDate.now().plusDays(4), LocalTime.of(9, 0)), ZoneId.of("Africa/Maputo"), "x".repeat(256), "PUBLIC_BOOKING"));
         verify(availability, never()).assertAvailable(any(), any(), any(), any());
