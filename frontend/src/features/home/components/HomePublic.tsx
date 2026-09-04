@@ -46,6 +46,7 @@ export function HomePublic() {
   const servicesQuery = useServices()
   const coursesQuery = useCourses()
   const spacesQuery = useSpacesPreview()
+  const founderPortraitUrl = import.meta.env.VITE_ELIZABETH_PORTRAIT_URL?.trim()
 
   return <div className="home-v2">
     <section className="home-v2-hero">
@@ -99,6 +100,22 @@ export function HomePublic() {
         <div className="home-v2-practice__list">
           {practiceLines.map((line, index) => <div className="home-v2-practice__row" key={line}><span>0{index + 1}</span><strong>{line}</strong><ArrowUpRight size={18} aria-hidden="true" /></div>)}
         </div>
+      </div>
+    </section>
+
+    <section className="home-v2-founder container" aria-labelledby="founder-title">
+      <div className="home-v2-founder__portrait">
+        {founderPortraitUrl
+          ? <img src={founderPortraitUrl} alt="Elizabeth Castro, fundadora da Castro’s" />
+          : <div className="home-v2-founder__placeholder" role="img" aria-label="Área reservada para o retrato oficial de Elizabeth Castro"><strong>EC</strong><span>Retrato oficial em preparação</span></div>}
+        <div className="home-v2-founder__identity"><strong>Elizabeth Castro</strong><span>Fundadora · Consultora · Formadora</span></div>
+      </div>
+      <div className="home-v2-founder__copy">
+        <span className="eyebrow">FUNDADORA</span>
+        <h2 id="founder-title">Experiência que se transforma em impacto.</h2>
+        <p>Fundadora da Castro’s, consultora e formadora dedicada ao desenvolvimento de pessoas e organizações através da comunicação, liderança e desenvolvimento organizacional.</p>
+        <p className="home-v2-founder__note">Elizabeth dá rosto à confiança. A Castro’s transforma essa confiança numa estrutura de valor para pessoas e organizações.</p>
+        <Link className="home-v2-link" to="/sobre">Conhecer a Castro’s e a sua fundadora <ArrowRight size={16} /></Link>
       </div>
     </section>
 
