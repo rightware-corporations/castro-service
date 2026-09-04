@@ -28,12 +28,12 @@ export function CourseCollectionView({ resource }: { resource: { isLoading: bool
 
     <section className="courses-v2-catalog">
       <div className="container courses-v2-catalog__grid">
-        <div><span className="eyebrow">FORMAÇÃO PUBLICADA</span><h2>Escolha um ponto de partida.</h2><p>O catálogo abaixo é alimentado pelo backend. Datas e sessões só aparecem quando estiverem realmente publicadas.</p></div>
+        <div><span className="eyebrow">FORMAÇÃO PUBLICADA</span><h2>Escolha um ponto de partida.</h2><p>Todos os cursos publicados usam o mesmo sistema visual. O conteúdo muda; a experiência, os estados e os CTAs permanecem consistentes.</p></div>
         <div>
           {resource.isLoading && <LoadingState label="A carregar formação." />}
           {resource.isError && <ErrorState title="Não foi possível carregar a formação." />}
           {!resource.isLoading && !resource.isError && !resource.data?.items.length && <EmptyState title="Catálogo em preparação">A oferta será apresentada aqui quando as formações estiverem publicadas.</EmptyState>}
-          {resource.data?.items.length ? <div className="courses-v2-list">{resource.data.items.map((course, index) => <Link key={course.slug} to={`/formacao/${course.slug}`}><span>{String(index + 1).padStart(2, '0')}</span><div><small>FORMAÇÃO</small><strong>{course.name}</strong>{course.summary && <p>{course.summary}</p>}</div><ArrowUpRight size={20} /></Link>)}</div> : null}
+          {resource.data?.items.length ? <div className="course-system-grid">{resource.data.items.map((course, index) => <CourseCatalogCard key={course.slug} course={course} index={index} />)}</div> : null}
         </div>
       </div>
     </section>
@@ -42,6 +42,21 @@ export function CourseCollectionView({ resource }: { resource: { isLoading: bool
       <div className="container courses-v2-corporate__inner"><div><span className="eyebrow eyebrow--light">PARA ORGANIZAÇÕES</span><h2>Quando o contexto pede uma formação própria.</h2></div><div><p>O treinamento corporativo personalizado parte da realidade da organização, em vez de obrigar a realidade a caber num programa genérico.</p><Link className="ds-button courses-v2-corporate__button" to={corporateHref}>Formação para a minha organização <ArrowRight size={17} /></Link></div></div>
     </section>
   </div>
+}
+
+function CourseCatalogCard({ course, index }: { course: Course; index: number }) {
+  const detailHref = `/formacao/${encodeURIComponent(course.slug)}`
+  const infoHref = contactHref({ type: 'TRAINING_INFO', sourceType: 'TRAINING', entityId: course.id, cta: 'TRAINING_INFO', message: `Gostaria de receber informação sobre ${course.name}.` })
+  return <article className="course-system-card">
+    <div className="course-system-card__top"><span>FORMAÇÃO · {String(index + 1).padStart(2, '0')}</span>{course.featured && <strong>Em destaque</strong>}</div>
+    <div className="course-system-card__content"><h3><Link to={detailHref}>{course.name}</Link></h3><p>{course.summary || course.description || 'Detalhes desta formação serão apresentados na página do curso.'}</p></div>
+    <dl className="course-system-card__facts">
+      <div><dt>Modalidade</dt><dd>{course.modality ? humanize(course.modality) : 'A confirmar'}</dd></div>
+      <div><dt>Duração</dt><dd>{course.durationLabel || 'A confirmar'}</dd></div>
+      <div><dt>Investimento</dt><dd>{formatInvestment(course.investmentAmount, course.investmentCurrency)}</dd></div>
+    </dl>
+    <div className="course-system-card__actions"><Link className="ds-button ds-button--primary" to={detailHref}>Ver curso e inscrição <ArrowRight size={16} /></Link><Link className="text-link" to={infoHref}>Pedir informação</Link></div>
+  </article>
 }
 
 export function CourseDetail() { const { slug } = useParams(); const courseQuery = useCourse(slug); return <CourseDetailView courseResource={courseQuery} sessionsResource={useCourseSessions(courseQuery.data?.id)} /> }
@@ -71,6 +86,8 @@ export function CourseSessionsView({ resource, course }: { resource: { isLoading
   })}</div>
 }
 
+function humanize(value: string) { return value.replaceAll('_', ' ').toLocaleLowerCase('pt-PT').replace(/^./, (letter) => letter.toUpperCase()) }
+function formatInvestment(value?: number, currency?: string) { if (value == null) return 'Consultar'; const amount = new Intl.NumberFormat('pt-PT', { maximumFractionDigits: 0 }).format(value); return currency === 'MZN' || !currency ? `${amount} MT` : `${amount} ${currency}` }
 function formatSessionDateTime(value: string) {
   const date = new Date(value)
   return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat('pt-PT', { dateStyle: 'medium', timeStyle: 'short' }).format(date)
