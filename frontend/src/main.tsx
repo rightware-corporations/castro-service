@@ -16,6 +16,7 @@ import './styles/secretary-dashboard.css'
 import './styles/owner-executive.css'
 import './styles/platform-admin.css'
 import './styles/accessibility-foundation.css'
+import './styles/product-experience.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

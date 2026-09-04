@@ -12,14 +12,22 @@ const SessionReadyContext = createContext(false)
 const SessionErrorContext = createContext(false)
 const PermissionContextValue = createContext<PermissionContext | null>(null)
 
+// Local mock mode represents the day-to-day Secretary/Operations persona.
+// Platform access, tenant-user administration and RBAC management are intentionally excluded.
 const developmentPermissions: Permission[] = [
-  'dashboard.read', 'customer.read', 'customer.create', 'customer.update', 'customer.delete',
+  'dashboard.read',
+  'customer.read', 'customer.create', 'customer.update',
   'request.read', 'request.create', 'request.update', 'request.assign', 'request.close',
   'booking.read', 'booking.create', 'booking.update', 'booking.cancel',
-  'service.read', 'service.manage', 'course.read', 'course.manage', 'space.read', 'space.manage',
-  'availability.read', 'availability.manage', 'content.read', 'content.manage', 'user.read', 'user.manage',
-  'role.read', 'role.manage', 'permission.read', 'permission.manage', 'settings.read', 'settings.manage',
-  'task.read', 'task.manage', 'notification.read', 'report.read', 'audit.read',
+  'service.read', 'service.manage',
+  'course.read', 'course.manage',
+  'space.read', 'space.manage',
+  'availability.read', 'availability.manage',
+  'content.read', 'content.manage',
+  'settings.read', 'settings.manage',
+  'task.read', 'task.manage',
+  'notification.read',
+  'report.read',
 ]
 
 export function useApi(): ApiAdapter { const api = useContext(ApiContext); if (!api) throw new Error('useApi must be used inside AppProviders'); return api }

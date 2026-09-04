@@ -1,7 +1,9 @@
 import type { AuthSession } from '../../domain'
 import { HttpApiClient } from '../../api/client/HttpApiClient'
 
-const client = new HttpApiClient(import.meta.env.VITE_API_BASE_URL?.trim() ?? '')
+const baseUrl = import.meta.env.VITE_API_BASE_URL?.trim() ?? ''
+const client = new HttpApiClient(baseUrl)
+export const isPlatformMockMode = import.meta.env.DEV && !baseUrl
 
 export type PlatformAuthDto = {
   email: string
@@ -54,13 +56,53 @@ export function mapPlatformSession(dto: PlatformAuthDto): AuthSession {
   }
 }
 
+const mockAuth: PlatformAuthDto = {
+  email: 'superadmin@rightware.local',
+  authenticated: true,
+  firstName: 'RIGHTWARE',
+  lastName: 'Super Admin',
+  permissions: ['platform.admin'],
+}
+
+const mockOverview: PlatformOverviewDto = {
+  organizations: 1,
+  activeOrganizations: 1,
+  tenantUsers: 2,
+  activeTenantUsers: 2,
+  platformAdministrators: 1,
+  databaseStatus: 'DEV MOCK',
+  administratorEmail: mockAuth.email,
+  generatedAt: '2026-09-04T10:00:00+02:00',
+}
+
+const mockOrganizations: PlatformOrganizationDto[] = [{
+  id: '00000000-0000-0000-0000-000000000001',
+  name: 'Castro’s Services',
+  slug: 'castros-services',
+  active: true,
+  tenantUsers: 2,
+  activeTenantUsers: 2,
+  createdAt: '2026-08-01T09:00:00+02:00',
+}]
+
+const mockAudit: PlatformAuditDto[] = [{
+  id: '00000000-0000-0000-0000-000000000101',
+  action: 'LOCAL_PLATFORM_PREVIEW',
+  entityType: 'DEVELOPMENT',
+  details: 'Dados demonstrativos usados apenas para validar a experiência local do Super Admin.',
+  actorEmail: mockAuth.email,
+  createdAt: '2026-09-04T10:00:00+02:00',
+}]
+
 export const platformApi = {
-  login: (email: string, password: string) => client.requestOrThrow<PlatformAuthDto>('/api/v1/platform/auth/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
-  }),
-  getOverview: () => client.requestOrThrow<PlatformOverviewDto>('/api/v1/platform/overview'),
-  listOrganizations: () => client.requestOrThrow<PlatformOrganizationDto[]>('/api/v1/platform/organizations'),
-  listAudit: () => client.requestOrThrow<PlatformAuditDto[]>('/api/v1/platform/audit'),
+  login: (email: string, password: string) => isPlatformMockMode
+    ? Promise.resolve({ ...mockAuth, email: email || mockAuth.email })
+    : client.requestOrThrow<PlatformAuthDto>('/api/v1/platform/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    }),
+  getOverview: () => isPlatformMockMode ? Promise.resolve(mockOverview) : client.requestOrThrow<PlatformOverviewDto>('/api/v1/platform/overview'),
+  listOrganizations: () => isPlatformMockMode ? Promise.resolve(mockOrganizations) : client.requestOrThrow<PlatformOrganizationDto[]>('/api/v1/platform/organizations'),
+  listAudit: () => isPlatformMockMode ? Promise.resolve(mockAudit) : client.requestOrThrow<PlatformAuditDto[]>('/api/v1/platform/audit'),
 }

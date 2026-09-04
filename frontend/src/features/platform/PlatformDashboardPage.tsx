@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { ErrorState, LoadingState } from '../../design-system/patterns/feedback-overlays'
-import { platformApi } from './platformApi'
+import { isPlatformMockMode, platformApi } from './platformApi'
 
 const formatDate = (value: string) => new Intl.DateTimeFormat('pt-MZ', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
 
@@ -14,6 +14,7 @@ export function PlatformDashboardPage() {
 
   const data = overview.data
   return <main className="platform-main">
+    {isPlatformMockMode && <section className="platform-security-note"><span>MODO LOCAL</span><p>Esta pré-visualização usa dados demonstrativos. Autenticação, organizações e auditoria reais só são validadas com backend e PostgreSQL ligados.</p></section>}
     <section className="platform-hero">
       <div><span className="platform-kicker">PLATFORM OVERVIEW</span><h1>Control plane</h1><p>Visão administrativa da infraestrutura lógica e das organizações servidas pela plataforma.</p></div>
       <div className="platform-hero__status"><span>DATABASE</span><strong className={data.databaseStatus === 'UP' ? 'is-up' : ''}>{data.databaseStatus}</strong><small>Atualizado {formatDate(data.generatedAt)}</small></div>
