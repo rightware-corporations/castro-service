@@ -16,7 +16,6 @@ public record CourseItem(
     BigDecimal investmentAmount,
     String investmentCurrency,
     boolean certificateIncluded,
-    String contactPhone,
     List<String> learningOutcomes,
     boolean featured
 ) { }
