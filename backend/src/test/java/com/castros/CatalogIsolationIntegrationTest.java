@@ -73,7 +73,23 @@ class CatalogIsolationIntegrationTest {
             .andExpect(status().isNotFound());
         mvc.perform(put("/api/v1/operations/catalog/courses/{id}", courseB).with(as(actor, "course.manage")).with(csrf())
                 .contentType("application/json")
-                .content("{\"name\":\"Blocked\",\"slug\":\"blocked-course\",\"active\":true}"))
+                .content("""
+                    {
+                      "name":"Blocked",
+                      "slug":"blocked-course",
+                      "shortDescription":"Blocked tenant course",
+                      "description":"Cross-tenant mutation must remain hidden.",
+                      "modality":"PRESENCIAL",
+                      "durationLabel":"1 mês",
+                      "scheduleSummary":"Terças e quintas",
+                      "investmentAmount":1200.00,
+                      "investmentCurrency":"MZN",
+                      "certificateIncluded":true,
+                      "learningOutcomes":["Isolamento por organização"],
+                      "featured":false,
+                      "active":true
+                    }
+                    """))
             .andExpect(status().isNotFound());
         mvc.perform(put("/api/v1/operations/catalog/spaces/{id}", spaceB).with(as(actor, "space.manage")).with(csrf())
                 .contentType("application/json")
