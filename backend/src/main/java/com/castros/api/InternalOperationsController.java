@@ -6,6 +6,7 @@ import com.castros.booking.BookingRepository;
 import com.castros.booking.BookingStatus;
 import com.castros.customer.Customer;
 import com.castros.customer.CustomerRepository;
+import com.castros.notification.NotificationPublisher;
 import com.castros.request.RequestEntity;
 import com.castros.request.RequestRepository;
 import com.castros.request.RequestStatus;
@@ -36,15 +37,18 @@ public class InternalOperationsController {
     private final BookingApplicationService bookingApplicationService;
     private final AppProperties appProperties;
     private final JdbcTemplate jdbc;
+    private final NotificationPublisher notifications;
 
     public InternalOperationsController(RequestRepository requests, BookingRepository bookings, CustomerRepository customers,
-                                        BookingApplicationService bookingApplicationService, AppProperties appProperties, JdbcTemplate jdbc) {
+                                        BookingApplicationService bookingApplicationService, AppProperties appProperties,
+                                        JdbcTemplate jdbc, NotificationPublisher notifications) {
         this.requests = requests;
         this.bookings = bookings;
         this.customers = customers;
         this.bookingApplicationService = bookingApplicationService;
         this.appProperties = appProperties;
         this.jdbc = jdbc;
+        this.notifications = notifications;
     }
 
     @GetMapping("/summary")
@@ -158,6 +162,10 @@ public class InternalOperationsController {
         BookingStatus next = parseBookingStatus(input.status());
         if (!bookingTransitionAllowed(item.status, next)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Invalid booking status transition");
         item.status = next; item.updatedAt = OffsetDateTime.now(); item = bookings.save(item);
+        if (next == BookingStatus.CANCELLED) {
+            notifications.publishToOperations(organizationId, "BOOKING_CANCELLED", "Marcação cancelada",
+                item.reference + " foi cancelada.", "BOOKING", item.id);
+        }
         return toBooking(item, customers.findByOrganizationIdAndId(organizationId, item.customerId).orElse(null));
     }
 
