@@ -64,7 +64,7 @@ public class BookingApplicationService {
         validateResourceAndBusinessRules(organizationId, request, zone);
         OffsetDateTime start = ZonedDateTime.of(request.date(), request.startTime(), zone).toOffsetDateTime();
         OffsetDateTime end = ZonedDateTime.of(request.date(), request.endTime(), zone).toOffsetDateTime();
-        availability.assertAvailable(request.bookableType(), request.bookableId(), start, end);
+        availability.assertBookableSlot(request.bookableType(), request.bookableId(), start, end);
 
         Customer customer = findOrCreateCustomer(organizationId, request.customer(), customerSource);
         Booking booking = new Booking(organizationId, customer.id, request.bookableType(), request.bookableId(), start, end, reference());
