@@ -27,7 +27,7 @@ export function SecretaryCalendarPage() {
   const selectedBooking = bookings.data?.items.find((item) => item.id === selectedBookingId) ?? null
   const dayBookings = (bookings.data?.items ?? []).filter((item) => localDateKey(item.startAt, config.data?.businessTimezone) === selectedDate)
   const dayBlocks = (blocked.data?.items ?? []).filter((item) => localDateKey(item.startAt, config.data?.businessTimezone) === selectedDate)
-  const visibleDays = mode === 'month' ? monthGrid(anchor) : weekGrid(anchor)
+  const visibleDays = useMemo(() => mode === 'month' ? monthGrid(anchor) : weekGrid(anchor), [anchor, mode])
 
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: ['operations', 'calendar'] })
@@ -81,7 +81,7 @@ export function SecretaryCalendarPage() {
       </section>
 
       <aside className="secretary-calendar__side">
-        {selectedBooking ? <BookingPanel booking={selectedBooking} timezone={config.data?.businessTimezone} onChanged={refresh} /> : <BlockPeriodForm selectedDate={selectedDate} timezone={config.data?.businessTimezone ?? 'Africa/Maputo'} services={services.data?.items ?? []} spaces={spaces.data?.items ?? []} onCreated={refresh} />}
+        {selectedBooking ? <BookingPanel booking={selectedBooking} timezone={config.data?.businessTimezone} onChanged={refresh} /> : <BlockPeriodForm key={selectedDate} selectedDate={selectedDate} timezone={config.data?.businessTimezone ?? 'Africa/Maputo'} services={services.data?.items ?? []} spaces={spaces.data?.items ?? []} onCreated={refresh} />}
       </aside>
     </div>
   </section>
