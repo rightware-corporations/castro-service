@@ -69,7 +69,7 @@ class CourseRegistrationIntegrationTest {
             + "@example.test\",\"phone\":\"+258840000000\",\"participantCount\":3,\"organizationName\":\"Empresa X\",\"notes\":\"Equipa de liderança\"}";
 
         MvcResult first = mvc.perform(post("/api/v1/course-sessions/{sessionId}/registrations", sessionId)
-                .header("Idempotency-Key", key).contentType(MediaType.APPLICATION_JSON).content(body))
+                .with(csrf()).header("Idempotency-Key", key).contentType(MediaType.APPLICATION_JSON).content(body))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.status").value("PENDING"))
             .andExpect(jsonPath("$.courseSessionId").value(sessionId.toString()))
@@ -80,13 +80,13 @@ class CourseRegistrationIntegrationTest {
         assertTrue(firstJson.contains("TRN-"));
 
         mvc.perform(post("/api/v1/course-sessions/{sessionId}/registrations", sessionId)
-                .header("Idempotency-Key", key).contentType(MediaType.APPLICATION_JSON).content(body))
+                .with(csrf()).header("Idempotency-Key", key).contentType(MediaType.APPLICATION_JSON).content(body))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.participantCount").value(3));
 
         String changedBody = body.replace("\"participantCount\":3", "\"participantCount\":4");
         mvc.perform(post("/api/v1/course-sessions/{sessionId}/registrations", sessionId)
-                .header("Idempotency-Key", key).contentType(MediaType.APPLICATION_JSON).content(changedBody))
+                .with(csrf()).header("Idempotency-Key", key).contentType(MediaType.APPLICATION_JSON).content(changedBody))
             .andExpect(status().isConflict());
 
         assertEquals(1, count("course_registrations", organizationId));
@@ -130,7 +130,7 @@ class CourseRegistrationIntegrationTest {
             sessionId, courseId, startsAt, startsAt.plusHours(1));
 
         mvc.perform(post("/api/v1/course-sessions/{sessionId}/registrations", sessionId)
-                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf()).contentType(MediaType.APPLICATION_JSON)
                 .content("{\"firstName\":\"Ana\",\"email\":\"past@example.test\",\"participantCount\":1}"))
             .andExpect(status().isConflict());
 
