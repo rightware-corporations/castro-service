@@ -1,6 +1,5 @@
 package com.castros.api;
 
-import com.castros.platform.PlatformPrincipal;
 import com.castros.shared.config.AppProperties;
 import com.castros.shared.exception.ProblemDetailResponse;
 import com.castros.shared.security.DatabaseRateLimiter;
@@ -89,6 +88,7 @@ public class AuthController {
     @PostMapping("/logout")
     @ApiResponses({@ApiResponse(responseCode = "200", description = "Session ended"), @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ProblemDetailResponse.class)))})
     public AuthLogoutResponse logout(Authentication auth, HttpServletRequest request, HttpServletResponse response) {
+        tenantPrincipal(auth);
         new SecurityContextLogoutHandler().logout(request, response, auth);
         return new AuthLogoutResponse(true);
     }
@@ -99,16 +99,17 @@ public class AuthController {
 
     @GetMapping("/me")
     @SecurityRequirement(name = "sessionCookie")
-    @ApiResponses({@ApiResponse(responseCode = "200", description = "Current session"), @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ProblemDetailResponse.class)))})
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Current tenant session"), @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ProblemDetailResponse.class))), @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ProblemDetailResponse.class)))})
     public AuthMeResponse me(Authentication auth) {
-        Object principal = auth.getPrincipal();
-        if (principal instanceof PlatformPrincipal platform) {
-            return new AuthMeResponse(platform.email(), true, null, platform.firstName(), platform.lastName(), null, permissions(auth));
-        }
-        if (!(principal instanceof UserAccount user)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unsupported session principal");
-        }
+        UserAccount user = tenantPrincipal(auth);
         return new AuthMeResponse(user.email, true, user.organizationId, user.firstName, user.lastName, experience(user), permissions(auth));
+    }
+
+    private UserAccount tenantPrincipal(Authentication auth) {
+        if (auth == null || !(auth.getPrincipal() instanceof UserAccount user) || user.organizationId == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Tenant session required");
+        }
+        return user;
     }
 
     private String experience(UserAccount user) {

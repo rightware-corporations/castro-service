@@ -17,7 +17,10 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -92,6 +95,35 @@ public class PlatformAuthController {
         contextRepository.saveContext(context, request, response);
 
         return new AuthLoginResponse(account.email(), true, null, account.firstName(), account.lastName(), null, List.of("platform.admin"));
+    }
+
+    @GetMapping("/csrf")
+    public CsrfTokenResponse csrf(CsrfToken token) {
+        return new CsrfTokenResponse(token.getToken(), token.getHeaderName(), token.getParameterName());
+    }
+
+    @GetMapping("/me")
+    public AuthMeResponse me(Authentication authentication) {
+        PlatformPrincipal principal = principal(authentication);
+        return new AuthMeResponse(principal.email(), true, null, principal.firstName(), principal.lastName(), null, List.of("platform.admin"));
+    }
+
+    @PostMapping("/logout")
+    public AuthLogoutResponse logout(Authentication authentication, HttpServletRequest request, HttpServletResponse response) {
+        PlatformPrincipal principal = principal(authentication);
+        jdbc.update("""
+            insert into platform_audit_events(id,actor_platform_admin_id,action,entity_type,entity_id,details,created_at)
+            values (?,?,?,?,?,?,?)
+            """, UUID.randomUUID(), principal.id(), "PLATFORM_LOGOUT", "PLATFORM_ADMIN", principal.id(), "Platform session ended", OffsetDateTime.now());
+        new SecurityContextLogoutHandler().logout(request, response, authentication);
+        return new AuthLogoutResponse(true);
+    }
+
+    private PlatformPrincipal principal(Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof PlatformPrincipal principal)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Platform session required");
+        }
+        return principal;
     }
 
     public record LoginInput(@Email @NotBlank String email, @NotBlank String password) { }
