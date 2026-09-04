@@ -43,7 +43,6 @@ export const mapCourseDto = (dto: CourseDto): Course => {
   if (dto.investmentAmount != null) course.investmentAmount = dto.investmentAmount
   if (dto.investmentCurrency != null) course.investmentCurrency = dto.investmentCurrency
   if (dto.certificateIncluded != null) course.certificateIncluded = dto.certificateIncluded
-  if (dto.contactPhone != null) course.contactPhone = dto.contactPhone
   if (dto.learningOutcomes != null) course.learningOutcomes = dto.learningOutcomes
   if (dto.featured != null) course.featured = dto.featured
   return course
