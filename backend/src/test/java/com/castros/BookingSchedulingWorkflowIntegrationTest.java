@@ -86,7 +86,7 @@ class BookingSchedulingWorkflowIntegrationTest {
                 .content("{\"date\":\"" + date + "\",\"startTime\":\"11:00\",\"endTime\":\"12:00\"}"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(firstBookingId.toString()))
-            .andExpect(jsonPath("$.startAt").value(at(date, 11, 0).toString()));
+            .andExpect(jsonPath("$.startAt").value(date + "T11:00:00+02:00"));
 
         assertEquals(1, notificationCount(organizationId, "BOOKING_RESCHEDULED"));
 
