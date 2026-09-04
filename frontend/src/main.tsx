@@ -20,6 +20,7 @@ import './styles/accessibility-foundation.css'
 import './styles/product-experience.css'
 import './styles/founder-launch.css'
 import './styles/home-founder.css'
+import './styles/public-design-lock.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
