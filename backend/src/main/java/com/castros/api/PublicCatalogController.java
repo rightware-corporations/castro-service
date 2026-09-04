@@ -77,6 +77,6 @@ public class PublicCatalogController {
         return new CourseItem(
             course.id, course.name, course.slug, course.shortDescription, course.description,
             course.modality, course.durationLabel, course.scheduleSummary, course.investmentAmount,
-            course.investmentCurrency, course.certificateIncluded, course.contactPhone, outcomes, course.featured);
+            course.investmentCurrency, course.certificateIncluded, outcomes, course.featured);
     }
 }

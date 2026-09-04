@@ -32,7 +32,6 @@ export type Course = {
   investmentAmount?: number
   investmentCurrency?: string
   certificateIncluded?: boolean
-  contactPhone?: string
   learningOutcomes?: string[]
   featured?: boolean
 }

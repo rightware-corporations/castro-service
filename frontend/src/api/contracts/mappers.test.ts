@@ -31,7 +31,7 @@ describe('DTO to domain mappings', () => {
     })
   })
 
-  it('maps confirmed course marketing fields when the backend supplies them', () => {
+  it('maps confirmed course marketing fields while contact remains organization scoped', () => {
     expect(mapCourseDto({
       id: 'oratory-id',
       slug: 'oratoria-comunicacao-eficaz',
@@ -44,17 +44,21 @@ describe('DTO to domain mappings', () => {
       investmentAmount: 1200,
       investmentCurrency: 'MZN',
       certificateIncluded: true,
-      contactPhone: '878 665 180',
+      contactPhone: 'legacy-course-phone',
       learningOutcomes: ['Comunicação eficaz e assertiva'],
       featured: true,
-    })).toMatchObject({
+    })).toEqual({
+      id: 'oratory-id',
+      slug: 'oratoria-comunicacao-eficaz',
+      name: 'Oratória e Comunicação Eficaz',
       summary: 'Comunicação mais clara e confiante.',
+      description: 'Course description',
       modality: 'PRESENCIAL',
       durationLabel: '1 mês',
+      scheduleSummary: 'Terças e quintas, 17h–19h',
       investmentAmount: 1200,
       investmentCurrency: 'MZN',
       certificateIncluded: true,
-      contactPhone: '878 665 180',
       learningOutcomes: ['Comunicação eficaz e assertiva'],
       featured: true,
     })

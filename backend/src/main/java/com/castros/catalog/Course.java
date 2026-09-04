@@ -30,7 +30,6 @@ public class Course {
     @Column(nullable = false)
     public boolean certificateIncluded = false;
 
-    public String contactPhone;
     public String learningOutcomes;
 
     @Column(nullable = false)

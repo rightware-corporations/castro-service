@@ -2,16 +2,20 @@ package com.castros.catalog;
 
 import com.castros.user.UserAccount;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -122,7 +126,16 @@ public class CourseAdminController {
         course.organizationId = organizationId;
         course.name = input.name().trim();
         course.slug = slug;
+        course.shortDescription = clean(input.shortDescription());
         course.description = clean(input.description());
+        course.modality = clean(input.modality());
+        course.durationLabel = clean(input.durationLabel());
+        course.scheduleSummary = clean(input.scheduleSummary());
+        course.investmentAmount = input.investmentAmount();
+        course.investmentCurrency = normalizeCurrency(input.investmentCurrency());
+        course.certificateIncluded = input.certificateIncluded();
+        course.learningOutcomes = joinOutcomes(input.learningOutcomes());
+        course.featured = input.featured();
         course.active = input.active();
     }
 
@@ -130,17 +143,61 @@ public class CourseAdminController {
         session.courseId = courseId;
         session.startAt = input.startAt();
         session.endAt = input.endAt();
+        session.label = clean(input.label());
         session.active = input.active();
     }
 
-    private CourseResponse toResponse(Course course) { return new CourseResponse(course.id, course.name, course.slug, course.description, course.active); }
-    private SessionResponse toSession(CourseSession session) { return new SessionResponse(session.id, session.courseId, session.startAt, session.endAt, session.active); }
+    private CourseResponse toResponse(Course course) {
+        return new CourseResponse(
+            course.id,
+            course.name,
+            course.slug,
+            course.shortDescription,
+            course.description,
+            course.modality,
+            course.durationLabel,
+            course.scheduleSummary,
+            course.investmentAmount,
+            course.investmentCurrency,
+            course.certificateIncluded,
+            splitOutcomes(course.learningOutcomes),
+            course.featured,
+            course.active
+        );
+    }
+
+    private SessionResponse toSession(CourseSession session) {
+        return new SessionResponse(session.id, session.courseId, session.startAt, session.endAt, session.label, session.active);
+    }
 
     private static void validateSessionWindow(OffsetDateTime startAt, OffsetDateTime endAt) {
         if (!startAt.isBefore(endAt)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Session start must be before end");
     }
-    private static String clean(String value) { if (value == null) return null; String cleaned = value.trim(); return cleaned.isBlank() ? null : cleaned; }
+
+    private static String clean(String value) {
+        if (value == null) return null;
+        String cleaned = value.trim();
+        return cleaned.isBlank() ? null : cleaned;
+    }
+
     private static String normalizeSlug(String value) { return value.trim().toLowerCase(Locale.ROOT); }
+
+    private static String normalizeCurrency(String value) {
+        String cleaned = clean(value);
+        return cleaned == null ? null : cleaned.toUpperCase(Locale.ROOT);
+    }
+
+    private static String joinOutcomes(List<String> values) {
+        if (values == null) return null;
+        String joined = values.stream().map(CourseAdminController::clean).filter(value -> value != null).reduce((a, b) -> a + "\n" + b).orElse(null);
+        return clean(joined);
+    }
+
+    private static List<String> splitOutcomes(String value) {
+        if (value == null || value.isBlank()) return List.of();
+        return Arrays.stream(value.split("\\R")).map(String::trim).filter(item -> !item.isBlank()).toList();
+    }
+
     private static UUID organizationId(Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof UserAccount user) || user.organizationId == null) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Organization context unavailable");
@@ -151,12 +208,42 @@ public class CourseAdminController {
     public record CourseInput(
         @NotBlank String name,
         @NotBlank @Pattern(regexp = "[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*") String slug,
+        String shortDescription,
         String description,
+        @Size(max = 40) String modality,
+        @Size(max = 80) String durationLabel,
+        String scheduleSummary,
+        @DecimalMin("0.0") BigDecimal investmentAmount,
+        @Size(max = 10) String investmentCurrency,
+        boolean certificateIncluded,
+        List<@Size(max = 500) String> learningOutcomes,
+        boolean featured,
         boolean active
     ) {}
 
-    public record CourseResponse(UUID id, String name, String slug, String description, boolean active) {}
+    public record CourseResponse(
+        UUID id,
+        String name,
+        String slug,
+        String shortDescription,
+        String description,
+        String modality,
+        String durationLabel,
+        String scheduleSummary,
+        BigDecimal investmentAmount,
+        String investmentCurrency,
+        boolean certificateIncluded,
+        List<String> learningOutcomes,
+        boolean featured,
+        boolean active
+    ) {}
 
-    public record SessionInput(@NotNull OffsetDateTime startAt, @NotNull OffsetDateTime endAt, boolean active) {}
-    public record SessionResponse(UUID id, UUID courseId, OffsetDateTime startAt, OffsetDateTime endAt, boolean active) {}
+    public record SessionInput(
+        @NotNull OffsetDateTime startAt,
+        @NotNull OffsetDateTime endAt,
+        @Size(max = 160) String label,
+        boolean active
+    ) {}
+
+    public record SessionResponse(UUID id, UUID courseId, OffsetDateTime startAt, OffsetDateTime endAt, String label, boolean active) {}
 }
