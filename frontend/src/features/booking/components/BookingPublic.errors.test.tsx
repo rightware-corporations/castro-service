@@ -18,6 +18,7 @@ vi.mock('../../../app/providers/AppProviders', () => ({
     bookings: { create: apiMocks.createBooking, getByReference: apiMocks.getBooking },
   }),
 }))
+vi.mock('../../contact/PublicContactChannels', () => ({ PublicContactChannels: () => <div>contact-channels</div> }))
 
 function renderBooking(initialEntry: string) {
   const queryClient = new QueryClient({
@@ -107,7 +108,7 @@ describe('public booking error states', () => {
     expect(screen.queryByText('Database timeout')).not.toBeInTheDocument()
   })
 
-  it('renders the no-slots state when availability succeeds with an empty result', async () => {
+  it('renders the no-slots recovery state when availability succeeds with an empty result', async () => {
     sessionStorage.setItem('castros-booking:SERVICE:service-1', JSON.stringify({
       date: '2026-09-15',
       durationMinutes: 60,
@@ -117,7 +118,9 @@ describe('public booking error states', () => {
     renderBooking('/reservar/SERVICE/service-1/horario')
 
     expect(await screen.findByText('Sem horários disponíveis')).toBeInTheDocument()
-    expect(screen.getByText('Não existem horários disponíveis para esta combinação de data e duração.')).toBeInTheDocument()
+    expect(screen.getByText('Não existem horários livres nesta data para a duração selecionada.')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Pedir outro horário' })).toBeInTheDocument()
+    expect(await screen.findByText('Não encontrámos disponibilidade nos próximos 30 dias.')).toBeInTheDocument()
   })
 
   it.each(submissionErrorCases)('maps $code booking submission failures to the intended public message', async ({ code, expected }) => {
