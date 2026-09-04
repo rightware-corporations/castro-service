@@ -19,6 +19,7 @@ import java.time.OffsetDateTime;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -104,7 +105,7 @@ class CrmLifecycleIntegrationTest {
             .andExpect(status().isConflict());
 
         String lifecycle = jdbc.queryForObject("select lifecycle_stage from customers where id=?", String.class, customerId);
-        org.assertj.core.api.Assertions.assertThat(lifecycle).isEqualTo("CUSTOMER");
+        assertThat(lifecycle).isEqualTo("CUSTOMER");
     }
 
     private UUID seedOrganization(String prefix) {
