@@ -10,6 +10,9 @@ public class Organization {
     @Column(nullable=false, unique=true) public String name;
     @Column(nullable=false, unique=true) public String slug;
     @Column(name="business_timezone") public String businessTimezone;
+    public String contactPhone;
+    public String whatsappNumber;
+    public String contactEmail;
     @Column(nullable=false) public boolean active = true;
     @Column(nullable=false) public OffsetDateTime createdAt = OffsetDateTime.now();
     protected Organization() { }

@@ -5,14 +5,15 @@ import com.castros.organization.OrganizationRepository;
 import com.castros.shared.config.AppProperties;
 import com.castros.user.UserAccount;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
 
 import java.time.DateTimeException;
 import java.time.ZoneId;
@@ -32,8 +33,7 @@ public class InternalSettingsController {
     @GetMapping("/general")
     @PreAuthorize("hasAuthority('settings.read')")
     public GeneralSettingsResponse getGeneral(Authentication authentication) {
-        Organization organization = organization(authentication);
-        return response(organization);
+        return response(organization(authentication));
     }
 
     @PutMapping("/general")
@@ -46,6 +46,9 @@ public class InternalSettingsController {
         catch (DateTimeException ex) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid business timezone"); }
         organization.name = input.organizationName().trim();
         organization.businessTimezone = timezone;
+        organization.contactPhone = clean(input.contactPhone());
+        organization.whatsappNumber = clean(input.whatsappNumber());
+        organization.contactEmail = clean(input.contactEmail());
         return response(organizations.save(organization));
     }
 
@@ -53,7 +56,12 @@ public class InternalSettingsController {
         String timezone = organization.businessTimezone == null || organization.businessTimezone.isBlank()
             ? properties.getBusinessTimezone()
             : organization.businessTimezone;
-        return new GeneralSettingsResponse(organization.id, organization.name, organization.slug, timezone);
+        return new GeneralSettingsResponse(organization.id, organization.name, organization.slug, timezone,
+            organization.contactPhone, organization.whatsappNumber, organization.contactEmail);
+    }
+
+    private String clean(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 
     private Organization organization(Authentication authentication) {
@@ -63,6 +71,12 @@ public class InternalSettingsController {
         return organizations.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization not found"));
     }
 
-    public record GeneralSettingsResponse(UUID organizationId, String organizationName, String organizationSlug, String businessTimezone) { }
-    public record GeneralSettingsInput(@NotBlank @Size(max=160) String organizationName, @NotBlank @Size(max=80) String businessTimezone) { }
+    public record GeneralSettingsResponse(UUID organizationId, String organizationName, String organizationSlug,
+                                          String businessTimezone, String contactPhone, String whatsappNumber,
+                                          String contactEmail) { }
+    public record GeneralSettingsInput(@NotBlank @Size(max=160) String organizationName,
+                                       @NotBlank @Size(max=80) String businessTimezone,
+                                       @Size(max=50) String contactPhone,
+                                       @Size(max=50) String whatsappNumber,
+                                       @Email @Size(max=320) String contactEmail) { }
 }

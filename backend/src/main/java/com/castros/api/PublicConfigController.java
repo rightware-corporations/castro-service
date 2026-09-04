@@ -1,5 +1,6 @@
 package com.castros.api;
 
+import com.castros.organization.Organization;
 import com.castros.organization.OrganizationRepository;
 import com.castros.shared.config.AppProperties;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,10 +20,13 @@ public class PublicConfigController {
 
     @GetMapping
     public PublicConfigResponse config() {
-        String timezone = organizations.findFirstByActiveTrueOrderByCreatedAtAsc()
-            .map(organization -> organization.businessTimezone)
-            .filter(value -> value != null && !value.isBlank())
-            .orElse(properties.getBusinessTimezone());
-        return new PublicConfigResponse(timezone);
+        Organization organization = organizations.findFirstByActiveTrueOrderByCreatedAtAsc().orElse(null);
+        String timezone = organization != null && organization.businessTimezone != null && !organization.businessTimezone.isBlank()
+            ? organization.businessTimezone
+            : properties.getBusinessTimezone();
+        return new PublicConfigResponse(timezone,
+            organization == null ? null : organization.contactPhone,
+            organization == null ? null : organization.whatsappNumber,
+            organization == null ? null : organization.contactEmail);
     }
 }
