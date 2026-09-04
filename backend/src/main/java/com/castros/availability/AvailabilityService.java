@@ -8,6 +8,7 @@ import com.castros.shared.config.AppProperties;
 import com.castros.shared.exception.ApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
 import java.time.*;
 import java.util.*;
 
@@ -24,6 +25,10 @@ public class AvailabilityService {
     }
 
     public AvailabilityResult slots(BookableType type, UUID id, LocalDate date, int durationMinutes) {
+        return slots(type, id, date, durationMinutes, null);
+    }
+
+    private AvailabilityResult slots(BookableType type, UUID id, LocalDate date, int durationMinutes, UUID excludeBookingId) {
         if (durationMinutes <= 0) throw new ApiException("BOOKING_INVALID_TIME", "Duration must be positive.", HttpStatus.BAD_REQUEST);
         ZoneId zone = ZoneId.of(properties.getBusinessTimezone());
         List<AvailabilityRule> configured = rules.findByBookableTypeAndBookableIdAndDayOfWeekAndActiveTrue(type, id, date.getDayOfWeek());
@@ -51,7 +56,8 @@ public class AvailabilityService {
         OffsetDateTime now = OffsetDateTime.now();
         LocalDate today = now.atZoneSameInstant(zone).toLocalDate();
         if (date.isBefore(today) || date.isAfter(today.plusDays(maxAdvance))) return new AvailabilityResult(date, zone.getId(), List.of());
-        List<Booking> existing = bookings.findOverlaps(type, id, activeStatuses(), dayStart.minusMinutes(after), dayEnd.plusMinutes(before));
+        List<Booking> existing = new ArrayList<>(bookings.findOverlaps(type, id, activeStatuses(), dayStart.minusMinutes(after), dayEnd.plusMinutes(before)));
+        if (excludeBookingId != null) existing.removeIf(booking -> excludeBookingId.equals(booking.id));
         List<BlockedPeriod> blocks = blocked.findByBookableTypeAndBookableIdAndStartAtLessThanAndEndAtGreaterThan(type, id, dayEnd, dayStart);
         List<AvailabilitySlot> result = new ArrayList<>();
         for (OffsetDateTime start = dayStart; !start.plusMinutes(durationMinutes).isAfter(dayEnd); start = start.plusMinutes(interval)) {
@@ -65,6 +71,33 @@ public class AvailabilityService {
             result.add(new AvailabilitySlot(start.atZoneSameInstant(zone).toLocalTime().toString(), end.atZoneSameInstant(zone).toLocalTime().toString(), status));
         }
         return new AvailabilityResult(date, zone.getId(), result);
+    }
+
+    public void assertBookableSlot(BookableType type, UUID id, OffsetDateTime start, OffsetDateTime end) {
+        assertBookableSlot(type, id, start, end, null);
+    }
+
+    public void assertBookableSlot(BookableType type, UUID id, OffsetDateTime start, OffsetDateTime end, UUID excludeBookingId) {
+        if (!start.isBefore(end)) throw new ApiException("BOOKING_INVALID_TIME", "Start time must be before end time.", HttpStatus.BAD_REQUEST);
+        ZoneId zone = ZoneId.of(properties.getBusinessTimezone());
+        ZonedDateTime localStart = start.atZoneSameInstant(zone);
+        ZonedDateTime localEnd = end.atZoneSameInstant(zone);
+        if (!localStart.toLocalDate().equals(localEnd.toLocalDate())) {
+            throw new ApiException("BOOKING_INVALID_TIME", "A booking must start and end on the same business day.", HttpStatus.BAD_REQUEST);
+        }
+        long duration = Duration.between(start, end).toMinutes();
+        if (duration <= 0 || duration > Integer.MAX_VALUE) {
+            throw new ApiException("BOOKING_INVALID_TIME", "Invalid booking duration.", HttpStatus.BAD_REQUEST);
+        }
+        AvailabilityResult result = slots(type, id, localStart.toLocalDate(), (int) duration, excludeBookingId);
+        LocalTime requestedStart = localStart.toLocalTime().withSecond(0).withNano(0);
+        LocalTime requestedEnd = localEnd.toLocalTime().withSecond(0).withNano(0);
+        boolean allowed = result.slots().stream().anyMatch(slot ->
+            slot.status().equals("AVAILABLE") && LocalTime.parse(slot.start()).withSecond(0).withNano(0).equals(requestedStart)
+                && LocalTime.parse(slot.end()).withSecond(0).withNano(0).equals(requestedEnd));
+        if (!allowed) {
+            throw new ApiException("BOOKING_SLOT_UNAVAILABLE", "The selected interval is not an available scheduling slot.", HttpStatus.CONFLICT);
+        }
     }
 
     public void assertAvailable(BookableType type, UUID id, OffsetDateTime start, OffsetDateTime end) {
