@@ -41,7 +41,7 @@ export function HomeLaunchPublic() {
 
     {featuredCourse && <section className="launch-featured-course">
       <div className="container launch-featured-course__grid">
-        <div className="launch-featured-course__intro"><span className="eyebrow eyebrow--light">CURSO EM DESTAQUE</span><h2>{featuredCourse.name}</h2><p>{featuredCourse.summary || 'Formação publicada pela Castro’s com inscrição gerida pelo sistema de formação.'}</p><Link className="ds-button launch-featured-course__button" to={`/formacao/${featuredCourse.slug}`}>Ver curso e inscrição <ArrowRight size={17}/></Link></div>
+        <div className="launch-featured-course__intro"><span className="eyebrow eyebrow--light">CURSO EM DESTAQUE</span><h2>{featuredCourse.name}</h2><p>{featuredCourse.summary || 'Formação para desenvolver competências com aplicação prática e acompanhamento da Castro’s.'}</p><Link className="ds-button launch-featured-course__button" to={`/formacao/${featuredCourse.slug}`}>Ver curso e inscrição <ArrowRight size={17}/></Link></div>
         <div className="launch-featured-course__facts">
           <Fact icon={<Mic2 size={18}/>} label="Modalidade" value={featuredCourse.modality ? humanize(featuredCourse.modality) : 'A confirmar'} />
           <Fact icon={<BookOpenText size={18}/>} label="Duração" value={featuredCourse.durationLabel || 'A confirmar'} />
