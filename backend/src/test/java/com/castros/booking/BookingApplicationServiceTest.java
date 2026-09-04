@@ -5,6 +5,7 @@ import com.castros.catalog.CourseSessionRepository;
 import com.castros.catalog.ServiceRepository;
 import com.castros.catalog.SpaceRepository;
 import com.castros.customer.CustomerRepository;
+import com.castros.notification.NotificationPublisher;
 import com.castros.organization.OrganizationRepository;
 import com.castros.shared.exception.ApiException;
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,8 @@ class BookingApplicationServiceTest {
         SpaceRepository spaces = mock(SpaceRepository.class);
         CourseSessionRepository sessions = mock(CourseSessionRepository.class);
         AvailabilityService availability = mock(AvailabilityService.class);
-        BookingApplicationService application = new BookingApplicationService(bookings, customers, organizations, services, spaces, sessions, availability);
+        NotificationPublisher notifications = mock(NotificationPublisher.class);
+        BookingApplicationService application = new BookingApplicationService(bookings, customers, organizations, services, spaces, sessions, availability, notifications);
 
         UUID organizationId = UUID.randomUUID();
         UUID foreignServiceId = UUID.randomUUID();
