@@ -2,7 +2,7 @@ import type { AuthSession } from '../../domain'
 import { HttpApiClient } from '../../api/client/HttpApiClient'
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL?.trim() ?? ''
-const client = new HttpApiClient(baseUrl)
+const client = new HttpApiClient(baseUrl, fetch, '/api/v1/platform/auth/csrf')
 export const isPlatformMockMode = import.meta.env.DEV && !baseUrl
 
 export type PlatformAuthDto = {
@@ -49,6 +49,7 @@ export type PlatformAuditDto = {
 export function mapPlatformSession(dto: PlatformAuthDto): AuthSession {
   return {
     authenticated: dto.authenticated,
+    identityKind: 'PLATFORM',
     subject: dto.email,
     username: dto.email,
     displayName: [dto.firstName, dto.lastName].filter(Boolean).join(' ') || dto.email,
@@ -102,6 +103,8 @@ export const platformApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     }),
+  getSession: () => isPlatformMockMode ? Promise.resolve(mockAuth) : client.requestOrThrow<PlatformAuthDto>('/api/v1/platform/auth/me'),
+  logout: () => isPlatformMockMode ? Promise.resolve() : client.requestOrThrow<void>('/api/v1/platform/auth/logout', { method: 'POST' }),
   getOverview: () => isPlatformMockMode ? Promise.resolve(mockOverview) : client.requestOrThrow<PlatformOverviewDto>('/api/v1/platform/overview'),
   listOrganizations: () => isPlatformMockMode ? Promise.resolve(mockOrganizations) : client.requestOrThrow<PlatformOrganizationDto[]>('/api/v1/platform/organizations'),
   listAudit: () => isPlatformMockMode ? Promise.resolve(mockAudit) : client.requestOrThrow<PlatformAuditDto[]>('/api/v1/platform/audit'),

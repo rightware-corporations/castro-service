@@ -1,10 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
-import { useSession, useSessionReady } from '../../app/providers/AppProviders'
 import { mapPlatformSession, platformApi } from './platformApi'
+import { platformSessionQueryKey, usePlatformSession } from './platformSession'
 
 const schema = z.object({
   email: z.string().email('Indique um email válido.'),
@@ -14,19 +14,17 @@ const schema = z.object({
 type Values = z.infer<typeof schema>
 
 export function PlatformLoginPage() {
-  const session = useSession()
-  const ready = useSessionReady()
+  const { session, ready } = usePlatformSession()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm<Values>({ resolver: zodResolver(schema), mode: 'onBlur' })
 
-  if (ready && session?.authenticated && session.permissions?.includes('platform.admin')) return <Navigate to="/platform" replace />
+  if (ready && session?.authenticated && session.identityKind === 'PLATFORM') return <Navigate to="/platform" replace />
 
   const submit = async (values: Values) => {
     try {
       const dto = await platformApi.login(values.email, values.password)
-      const mapped = mapPlatformSession(dto)
-      queryClient.setQueryData(['auth', 'me'], mapped)
+      queryClient.setQueryData(platformSessionQueryKey, mapPlatformSession(dto))
       navigate('/platform', { replace: true })
     } catch {
       setError('root', { message: 'Não foi possível iniciar a sessão de plataforma. Verifique as credenciais.' })
@@ -53,7 +51,7 @@ export function PlatformLoginPage() {
           {errors.root && <div className="platform-login__error" role="alert">{errors.root.message}</div>}
           <button type="submit" disabled={isSubmitting}>{isSubmitting ? 'A autenticar…' : 'Entrar no Platform Control'}</button>
         </form>
-        <Link to="/">Voltar ao website da Castro’s</Link>
+        <a href={import.meta.env.VITE_PUBLIC_SITE_URL?.trim() || '/'}>Abrir website da Castro’s</a>
       </div>
     </section>
   </main>

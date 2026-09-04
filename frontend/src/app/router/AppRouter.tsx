@@ -20,7 +20,6 @@ import { SpaceExperienceSettingsPage } from '../../features/spaces/SpaceExperien
 import { SpaceScenesSettingsPage } from '../../features/spaces/SpaceScenesSettingsPage'
 import { SpaceHotspotsSettingsPage } from '../../features/spaces/SpaceHotspotsSettingsPage'
 import { ManualBookingPage } from '../../features/operations/ManualBookingPage'
-import { AccessSettingsPage } from '../../features/admin/AccessSettingsPage'
 import { GeneralSettingsPage } from '../../features/admin/GeneralSettingsPage'
 import { ContentSettingsPage } from '../../features/admin/ContentSettingsPage'
 import { TasksPage } from '../../features/operations/TasksPage'
@@ -32,6 +31,7 @@ import { OwnerActivityPage, OwnerAgendaPage, OwnerCustomersPage } from '../../fe
 import { PlatformDashboardPage } from '../../features/platform/PlatformDashboardPage'
 import { PlatformLayout } from '../../features/platform/PlatformLayout'
 import { PlatformLoginPage } from '../../features/platform/PlatformLoginPage'
+import { usePlatformSession } from '../../features/platform/platformSession'
 import { ComponentLab } from '../../pages/dev/ComponentLab'
 import { HomePublic } from '../../features/home/components/HomePublic'
 import { ServicesCatalog, ServiceDetail } from '../../features/services/components/ServicesPublic'
@@ -41,6 +41,7 @@ import { SpaceConfigurator, SpaceDetail, SpaceExplorer, SpacesCatalog } from '..
 import { BookingConfirmation, BookingCustomer, BookingDate, BookingReview, BookingTime } from '../../features/booking/components/BookingPublic'
 import { DeferredPublicPage } from '../../pages/public/DeferredPublicPage'
 import { ErrorState, LoadingState } from '../../design-system/patterns/feedback-overlays'
+import { appSurface, surfaceAllowsPlatform, surfaceAllowsPublic, surfaceAllowsStaff, surfaceFallbackPath } from './surface'
 
 const permissionRoutes: ReadonlyArray<readonly [string, Permission]> = [
   ['/app/pedidos/:id', 'request.read'],
@@ -49,15 +50,12 @@ const permissionRoutes: ReadonlyArray<readonly [string, Permission]> = [
   ['/app/espacos', 'space.read'], ['/app/servicos', 'service.read'], ['/app/formacao', 'course.read'],
 ]
 
-const isPlatformSession = (permissions?: string[]) => permissions?.includes('platform.admin') === true
-
 function OperationsGuard() {
   const api = useApi(); const session = useSession(); const ready = useSessionReady(); const sessionError = useSessionError(); const location = useLocation()
   if (api.kind === 'mock' && import.meta.env.DEV) return <OperationsLayout />
   if (!ready) return <main className="operations-auth-loading"><LoadingState label="A validar sessão." /></main>
   if (sessionError) return <main className="operations-auth-loading"><ErrorState title="Não foi possível validar a sessão." /></main>
   if (!session?.authenticated) return <Navigate to="/login" state={{ from: `${location.pathname}${location.search}` }} replace />
-  if (isPlatformSession(session.permissions)) return <Navigate to="/platform" replace />
   if (session.experienceType === 'OWNER') return <Navigate to="/owner" replace />
   return <OperationsLayout />
 }
@@ -68,18 +66,16 @@ function OwnerGuard() {
   if (!ready) return <main className="operations-auth-loading"><LoadingState label="A validar sessão." /></main>
   if (sessionError) return <main className="operations-auth-loading"><ErrorState title="Não foi possível validar a sessão." /></main>
   if (!session?.authenticated) return <Navigate to="/login" state={{ from: `${location.pathname}${location.search}` }} replace />
-  if (isPlatformSession(session.permissions)) return <Navigate to="/platform" replace />
   if (session.experienceType !== 'OWNER') return <Navigate to="/app/dashboard" replace />
   return <OwnerLayout />
 }
 
 function PlatformGuard() {
-  const api = useApi(); const session = useSession(); const ready = useSessionReady(); const sessionError = useSessionError(); const location = useLocation()
-  if (api.kind === 'mock' && import.meta.env.DEV) return <PlatformLayout />
+  const { session, ready, error } = usePlatformSession()
+  const location = useLocation()
   if (!ready) return <main className="operations-auth-loading"><LoadingState label="A validar sessão de plataforma." /></main>
-  if (sessionError) return <main className="operations-auth-loading"><ErrorState title="Não foi possível validar a sessão de plataforma." /></main>
-  if (!session?.authenticated) return <Navigate to="/platform/login" state={{ from: `${location.pathname}${location.search}` }} replace />
-  if (!isPlatformSession(session.permissions)) return <Navigate to={session.experienceType === 'OWNER' ? '/owner' : '/app/dashboard'} replace />
+  if (error) return <main className="operations-auth-loading"><ErrorState title="Não foi possível validar a sessão de plataforma." /></main>
+  if (!session?.authenticated || session.identityKind !== 'PLATFORM') return <Navigate to="/platform/login" state={{ from: `${location.pathname}${location.search}` }} replace />
   return <PlatformLayout />
 }
 
@@ -93,7 +89,7 @@ const guarded = (permission: Permission, element: ReactNode) => <RequirePermissi
 
 export function AppRouter() {
   return <Routes>
-    <Route element={<PublicLayout />}>
+    {surfaceAllowsPublic && <Route element={<PublicLayout />}>
       <Route path="/" element={<HomePublic />} />
       <Route path="/servicos" element={<ServicesCatalog />} />
       <Route path="/servicos/:slug" element={<ServiceDetail />} />
@@ -114,24 +110,28 @@ export function AppRouter() {
       <Route path="/reservar/confirmacao/:reference" element={<BookingConfirmation />} />
       {import.meta.env.DEV && <Route path="/__dev/components" element={<ComponentLab />} />}
       <Route path="*" element={<NotFound />} />
-    </Route>
-    <Route element={<AuthLayout />}>
+    </Route>}
+
+    {surfaceAllowsStaff && <Route element={<AuthLayout />}>
       <Route path="/login" element={<AuthPage kind="login" />} />
       <Route path="/forgot-password" element={<AuthPage kind="forgot" />} />
       <Route path="/reset-password" element={<AuthPage kind="reset" />} />
-    </Route>
-    <Route path="/platform/login" element={<PlatformLoginPage />} />
-    <Route element={<PlatformGuard />}>
+    </Route>}
+
+    {surfaceAllowsPlatform && <Route path="/platform/login" element={<PlatformLoginPage />} />}
+    {surfaceAllowsPlatform && <Route element={<PlatformGuard />}>
       <Route path="/platform" element={<PlatformDashboardPage />} />
-    </Route>
-    <Route element={<OwnerGuard />}>
+    </Route>}
+
+    {surfaceAllowsStaff && <Route element={<OwnerGuard />}>
       <Route path="/owner" element={guarded('dashboard.read', <OwnerDashboardPage />)} />
       <Route path="/owner/agenda" element={guarded('booking.read', <OwnerAgendaPage />)} />
       <Route path="/owner/atividade" element={guarded('dashboard.read', <OwnerActivityPage />)} />
       <Route path="/owner/clientes" element={guarded('customer.read', <OwnerCustomersPage />)} />
       <Route path="/owner/relatorios" element={guarded('report.read', <ReportsPage />)} />
-    </Route>
-    <Route element={<OperationsGuard />}>
+    </Route>}
+
+    {surfaceAllowsStaff && <Route element={<OperationsGuard />}>
       <Route path="/app/dashboard" element={guarded('dashboard.read', <SecretaryDashboardPage />)} />
       <Route path="/app/pedidos" element={guarded('request.read', <RequestsPagedPage />)} />
       <Route path="/app/reservas" element={guarded('booking.read', <BookingsPagedPage />)} />
@@ -150,13 +150,12 @@ export function AppRouter() {
       <Route path="/app/configuracoes/recursos" element={guarded('space.read', <SpaceExperienceSettingsPage />)} />
       <Route path="/app/configuracoes/cenas" element={guarded('space.read', <SpaceScenesSettingsPage />)} />
       <Route path="/app/configuracoes/hotspots" element={guarded('space.read', <SpaceHotspotsSettingsPage />)} />
-      <Route path="/app/configuracoes/utilizadores" element={guarded('user.read', <AccessSettingsPage />)} />
-      <Route path="/app/configuracoes/funcoes" element={guarded('role.read', <AccessSettingsPage />)} />
-      <Route path="/app/configuracoes/permissoes" element={guarded('permission.read', <AccessSettingsPage />)} />
       <Route path="/app/configuracoes/geral" element={guarded('settings.read', <GeneralSettingsPage />)} />
       <Route path="/app/configuracoes/conteudo" element={guarded('content.read', <ContentSettingsPage />)} />
       <Route path="/app/configuracoes/auditoria" element={guarded('audit.read', <AuditSettingsPage />)} />
       {permissionRoutes.map(([path, permission]) => <Route key={path} path={path} element={guarded(permission, <OperationsFoundationPage />)} />)}
-    </Route>
+    </Route>}
+
+    {!surfaceAllowsPublic && <Route path="*" element={<Navigate to={surfaceFallbackPath(appSurface)} replace />} />}
   </Routes>
 }
