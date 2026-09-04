@@ -133,7 +133,7 @@ class BookingSchedulingWorkflowIntegrationTest {
     }
 
     private void createPublicBooking(UUID serviceId, LocalDate date, String start, String end, String firstName, String email, String key) throws Exception {
-        mvc.perform(post("/api/v1/bookings").header("Idempotency-Key", key)
+        mvc.perform(post("/api/v1/bookings").header("Idempotency-Key", key).with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"bookableType\":\"SERVICE\",\"bookableId\":\"" + serviceId + "\",\"date\":\"" + date
                     + "\",\"startTime\":\"" + start + "\",\"endTime\":\"" + end
