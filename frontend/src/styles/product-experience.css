@@ -1,0 +1,6 @@
+/* Product-experience corrections layered after the existing visual system. */
+
+/* Route navigation scrolls normally; do not render a dedicated scroll prompt/control. */
+.home-v2-hero__scroll {
+  display: none;
+}
