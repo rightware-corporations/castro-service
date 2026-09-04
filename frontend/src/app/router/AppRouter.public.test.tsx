@@ -12,6 +12,7 @@ vi.mock('../../features/courses/components/CoursesPublic', () => ({
   CoursesCatalog: () => <div>route:courses</div>,
   CourseDetail: () => <div>route:course-detail</div>,
 }))
+vi.mock('../../features/courses/CourseRegistrationPage', () => ({ CourseRegistrationPage: () => <div>route:course-registration</div> }))
 vi.mock('../../features/contact/components/ContactPublic', () => ({ ContactPublic: () => <div>route:contact</div> }))
 vi.mock('../../features/spaces/components/SpacesPublic', () => ({
   SpacesCatalog: () => <div>route:spaces</div>,
@@ -40,6 +41,7 @@ describe('public router contract', () => {
     ['/servicos/lideranca', 'route:service-detail'],
     ['/formacao', 'route:courses'],
     ['/formacao/lideranca', 'route:course-detail'],
+    ['/formacao/lideranca/sessoes/session-1/inscricao', 'route:course-registration'],
     ['/espacos', 'route:spaces'],
     ['/espacos/sala-reuniao', 'route:space-detail'],
     ['/espacos/sala-reuniao/explorar', 'route:space-explorer'],
@@ -49,7 +51,7 @@ describe('public router contract', () => {
     ['/reservar', 'route:deferred'],
     ['/reservar/SERVICE/service-1/data', 'route:booking-date'],
     ['/reservar/SPACE/space-1/horario', 'route:booking-time'],
-    ['/reservar/COURSE_SESSION/session-1/dados', 'route:booking-customer'],
+    ['/reservar/SERVICE/service-1/dados', 'route:booking-customer'],
     ['/reservar/SERVICE/service-1/rever', 'route:booking-review'],
     ['/reservar/confirmacao/CASTRO-001', 'route:booking-confirmation'],
     ['/pagina-inexistente', 'route:not-found'],
