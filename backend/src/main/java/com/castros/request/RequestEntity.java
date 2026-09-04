@@ -41,7 +41,11 @@ public class RequestEntity {
     public String utmMedium;
     public String utmCampaign;
 
+    public UUID ownerUserId;
+    public OffsetDateTime followUpAt;
+    public OffsetDateTime lastContactAt;
     public OffsetDateTime createdAt = OffsetDateTime.now();
+    public OffsetDateTime updatedAt = OffsetDateTime.now();
 
     protected RequestEntity() {}
 

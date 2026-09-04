@@ -31,6 +31,35 @@ describe('DTO to domain mappings', () => {
     })
   })
 
+  it('maps confirmed course marketing fields when the backend supplies them', () => {
+    expect(mapCourseDto({
+      id: 'oratory-id',
+      slug: 'oratoria-comunicacao-eficaz',
+      name: 'Oratória e Comunicação Eficaz',
+      shortDescription: 'Comunicação mais clara e confiante.',
+      description: 'Course description',
+      modality: 'PRESENCIAL',
+      durationLabel: '1 mês',
+      scheduleSummary: 'Terças e quintas, 17h–19h',
+      investmentAmount: 1200,
+      investmentCurrency: 'MZN',
+      certificateIncluded: true,
+      contactPhone: '878 665 180',
+      learningOutcomes: ['Comunicação eficaz e assertiva'],
+      featured: true,
+    })).toMatchObject({
+      summary: 'Comunicação mais clara e confiante.',
+      modality: 'PRESENCIAL',
+      durationLabel: '1 mês',
+      investmentAmount: 1200,
+      investmentCurrency: 'MZN',
+      certificateIncluded: true,
+      contactPhone: '878 665 180',
+      learningOutcomes: ['Comunicação eficaz e assertiva'],
+      featured: true,
+    })
+  })
+
   it('maps backend availability status to the frontend domain vocabulary', () => {
     expect(mapAvailabilitySlotDto({ start: '09:00', end: '10:00', status: 'AVAILABLE' })).toEqual({ start: '09:00', end: '10:00', status: 'available' })
     expect(mapAvailabilitySlotDto({ start: '09:00', end: '10:00', status: 'BOOKED' }).status).toBe('booked')

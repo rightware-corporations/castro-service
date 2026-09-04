@@ -26,12 +26,22 @@ export type Course = {
   name: string
   summary?: string
   description?: string
+  modality?: string
+  durationLabel?: string
+  scheduleSummary?: string
+  investmentAmount?: number
+  investmentCurrency?: string
+  certificateIncluded?: boolean
+  contactPhone?: string
+  learningOutcomes?: string[]
+  featured?: boolean
 }
 
 export type CourseSession = {
   id: string
   startAt: string
   endAt: string
+  label?: string
 }
 
 export type Space = {

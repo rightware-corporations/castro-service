@@ -4,10 +4,10 @@ export type BookableType = BookingTarget
 export type BookingConfirmationMode = 'MANUAL' | 'AUTOMATIC'
 export type PublicConfigDto = { businessTimezone: string; contactPhone?: string | null; whatsappNumber?: string | null; contactEmail?: string | null }
 export type ServiceDto = { id: string; name: string; slug: string; description?: string | null; durationMinutes?: number | null; bookingEnabled?: boolean | null; confirmationMode?: BookingConfirmationMode | null }
-export type CourseDto = { id: string; name: string; slug: string; description?: string | null }
+export type CourseDto = { id: string; name: string; slug: string; shortDescription?: string | null; description?: string | null; modality?: string | null; durationLabel?: string | null; scheduleSummary?: string | null; investmentAmount?: number | null; investmentCurrency?: string | null; certificateIncluded?: boolean; contactPhone?: string | null; learningOutcomes?: string[]; featured?: boolean }
 export type CsrfTokenResponse = { token: string; headerName?: string; parameterName?: string }
 export type AuthSessionDto = { email: string; authenticated: boolean; organizationId?: string; firstName?: string; lastName?: string; experienceType?: OrganizationExperience; permissions?: string[] }
-export type CourseSessionDto = { id: string; startAt: string; endAt: string }
+export type CourseSessionDto = { id: string; startAt: string; endAt: string; label?: string | null }
 export type CourseSessionResponse = CourseSessionDto
 export type SpaceDto = { id: string; name: string; slug: string; description?: string | null; location?: string | null; capacityMin?: number | null; capacityMax?: number | null; bookingEnabled?: boolean | null; confirmationMode?: BookingConfirmationMode | null }
 export type AvailabilityQueryDto = { bookableType: BookableType; bookableId: string; date: string; durationMinutes: number }
@@ -27,6 +27,7 @@ export type RequestInput = { firstName: string; lastName: string; email: string;
 export type RequestRequestDto = RequestInput
 export type RequestResponseDto = { id: string; status: string }
 export type RequestOperationalStatus = 'NEW' | 'CONTACTED' | 'QUALIFIED' | 'WAITING_CUSTOMER' | 'CONVERTED' | 'CLOSED' | 'CANCELLED'
+export type CustomerLifecycleStage = 'LEAD' | 'QUALIFIED_LEAD' | 'CUSTOMER' | 'RETURNING_CUSTOMER'
 export type BookingOperationalStatus = 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW'
 export type TaskStatus = 'OPEN' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED'
 export type TaskPriority = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT'
@@ -39,9 +40,9 @@ export type ContentStatus = 'DRAFT' | 'PUBLISHED'
 export type AdminContentItemDto = { id: string; contentKey: string; title?: string | null; body?: string | null; mediaUrl?: string | null; status: ContentStatus; publishedAt?: string | null; createdAt: string; updatedAt: string }
 export type AdminContentInputDto = { contentKey: string; title?: string; body?: string; mediaUrl?: string; status: ContentStatus }
 export type OperationsSummaryDto = { requests: number; bookings: number; customers: number }
-export type OperationsRequestItemDto = { id: string; type: string; status: RequestOperationalStatus; message?: string | null; createdAt: string; customerId?: string | null; firstName?: string | null; lastName?: string | null; email?: string | null; phone?: string | null; sourceType?: RequestSourceType | null; sourceEntityId?: string | null; sourceEntitySlug?: string | null; sourceEntityName?: string | null; sourceCta?: string | null; sourcePath?: string | null; entryPath?: string | null; referrer?: string | null; utmSource?: string | null; utmMedium?: string | null; utmCampaign?: string | null }
+export type OperationsRequestItemDto = { id: string; type: string; status: RequestOperationalStatus; message?: string | null; createdAt: string; customerId?: string | null; firstName?: string | null; lastName?: string | null; email?: string | null; phone?: string | null; lifecycleStage?: CustomerLifecycleStage | null; sourceType?: RequestSourceType | null; sourceEntityId?: string | null; sourceEntitySlug?: string | null; sourceEntityName?: string | null; sourceCta?: string | null; sourcePath?: string | null; entryPath?: string | null; referrer?: string | null; utmSource?: string | null; utmMedium?: string | null; utmCampaign?: string | null; ownerUserId?: string | null; ownerName?: string | null; followUpAt?: string | null; lastContactAt?: string | null; updatedAt?: string | null }
 export type OperationsBookingItemDto = { id: string; reference: string; status: BookingOperationalStatus; bookableType: string; bookableId: string; startAt: string; endAt: string; participants?: number | null; purpose?: string | null; createdAt: string; customerId?: string | null; firstName?: string | null; lastName?: string | null; email?: string | null; phone?: string | null }
-export type OperationsCustomerItemDto = { id: string; firstName: string; lastName?: string | null; email?: string | null; phone?: string | null; company?: string | null; source?: string | null; createdAt: string; updatedAt: string }
+export type OperationsCustomerItemDto = { id: string; firstName: string; lastName?: string | null; email?: string | null; phone?: string | null; company?: string | null; source?: string | null; lifecycleStage?: CustomerLifecycleStage | null; createdAt: string; updatedAt: string }
 export type AvailabilityRuleDto = { id: string; bookableType: BookableType; bookableId: string; dayOfWeek: string; opensAt: string; closesAt: string; slotIntervalMinutes: number; bufferBeforeMinutes: number; bufferAfterMinutes: number; minimumNoticeMinutes: number; maximumAdvanceDays: number; active: boolean }
 export type AvailabilityRuleInputDto = Omit<AvailabilityRuleDto, 'id'>
 export type AvailabilityExceptionDto = { id: string; bookableType: BookableType; bookableId: string; date: string; closed: boolean; opensAt?: string | null; closesAt?: string | null }
@@ -98,8 +99,7 @@ export type ApiPort = {
     listAdminSpaces(): Promise<Collection<AdminSpaceDto>>; createAdminSpace(input: AdminSpaceInputDto): Promise<AdminSpaceDto>; updateAdminSpace(id: string, input: AdminSpaceInputDto): Promise<AdminSpaceDto>; deactivateAdminSpace(id: string): Promise<void>
     listAdminUsers(): Promise<Collection<AdminUserDto>>; createAdminUser(input: CreateAdminUserDto): Promise<AdminUserDto>; updateAdminUser(id: string, input: UpdateAdminUserDto): Promise<AdminUserDto>
     listAdminRoles(): Promise<Collection<AdminRoleDto>>; createAdminRole(input: AdminRoleInputDto): Promise<AdminRoleDto>; updateAdminRole(id: string, input: AdminRoleInputDto): Promise<AdminRoleDto>; deleteAdminRole(id: string): Promise<void>
-    listAdminPermissions(): Promise<Collection<AdminPermissionDto>
-    >
+    listAdminPermissions(): Promise<Collection<AdminPermissionDto>>
     getGeneralSettings(): Promise<GeneralSettingsDto>; updateGeneralSettings(input: GeneralSettingsInputDto): Promise<GeneralSettingsDto>
   }
 }

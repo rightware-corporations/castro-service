@@ -3,15 +3,15 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 import { AppRouter } from './AppRouter'
 
-vi.mock('../../features/home/components/HomePublic', () => ({ HomePublic: () => <div>route:home</div> }))
+vi.mock('../../features/home/components/HomeLaunchPublic', () => ({ HomeLaunchPublic: () => <div>route:home</div> }))
+vi.mock('../../features/home/components/AboutPublic', () => ({ AboutPublic: () => <div>route:about</div> }))
+vi.mock('../../features/home/components/InsightsPublic', () => ({ InsightsPublic: () => <div>route:insights</div> }))
 vi.mock('../../features/services/components/ServicesPublic', () => ({
   ServicesCatalog: () => <div>route:services</div>,
   ServiceDetail: () => <div>route:service-detail</div>,
 }))
-vi.mock('../../features/courses/components/CoursesPublic', () => ({
-  CoursesCatalog: () => <div>route:courses</div>,
-  CourseDetail: () => <div>route:course-detail</div>,
-}))
+vi.mock('../../features/courses/components/CoursesPublic', () => ({ CoursesCatalog: () => <div>route:courses</div> }))
+vi.mock('../../features/courses/CourseMarketingDetailPage', () => ({ CourseMarketingDetailPage: () => <div>route:course-detail</div> }))
 vi.mock('../../features/courses/CourseRegistrationPage', () => ({ CourseRegistrationPage: () => <div>route:course-registration</div> }))
 vi.mock('../../features/contact/components/ContactPublic', () => ({ ContactPublic: () => <div>route:contact</div> }))
 vi.mock('../../features/spaces/components/SpacesPublic', () => ({
@@ -37,6 +37,8 @@ function renderPath(path: string) {
 describe('public router contract', () => {
   it.each([
     ['/', 'route:home'],
+    ['/sobre', 'route:about'],
+    ['/insights', 'route:insights'],
     ['/servicos', 'route:services'],
     ['/servicos/lideranca', 'route:service-detail'],
     ['/formacao', 'route:courses'],

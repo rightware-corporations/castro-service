@@ -5,6 +5,7 @@ import { AppProviders } from './app/providers/AppProviders'
 import './styles/global.css'
 import './styles/public-v2.css'
 import './styles/public-pages-v2.css'
+import './styles/course-system.css'
 import './styles/spaces-v2.css'
 import './styles/booking-v2.css'
 import './styles/operations-v2.css'
@@ -17,6 +18,7 @@ import './styles/owner-executive.css'
 import './styles/platform-admin.css'
 import './styles/accessibility-foundation.css'
 import './styles/product-experience.css'
+import './styles/founder-launch.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

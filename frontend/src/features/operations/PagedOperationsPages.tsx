@@ -14,7 +14,7 @@ export function RequestsPagedPage() {
   const [q, setQ] = useState('')
   const [status, setStatus] = useState('')
   const query = useQuery({ queryKey: ['operations', 'requests', 'paged', page, q, status], queryFn: () => operationsQueryAdmin.listRequests({ page, size: PAGE_SIZE, q, status }) })
-  return <PagedShell eyebrow="RELAÇÃO COM CLIENTES" title="Pedidos" description="Pesquisa, filtros e paginação processados pelo servidor." icon={Inbox} q={q} onQ={(value) => { setQ(value); setPage(0) }} status={status} onStatus={(value) => { setStatus(value); setPage(0) }} statusOptions={requestStatuses} loading={query.isLoading} error={query.isError} total={query.data?.total ?? 0} page={page} setPage={setPage}>
+  return <PagedShell eyebrow="CRM · RELAÇÃO" title="Pedidos e leads" description="Origem, lifecycle, responsável e próximo follow-up numa única caixa de trabalho." icon={Inbox} q={q} onQ={(value) => { setQ(value); setPage(0) }} status={status} onStatus={(value) => { setStatus(value); setPage(0) }} statusOptions={requestStatuses} loading={query.isLoading} error={query.isError} total={query.data?.total ?? 0} page={page} setPage={setPage}>
     {(query.data?.items ?? []).map((item) => <RequestRow key={item.id} item={item} />)}
   </PagedShell>
 }
@@ -33,7 +33,7 @@ export function CustomersPagedPage() {
   const [page, setPage] = useState(0)
   const [q, setQ] = useState('')
   const query = useQuery({ queryKey: ['operations', 'customers', 'paged', page, q], queryFn: () => operationsQueryAdmin.listCustomers({ page, size: PAGE_SIZE, q }) })
-  return <PagedShell eyebrow="RELAÇÃO" title="Clientes" description="Pesquisa e paginação processadas pelo servidor." icon={UsersRound} q={q} onQ={(value) => { setQ(value); setPage(0) }} loading={query.isLoading} error={query.isError} total={query.data?.total ?? 0} page={page} setPage={setPage}>
+  return <PagedShell eyebrow="CRM · RELAÇÃO" title="Contactos e clientes" description="Relação consolidada desde o primeiro lead até ao cliente recorrente." icon={UsersRound} q={q} onQ={(value) => { setQ(value); setPage(0) }} loading={query.isLoading} error={query.isError} total={query.data?.total ?? 0} page={page} setPage={setPage}>
     {(query.data?.items ?? []).map((item) => <CustomerRow key={item.id} item={item} />)}
   </PagedShell>
 }
@@ -66,7 +66,13 @@ function PagedShell({ eyebrow, title, description, icon: Icon, q, onQ, status = 
 }
 
 function RequestRow({ item }: { item: OperationsRequestItemDto }) {
-  return <Link className="ops-workspace__row" to={`/app/pedidos/${item.id}`}><span><strong>{fullName(item)}</strong><small>{item.email || item.phone || 'Sem contacto'}</small></span><span>{humanize(item.type)}</span><span>{item.message || 'Sem mensagem'}</span><span>{humanize(item.status)}</span><span>{formatDate(item.createdAt)}</span></Link>
+  const followUp = item.followUpAt ? formatDate(item.followUpAt) : 'Sem follow-up'
+  return <Link className="ops-workspace__row crm-inbox-row" to={`/app/pedidos/${item.id}`}>
+    <span><strong>{fullName(item)}</strong><small>{lifecycleLabel(item.lifecycleStage)} · {item.email || item.phone || 'Sem contacto'}</small></span>
+    <span><strong>{item.sourceEntityName || humanize(item.type)}</strong><small>{item.sourceCta ? humanize(item.sourceCta) : item.sourceType ? humanize(item.sourceType) : 'Origem geral'}</small></span>
+    <span><strong>{followUp}</strong><small>{item.ownerName || 'Sem responsável'}</small></span>
+    <span>{humanize(item.status)}</span><span>{formatDate(item.createdAt)}</span>
+  </Link>
 }
 
 function BookingRow({ item }: { item: OperationsBookingItemDto }) {
@@ -74,11 +80,12 @@ function BookingRow({ item }: { item: OperationsBookingItemDto }) {
 }
 
 function CustomerRow({ item }: { item: OperationsCustomerItemDto }) {
-  return <Link className="ops-workspace__row" to={`/app/clientes/${item.id}`}><span><strong>{fullName(item)}</strong><small>{item.company || '—'}</small></span><span>{item.email || '—'}</span><span>{item.phone || '—'}</span><span>{item.source || '—'}</span><span>{formatDate(item.updatedAt)}</span></Link>
+  return <Link className="ops-workspace__row" to={`/app/clientes/${item.id}`}><span><strong>{fullName(item)}</strong><small>{lifecycleLabel(item.lifecycleStage)}</small></span><span>{item.email || '—'}</span><span>{item.phone || '—'}</span><span>{item.source || '—'}</span><span>{formatDate(item.updatedAt)}</span></Link>
 }
 
 const requestStatuses = [['NEW','Novo'],['CONTACTED','Contactado'],['QUALIFIED','Qualificado'],['WAITING_CUSTOMER','A aguardar cliente'],['CONVERTED','Convertido'],['CLOSED','Fechado'],['CANCELLED','Cancelado']] as const
 const bookingStatuses = [['PENDING','Pendente'],['CONFIRMED','Confirmada'],['COMPLETED','Concluída'],['CANCELLED','Cancelada'],['NO_SHOW','Não compareceu']] as const
 function fullName(item: { firstName?: string | null; lastName?: string | null }) { return [item.firstName, item.lastName].filter(Boolean).join(' ') || 'Sem nome' }
 function humanize(value: string) { return value.replaceAll('_', ' ').toLocaleLowerCase('pt-PT').replace(/^./, (letter) => letter.toUpperCase()) }
+function lifecycleLabel(value?: string | null) { return value ? humanize(value) : 'Lead' }
 function formatDate(value: string) { return new Intl.DateTimeFormat('pt-PT', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value)) }

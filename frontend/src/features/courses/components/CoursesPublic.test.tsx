@@ -3,16 +3,18 @@ import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { CourseCollectionView, CourseDetailView, CourseSessionsView } from './CoursesPublic'
 
-const course = { id: 'course-1', slug: 'course-1', name: '[CONTENT TBD]', summary: '[A confirmar]' }
+const course = { id: 'course-1', slug: 'course-1', name: '[CONTENT TBD]', summary: '[A confirmar]', contactPhone: '878 665 180' }
 const emptySessions = { isLoading: false, isError: false, data: { items: [] } }
 
 describe('public training', () => {
-  it('renders catalog loading and success states', () => {
+  it('renders catalog loading and success states through the reusable course card', () => {
     const { rerender } = render(<MemoryRouter><CourseCollectionView resource={{ isLoading: true, isError: false }} /></MemoryRouter>)
     expect(screen.getByRole('status')).toHaveTextContent('A carregar formação.')
     rerender(<MemoryRouter><CourseCollectionView resource={{ isLoading: false, isError: false, data: { items: [course] } }} /></MemoryRouter>)
     expect(screen.getByText('[CONTENT TBD]')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /CONTENT TBD/i })).toHaveAttribute('href', '/formacao/course-1')
+    expect(screen.getByRole('link', { name: '[CONTENT TBD]' })).toHaveAttribute('href', '/formacao/course-1')
+    expect(screen.getByRole('link', { name: /Ver curso e inscrição/i })).toHaveAttribute('href', '/formacao/course-1')
+    expect(screen.queryByText('878 665 180')).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Formação para a minha organização/i }).getAttribute('href')).toContain('CORPORATE_TRAINING')
   })
 

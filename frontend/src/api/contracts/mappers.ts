@@ -29,19 +29,31 @@ export const mapServiceDto = (dto: ServiceDto): Service => {
   }
 }
 
-export const mapCourseDto = (dto: CourseDto): Course => ({
-  id: dto.id,
-  slug: dto.slug,
-  name: dto.name,
-  summary: dto.description ?? undefined,
-  description: dto.description ?? undefined,
-})
+export const mapCourseDto = (dto: CourseDto): Course => {
+  const course: Course = {
+    id: dto.id,
+    slug: dto.slug,
+    name: dto.name,
+    summary: dto.shortDescription ?? dto.description ?? undefined,
+    description: dto.description ?? undefined,
+  }
+  if (dto.modality != null) course.modality = dto.modality
+  if (dto.durationLabel != null) course.durationLabel = dto.durationLabel
+  if (dto.scheduleSummary != null) course.scheduleSummary = dto.scheduleSummary
+  if (dto.investmentAmount != null) course.investmentAmount = dto.investmentAmount
+  if (dto.investmentCurrency != null) course.investmentCurrency = dto.investmentCurrency
+  if (dto.certificateIncluded != null) course.certificateIncluded = dto.certificateIncluded
+  if (dto.contactPhone != null) course.contactPhone = dto.contactPhone
+  if (dto.learningOutcomes != null) course.learningOutcomes = dto.learningOutcomes
+  if (dto.featured != null) course.featured = dto.featured
+  return course
+}
 
-export const mapCourseSessionDto = (dto: CourseSessionDto): CourseSession => ({
-  id: dto.id,
-  startAt: dto.startAt,
-  endAt: dto.endAt,
-})
+export const mapCourseSessionDto = (dto: CourseSessionDto): CourseSession => {
+  const session: CourseSession = { id: dto.id, startAt: dto.startAt, endAt: dto.endAt }
+  if (dto.label != null) session.label = dto.label
+  return session
+}
 
 export const mapSpaceDto = (dto: SpaceDto): Space => {
   const value = dto as ExtendedSpaceDto

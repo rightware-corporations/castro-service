@@ -6,6 +6,7 @@ import type { Permission } from '../../domain'
 import { AuthPage } from '../../pages/auth/AuthPages'
 import { NotFound } from '../../pages/NotFound'
 import { OperationsFoundationPage } from '../../features/operations/OperationsFoundationPage'
+import { RequestCrmDetailPage } from '../../features/operations/RequestCrmDetailPage'
 import { SecretaryDashboardPage } from '../../features/operations/SecretaryDashboardPage'
 import { SecretaryCalendarPage } from '../../features/operations/SecretaryCalendarPage'
 import { SecretarySettingsHomePage } from '../../features/operations/SecretarySettingsHomePage'
@@ -15,6 +16,7 @@ import { AuditSettingsPage } from '../../features/admin/AuditSettingsPage'
 import { ServiceSettingsPage } from '../../features/services/ServiceSettingsPage'
 import { CourseSettingsPage } from '../../features/courses/CourseSettingsPage'
 import { CourseRegistrationPage } from '../../features/courses/CourseRegistrationPage'
+import { CourseMarketingDetailPage } from '../../features/courses/CourseMarketingDetailPage'
 import { SpaceSettingsPage } from '../../features/spaces/SpaceSettingsPage'
 import { SpaceExperienceSettingsPage } from '../../features/spaces/SpaceExperienceSettingsPage'
 import { SpaceScenesSettingsPage } from '../../features/spaces/SpaceScenesSettingsPage'
@@ -33,9 +35,11 @@ import { PlatformLayout } from '../../features/platform/PlatformLayout'
 import { PlatformLoginPage } from '../../features/platform/PlatformLoginPage'
 import { usePlatformSession } from '../../features/platform/platformSession'
 import { ComponentLab } from '../../pages/dev/ComponentLab'
-import { HomePublic } from '../../features/home/components/HomePublic'
+import { HomeLaunchPublic } from '../../features/home/components/HomeLaunchPublic'
+import { AboutPublic } from '../../features/home/components/AboutPublic'
+import { InsightsPublic } from '../../features/home/components/InsightsPublic'
 import { ServicesCatalog, ServiceDetail } from '../../features/services/components/ServicesPublic'
-import { CoursesCatalog, CourseDetail } from '../../features/courses/components/CoursesPublic'
+import { CoursesCatalog } from '../../features/courses/components/CoursesPublic'
 import { ContactPublic } from '../../features/contact/components/ContactPublic'
 import { SpaceConfigurator, SpaceDetail, SpaceExplorer, SpacesCatalog } from '../../features/spaces/components/SpacesPublic'
 import { BookingConfirmation, BookingCustomer, BookingDate, BookingReview, BookingTime } from '../../features/booking/components/BookingPublic'
@@ -44,7 +48,6 @@ import { ErrorState, LoadingState } from '../../design-system/patterns/feedback-
 import { appSurface, surfaceAllowsPlatform, surfaceAllowsPublic, surfaceAllowsStaff, surfaceFallbackPath } from './surface'
 
 const permissionRoutes: ReadonlyArray<readonly [string, Permission]> = [
-  ['/app/pedidos/:id', 'request.read'],
   ['/app/reservas/:id', 'booking.read'],
   ['/app/clientes/:id', 'customer.read'],
   ['/app/espacos', 'space.read'], ['/app/servicos', 'service.read'], ['/app/formacao', 'course.read'],
@@ -90,11 +93,13 @@ const guarded = (permission: Permission, element: ReactNode) => <RequirePermissi
 export function AppRouter() {
   return <Routes>
     {surfaceAllowsPublic && <Route element={<PublicLayout />}>
-      <Route path="/" element={<HomePublic />} />
+      <Route path="/" element={<HomeLaunchPublic />} />
+      <Route path="/sobre" element={<AboutPublic />} />
+      <Route path="/insights" element={<InsightsPublic />} />
       <Route path="/servicos" element={<ServicesCatalog />} />
       <Route path="/servicos/:slug" element={<ServiceDetail />} />
       <Route path="/formacao" element={<CoursesCatalog />} />
-      <Route path="/formacao/:slug" element={<CourseDetail />} />
+      <Route path="/formacao/:slug" element={<CourseMarketingDetailPage />} />
       <Route path="/formacao/:slug/sessoes/:sessionId/inscricao" element={<CourseRegistrationPage />} />
       <Route path="/espacos" element={<SpacesCatalog />} />
       <Route path="/espacos/:slug" element={<SpaceDetail />} />
@@ -134,6 +139,7 @@ export function AppRouter() {
     {surfaceAllowsStaff && <Route element={<OperationsGuard />}>
       <Route path="/app/dashboard" element={guarded('dashboard.read', <SecretaryDashboardPage />)} />
       <Route path="/app/pedidos" element={guarded('request.read', <RequestsPagedPage />)} />
+      <Route path="/app/pedidos/:id" element={guarded('request.read', <RequestCrmDetailPage />)} />
       <Route path="/app/reservas" element={guarded('booking.read', <BookingsPagedPage />)} />
       <Route path="/app/clientes" element={guarded('customer.read', <CustomersPagedPage />)} />
       <Route path="/app/calendario" element={guarded('booking.read', <SecretaryCalendarPage />)} />
