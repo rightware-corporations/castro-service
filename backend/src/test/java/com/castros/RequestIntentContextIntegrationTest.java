@@ -39,7 +39,7 @@ class RequestIntentContextIntegrationTest {
         UUID org = UUID.randomUUID();
         UUID course = UUID.randomUUID();
         jdbc.update("insert into organizations(id,name,slug,active,created_at) values (?,?,?,true,?)", org, "Intent Org " + org, "intent-" + org, OffsetDateTime.now());
-        jdbc.update("insert into courses(id,organization_id,name,slug,description,active) values (?,?,?,?,?,true)", course, org, "Liderança Canónica", "lideranca-canonica", "Teste", true);
+        jdbc.update("insert into courses(id,organization_id,name,slug,description,active) values (?,?,?,?,?,true)", course, org, "Liderança Canónica", "lideranca-canonica", "Teste");
 
         RequestController.RequestContextInput context = new RequestController.RequestContextInput(
             RequestSourceType.TRAINING, course, "TRAINING_DATES", "/formacao/lideranca-canonica",
