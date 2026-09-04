@@ -7,6 +7,7 @@ import { AuthPage } from '../../pages/auth/AuthPages'
 import { NotFound } from '../../pages/NotFound'
 import { OperationsFoundationPage } from '../../features/operations/OperationsFoundationPage'
 import { SecretaryDashboardPage } from '../../features/operations/SecretaryDashboardPage'
+import { SecretarySettingsHomePage } from '../../features/operations/SecretarySettingsHomePage'
 import { BookingsPagedPage, CustomersPagedPage, RequestsPagedPage } from '../../features/operations/PagedOperationsPages'
 import { AvailabilitySettingsPage } from '../../features/admin/AvailabilitySettingsPage'
 import { AuditSettingsPage } from '../../features/admin/AuditSettingsPage'
@@ -45,7 +46,6 @@ const permissionRoutes: ReadonlyArray<readonly [string, Permission]> = [
   ['/app/clientes/:id', 'customer.read'],
   ['/app/calendario', 'booking.read'],
   ['/app/espacos', 'space.read'], ['/app/servicos', 'service.read'], ['/app/formacao', 'course.read'],
-  ['/app/configuracoes', 'settings.read'],
 ]
 
 const isPlatformSession = (permissions?: string[]) => permissions?.includes('platform.admin') === true
@@ -73,7 +73,8 @@ function OwnerGuard() {
 }
 
 function PlatformGuard() {
-  const session = useSession(); const ready = useSessionReady(); const sessionError = useSessionError(); const location = useLocation()
+  const api = useApi(); const session = useSession(); const ready = useSessionReady(); const sessionError = useSessionError(); const location = useLocation()
+  if (api.kind === 'mock' && import.meta.env.DEV) return <PlatformLayout />
   if (!ready) return <main className="operations-auth-loading"><LoadingState label="A validar sessão de plataforma." /></main>
   if (sessionError) return <main className="operations-auth-loading"><ErrorState title="Não foi possível validar a sessão de plataforma." /></main>
   if (!session?.authenticated) return <Navigate to="/platform/login" state={{ from: `${location.pathname}${location.search}` }} replace />
@@ -82,9 +83,7 @@ function PlatformGuard() {
 }
 
 function RequirePermission({ permission, children }: { permission: Permission; children: ReactNode }) {
-  const api = useApi()
   const can = useCan()
-  if (api.kind === 'mock' && import.meta.env.DEV) return <>{children}</>
   if (can(permission)) return <>{children}</>
   return <section className="ops-v2__page"><header className="ops-v2__hero"><div><span className="eyebrow">ACESSO</span><h1>Sem acesso</h1><p>A tua função não possui a permissão necessária para abrir esta área.</p></div></header><div className="catalog-admin__empty"><h3>Permissão necessária</h3><p><code>{permission}</code></p></div></section>
 }
@@ -139,6 +138,7 @@ export function AppRouter() {
       <Route path="/app/tarefas" element={guarded('task.read', <TasksPage />)} />
       <Route path="/app/notificacoes" element={guarded('notification.read', <NotificationsPage />)} />
       <Route path="/app/relatorios" element={guarded('report.read', <ReportsPage />)} />
+      <Route path="/app/configuracoes" element={guarded('settings.read', <SecretarySettingsHomePage />)} />
       <Route path="/app/configuracoes/disponibilidade" element={guarded('availability.read', <AvailabilitySettingsPage />)} />
       <Route path="/app/configuracoes/servicos" element={guarded('service.read', <ServiceSettingsPage />)} />
       <Route path="/app/configuracoes/formacao" element={guarded('course.read', <CourseSettingsPage />)} />
