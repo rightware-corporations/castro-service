@@ -44,6 +44,13 @@
   line-height: 1;
 }
 
+/* Keep the course detail inside the same public editorial typography system. */
+.launch-course-detail h1,
+.launch-course-detail h2 {
+  font-family: var(--font-editorial);
+  font-weight: 400;
+}
+
 .course-system-card__content h3 a {
   color: var(--color-deep-navy);
   text-decoration: none;
