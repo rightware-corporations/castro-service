@@ -7,6 +7,7 @@ import { AuthPage } from '../../pages/auth/AuthPages'
 import { NotFound } from '../../pages/NotFound'
 import { OperationsFoundationPage } from '../../features/operations/OperationsFoundationPage'
 import { SecretaryDashboardPage } from '../../features/operations/SecretaryDashboardPage'
+import { SecretaryCalendarPage } from '../../features/operations/SecretaryCalendarPage'
 import { SecretarySettingsHomePage } from '../../features/operations/SecretarySettingsHomePage'
 import { BookingsPagedPage, CustomersPagedPage, RequestsPagedPage } from '../../features/operations/PagedOperationsPages'
 import { AvailabilitySettingsPage } from '../../features/admin/AvailabilitySettingsPage'
@@ -44,7 +45,6 @@ const permissionRoutes: ReadonlyArray<readonly [string, Permission]> = [
   ['/app/pedidos/:id', 'request.read'],
   ['/app/reservas/:id', 'booking.read'],
   ['/app/clientes/:id', 'customer.read'],
-  ['/app/calendario', 'booking.read'],
   ['/app/espacos', 'space.read'], ['/app/servicos', 'service.read'], ['/app/formacao', 'course.read'],
 ]
 
@@ -134,6 +134,7 @@ export function AppRouter() {
       <Route path="/app/pedidos" element={guarded('request.read', <RequestsPagedPage />)} />
       <Route path="/app/reservas" element={guarded('booking.read', <BookingsPagedPage />)} />
       <Route path="/app/clientes" element={guarded('customer.read', <CustomersPagedPage />)} />
+      <Route path="/app/calendario" element={guarded('booking.read', <SecretaryCalendarPage />)} />
       <Route path="/app/reservas/nova" element={guarded('booking.create', <ManualBookingPage />)} />
       <Route path="/app/tarefas" element={guarded('task.read', <TasksPage />)} />
       <Route path="/app/notificacoes" element={guarded('notification.read', <NotificationsPage />)} />
