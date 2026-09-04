@@ -28,7 +28,7 @@ export function CourseCollectionView({ resource }: { resource: { isLoading: bool
 
     <section className="courses-v2-catalog">
       <div className="container courses-v2-catalog__grid">
-        <div><span className="eyebrow">FORMAÇÃO PUBLICADA</span><h2>Escolha um ponto de partida.</h2><p>Todos os cursos publicados usam o mesmo sistema visual. O conteúdo muda; a experiência, os estados e os CTAs permanecem consistentes.</p></div>
+        <div><span className="eyebrow">FORMAÇÃO PUBLICADA</span><h2>Escolha um ponto de partida.</h2><p>Consulte as formações disponíveis, os detalhes de cada curso, o investimento e o caminho para inscrição.</p></div>
         <div>
           {resource.isLoading && <LoadingState label="A carregar formação." />}
           {resource.isError && <ErrorState title="Não foi possível carregar a formação." />}
