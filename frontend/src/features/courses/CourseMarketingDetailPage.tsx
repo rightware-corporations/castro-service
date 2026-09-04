@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Award, CalendarDays, CheckCircle2, Clock3, Coins, MapPin, Phone, UsersRound } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Award, CalendarDays, CheckCircle2, Clock3, Coins, MapPin, UsersRound } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { useCourse, useCourseSessions } from './hooks'
 import { contactHref } from '../contact/intent'
@@ -31,11 +31,11 @@ export function CourseMarketingDetailPage() {
     </section>
 
     <section className="container launch-course-detail__body">
-      <article><span className="eyebrow">SOBRE O CURSO</span><h2>Comunicar melhor muda a forma como as ideias chegam às pessoas.</h2><p>{course.description || course.summary}</p>{course.scheduleSummary && <div className="launch-course-detail__schedule"><Clock3 size={19}/><div><span>HORÁRIOS</span><strong>{course.scheduleSummary}</strong></div></div>}</article>
+      <article><span className="eyebrow">SOBRE O CURSO</span><h2>Sobre esta formação.</h2><p>{course.description || course.summary}</p>{course.scheduleSummary && <div className="launch-course-detail__schedule"><Clock3 size={19}/><div><span>HORÁRIOS</span><strong>{course.scheduleSummary}</strong></div></div>}</article>
       <article><span className="eyebrow">O QUE IRÁ DESENVOLVER</span>{course.learningOutcomes?.length ? <ul className="launch-course-detail__outcomes">{course.learningOutcomes.map((outcome) => <li key={outcome}><CheckCircle2 size={17}/><span>{outcome}</span></li>)}</ul> : <EmptyState title="Programa em preparação">Os conteúdos detalhados serão publicados quando confirmados.</EmptyState>}</article>
     </section>
 
-    <section className="launch-course-detail__registration"><div className="container launch-course-detail__registration-grid"><div><span className="eyebrow eyebrow--light">INSCRIÇÕES</span><h2>{session?.label || 'Próxima edição'}</h2><p>{session ? `Início confirmado para ${formatDate(session.startAt)}. A inscrição é processada pelo sistema de formação da Castro’s e não ocupa um slot exclusivo de agenda.` : 'Não existe uma edição publicada neste momento. Pode pedir as próximas datas.'}</p></div><div>{session ? <><Link className="ds-button launch-course-detail__registration-button" to={`/formacao/${encodeURIComponent(course.slug)}/sessoes/${encodeURIComponent(session.id)}/inscricao`}><UsersRound size={17}/> Garantir a minha vaga</Link>{course.contactPhone && <a className="launch-course-detail__phone" href={`tel:${course.contactPhone.replace(/\s/g, '')}`}><Phone size={15}/> {course.contactPhone}</a>}</> : <Link className="ds-button launch-course-detail__registration-button" to={nextDatesHref}>Receber próximas datas</Link>}</div></div></section>
+    <section className="launch-course-detail__registration"><div className="container launch-course-detail__registration-grid"><div><span className="eyebrow eyebrow--light">INSCRIÇÕES</span><h2>{session?.label || 'Próxima edição'}</h2><p>{session ? `Início confirmado para ${formatDate(session.startAt)}. Preencha os seus dados para solicitar a inscrição nesta edição.` : 'Não existe uma edição publicada neste momento. Pode pedir as próximas datas.'}</p></div><div>{session ? <Link className="ds-button launch-course-detail__registration-button" to={`/formacao/${encodeURIComponent(course.slug)}/sessoes/${encodeURIComponent(session.id)}/inscricao`}><UsersRound size={17}/> Garantir a minha vaga</Link> : <Link className="ds-button launch-course-detail__registration-button" to={nextDatesHref}>Receber próximas datas</Link>}</div></div></section>
   </div>
 }
 
