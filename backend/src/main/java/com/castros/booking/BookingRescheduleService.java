@@ -3,8 +3,8 @@ package com.castros.booking;
 import com.castros.availability.AvailabilityService;
 import com.castros.catalog.ServiceEntity;
 import com.castros.catalog.ServiceRepository;
-import com.castros.catalog.Space;
 import com.castros.catalog.SpaceRepository;
+import com.castros.notification.NotificationPublisher;
 import com.castros.shared.config.AppProperties;
 import com.castros.shared.exception.ApiException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -22,14 +22,17 @@ public class BookingRescheduleService {
     private final SpaceRepository spaces;
     private final AvailabilityService availability;
     private final AppProperties properties;
+    private final NotificationPublisher notifications;
 
     public BookingRescheduleService(BookingRepository bookings, ServiceRepository services, SpaceRepository spaces,
-                                    AvailabilityService availability, AppProperties properties) {
+                                    AvailabilityService availability, AppProperties properties,
+                                    NotificationPublisher notifications) {
         this.bookings = bookings;
         this.services = services;
         this.spaces = spaces;
         this.availability = availability;
         this.properties = properties;
+        this.notifications = notifications;
     }
 
     public AvailabilityService.AvailabilityResult slots(UUID organizationId, UUID bookingId, LocalDate date) {
@@ -63,7 +66,10 @@ public class BookingRescheduleService {
         booking.endAt = end;
         booking.updatedAt = OffsetDateTime.now();
         try {
-            return bookings.saveAndFlush(booking);
+            Booking saved = bookings.saveAndFlush(booking);
+            notifications.publishToOperations(organizationId, "BOOKING_RESCHEDULED", "Marcação reagendada",
+                saved.reference + " foi movida para " + saved.startAt + ".", "BOOKING", saved.id);
+            return saved;
         } catch (DataIntegrityViolationException exception) {
             throw new ApiException("BOOKING_SLOT_UNAVAILABLE", "The selected time slot is no longer available.", HttpStatus.CONFLICT);
         }
