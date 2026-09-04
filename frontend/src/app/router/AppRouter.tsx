@@ -14,6 +14,7 @@ import { AvailabilitySettingsPage } from '../../features/admin/AvailabilitySetti
 import { AuditSettingsPage } from '../../features/admin/AuditSettingsPage'
 import { ServiceSettingsPage } from '../../features/services/ServiceSettingsPage'
 import { CourseSettingsPage } from '../../features/courses/CourseSettingsPage'
+import { CourseRegistrationPage } from '../../features/courses/CourseRegistrationPage'
 import { SpaceSettingsPage } from '../../features/spaces/SpaceSettingsPage'
 import { SpaceExperienceSettingsPage } from '../../features/spaces/SpaceExperienceSettingsPage'
 import { SpaceScenesSettingsPage } from '../../features/spaces/SpaceScenesSettingsPage'
@@ -98,6 +99,7 @@ export function AppRouter() {
       <Route path="/servicos/:slug" element={<ServiceDetail />} />
       <Route path="/formacao" element={<CoursesCatalog />} />
       <Route path="/formacao/:slug" element={<CourseDetail />} />
+      <Route path="/formacao/:slug/sessoes/:sessionId/inscricao" element={<CourseRegistrationPage />} />
       <Route path="/espacos" element={<SpacesCatalog />} />
       <Route path="/espacos/:slug" element={<SpaceDetail />} />
       <Route path="/espacos/:slug/explorar" element={<SpaceExplorer />} />
