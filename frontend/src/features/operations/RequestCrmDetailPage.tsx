@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, CalendarClock, CircleUserRound, ExternalLink, Target } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
@@ -10,17 +10,18 @@ import { crmOperationsApi } from './crmOperationsApi'
 export function RequestCrmDetailPage() {
   const { id } = useParams()
   const can = useCan()
-  const queryClient = useQueryClient()
   const requestQuery = useQuery({ queryKey: ['crm', 'request', id], queryFn: () => crmOperationsApi.getRequest(id!), enabled: Boolean(id) && can('request.read') })
-  const assigneesQuery = useQuery({ queryKey: ['crm', 'assignees'], queryFn: crmOperationsApi.listAssignees, enabled: can('request.assign') })
-  const [ownerUserId, setOwnerUserId] = useState('')
-  const [followUpAt, setFollowUpAt] = useState('')
+  if (requestQuery.isLoading) return <LoadingState label="A carregar contexto CRM." />
+  if (requestQuery.isError || !requestQuery.data || !id) return <ErrorState title="Não foi possível carregar este pedido." />
+  return <RequestCrmWorkspace key={`${requestQuery.data.id}-${requestQuery.data.updatedAt ?? requestQuery.data.status}`} id={id} request={requestQuery.data} />
+}
 
-  useEffect(() => {
-    if (!requestQuery.data) return
-    setOwnerUserId(requestQuery.data.ownerUserId ?? '')
-    setFollowUpAt(toLocalInput(requestQuery.data.followUpAt))
-  }, [requestQuery.data])
+function RequestCrmWorkspace({ id, request }: { id: string; request: OperationsRequestItemDto }) {
+  const can = useCan()
+  const queryClient = useQueryClient()
+  const assigneesQuery = useQuery({ queryKey: ['crm', 'assignees'], queryFn: crmOperationsApi.listAssignees, enabled: can('request.assign') })
+  const [ownerUserId, setOwnerUserId] = useState(request.ownerUserId ?? '')
+  const [followUpAt, setFollowUpAt] = useState(() => toLocalInput(request.followUpAt))
 
   const refresh = (data: OperationsRequestItemDto) => {
     queryClient.setQueryData(['crm', 'request', id], data)
@@ -29,24 +30,16 @@ export function RequestCrmDetailPage() {
     void queryClient.invalidateQueries({ queryKey: ['operations', 'summary'] })
   }
 
-  const statusMutation = useMutation({
-    mutationFn: (status: RequestOperationalStatus) => crmOperationsApi.updateStatus(id!, status),
-    onSuccess: refresh,
-  })
+  const statusMutation = useMutation({ mutationFn: (status: RequestOperationalStatus) => crmOperationsApi.updateStatus(id, status), onSuccess: refresh })
   const followUpMutation = useMutation({
-    mutationFn: () => crmOperationsApi.updateFollowUp(id!, {
+    mutationFn: () => crmOperationsApi.updateFollowUp(id, {
       ownerUserId: ownerUserId || null,
       followUpAt: followUpAt ? new Date(followUpAt).toISOString() : null,
     }),
     onSuccess: refresh,
   })
 
-  if (requestQuery.isLoading) return <LoadingState label="A carregar contexto CRM." />
-  if (requestQuery.isError || !requestQuery.data) return <ErrorState title="Não foi possível carregar este pedido." />
-  const request = requestQuery.data
   const nextStatuses = allowedStatuses(request.status)
-  const overdue = Boolean(request.followUpAt && new Date(request.followUpAt).getTime() < Date.now() && !['CLOSED', 'CANCELLED'].includes(request.status))
-
   return <section className="crm-detail">
     <Link className="crm-detail__back" to="/app/pedidos"><ArrowLeft size={16} /> Voltar aos pedidos</Link>
     <header className="crm-detail__hero">
@@ -85,7 +78,7 @@ export function RequestCrmDetailPage() {
       <aside className="crm-detail__aside">
         <section className="crm-panel crm-panel--action">
           <div className="crm-panel__heading"><CalendarClock size={19} /><div><span>FOLLOW-UP</span><h2>Próxima ação</h2></div></div>
-          {overdue && <p className="crm-detail__alert">Follow-up vencido — requer atenção.</p>}
+          {request.followUpAt && <p className="crm-detail__scheduled">Agendado: {formatDate(request.followUpAt)}</p>}
           <label><span>Responsável</span><select value={ownerUserId} onChange={(event) => setOwnerUserId(event.target.value)} disabled={!can('request.assign') || assigneesQuery.isLoading}><option value="">Sem responsável</option>{(assigneesQuery.data ?? []).map((person) => <option key={person.id} value={person.id}>{person.firstName} {person.lastName} · {person.experienceType === 'OWNER' ? 'CEO' : 'Operações'}</option>)}</select></label>
           <label><span>Data e hora</span><input type="datetime-local" value={followUpAt} onChange={(event) => setFollowUpAt(event.target.value)} disabled={!can('request.assign')} /></label>
           {can('request.assign') && <button className="ds-button ds-button--primary" type="button" onClick={() => followUpMutation.mutate()} disabled={followUpMutation.isPending}>{followUpMutation.isPending ? 'A guardar…' : 'Guardar follow-up'}</button>}

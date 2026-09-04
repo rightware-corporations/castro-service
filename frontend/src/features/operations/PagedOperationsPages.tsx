@@ -67,11 +67,10 @@ function PagedShell({ eyebrow, title, description, icon: Icon, q, onQ, status = 
 
 function RequestRow({ item }: { item: OperationsRequestItemDto }) {
   const followUp = item.followUpAt ? formatDate(item.followUpAt) : 'Sem follow-up'
-  const overdue = Boolean(item.followUpAt && new Date(item.followUpAt).getTime() < Date.now() && !['CLOSED','CANCELLED'].includes(item.status))
   return <Link className="ops-workspace__row crm-inbox-row" to={`/app/pedidos/${item.id}`}>
     <span><strong>{fullName(item)}</strong><small>{lifecycleLabel(item.lifecycleStage)} · {item.email || item.phone || 'Sem contacto'}</small></span>
     <span><strong>{item.sourceEntityName || humanize(item.type)}</strong><small>{item.sourceCta ? humanize(item.sourceCta) : item.sourceType ? humanize(item.sourceType) : 'Origem geral'}</small></span>
-    <span className={overdue ? 'crm-inbox-row__overdue' : ''}><strong>{followUp}</strong><small>{item.ownerName || 'Sem responsável'}</small></span>
+    <span><strong>{followUp}</strong><small>{item.ownerName || 'Sem responsável'}</small></span>
     <span>{humanize(item.status)}</span><span>{formatDate(item.createdAt)}</span>
   </Link>
 }
