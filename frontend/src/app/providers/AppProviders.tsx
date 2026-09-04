@@ -1,7 +1,7 @@
 import { createContext, useContext, useMemo, type PropsWithChildren } from 'react'
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
 import type { ApiAdapter } from '../../api/client/adapters'
-import { createApiAdapter } from '../../api/client/adapters'
+import { createPreviewAwareApiAdapter } from '../../api/client/previewAdapter'
 import { ApiError } from '../../api/client/errors'
 import type { AuthSession, Permission, PermissionContext } from '../../domain'
 import { createCan } from '../../domain/permissions'
@@ -65,6 +65,6 @@ function SessionProviders({ api, children }: PropsWithChildren<{ api: ApiAdapter
 
 export function AppProviders({ children }: PropsWithChildren) {
   const queryClient = useMemo(() => new QueryClient(), [])
-  const api = useMemo(() => createApiAdapter(), [])
+  const api = useMemo(() => createPreviewAwareApiAdapter(), [])
   return <QueryClientProvider client={queryClient}><ApiContext.Provider value={api}><SessionProviders api={api}>{children}</SessionProviders></ApiContext.Provider></QueryClientProvider>
 }

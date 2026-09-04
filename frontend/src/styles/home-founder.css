@@ -1,0 +1,110 @@
+.home-v2-founder {
+  display: grid;
+  grid-template-columns: minmax(18rem, 0.72fr) minmax(0, 1fr);
+  gap: clamp(2.5rem, 7vw, 7rem);
+  align-items: center;
+  padding-block: clamp(5rem, 10vw, 9rem);
+}
+
+.home-v2-founder__portrait {
+  border: 1px solid var(--color-border);
+  background: var(--color-white);
+}
+
+.home-v2-founder__portrait img,
+.home-v2-founder__placeholder {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+}
+
+.home-v2-founder__portrait img {
+  object-fit: cover;
+}
+
+.home-v2-founder__placeholder {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 1rem;
+  background: var(--color-deep-navy);
+  color: var(--color-teal);
+  text-align: center;
+}
+
+.home-v2-founder__placeholder strong {
+  font-family: var(--font-editorial);
+  font-size: clamp(4.5rem, 10vw, 8rem);
+  font-weight: 400;
+  line-height: 0.9;
+}
+
+.home-v2-founder__placeholder span {
+  color: rgb(255 255 255 / 72%);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.home-v2-founder__identity {
+  display: grid;
+  gap: 0.15rem;
+  padding: 1rem 1.2rem 1.15rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.home-v2-founder__identity strong {
+  color: var(--color-deep-navy);
+  font-size: var(--text-sm);
+}
+
+.home-v2-founder__identity span {
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+}
+
+.home-v2-founder__copy {
+  max-width: 42rem;
+}
+
+.home-v2-founder__copy h2 {
+  margin: 0.75rem 0 1.35rem;
+  color: var(--color-deep-navy);
+  font-family: var(--font-editorial);
+  font-size: clamp(3rem, 6vw, 5.8rem);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+}
+
+.home-v2-founder__copy > p {
+  max-width: 38rem;
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--text-lg);
+}
+
+.home-v2-founder__copy .home-v2-founder__note {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-charcoal);
+  font-size: var(--text-md);
+}
+
+.home-v2-founder__copy .home-v2-link {
+  margin-top: 1.75rem;
+}
+
+@media (max-width: 800px) {
+  .home-v2-founder {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    padding-block: 4.5rem;
+  }
+
+  .home-v2-founder__portrait {
+    width: min(100%, 28rem);
+  }
+}

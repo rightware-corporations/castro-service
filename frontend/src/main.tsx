@@ -19,6 +19,7 @@ import './styles/platform-admin.css'
 import './styles/accessibility-foundation.css'
 import './styles/product-experience.css'
 import './styles/founder-launch.css'
+import './styles/home-founder.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
