@@ -61,8 +61,8 @@ export const motionPresets = {
     desktop: { opacity: 1, x: 0, visibility: 'visible' as const, pointerEvents: 'auto' as const, transition: { duration: 0 } },
   },
   sectionReveal: {
-    initial: { opacity: 0, y: 8 },
+    initial: { opacity: 0, y: 10 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: motionDurations.slow, ease: motionEasings.standard },
+    transition: { duration: motionDurations.emphasis, ease: motionEasings.standard },
   },
 } as const
