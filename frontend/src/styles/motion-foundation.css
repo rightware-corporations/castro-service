@@ -14,6 +14,10 @@
 
 .ds-time-slot{will-change:auto}
 
+.booking-v2-steps-wrap{position:relative}
+.booking-v2-progress{position:absolute;z-index:1;top:0;right:0;left:0;height:2px;transform-origin:left center;background:var(--color-teal);pointer-events:none}
+.booking-v2-slots button{will-change:auto}
+
 @media(max-width:767px){
   .public-nav{display:flex}
   .operations-sidebar{transition:none}
@@ -21,5 +25,5 @@
 
 @media(prefers-reduced-motion:reduce){
   [data-motion-reduced='true']{transform:none!important}
-  .ds-tabs__indicator,.ds-stepper__selection{transition:none!important}
+  .ds-tabs__indicator,.ds-stepper__selection,.booking-v2-progress{transition:none!important}
 }
