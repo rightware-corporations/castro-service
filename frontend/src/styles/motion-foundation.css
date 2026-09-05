@@ -1,0 +1,25 @@
+/* Functional Motion Foundation — presentation only; product state remains owned by React/domain logic. */
+
+.ds-motion-overlay--sheet{place-items:end stretch;padding:0}
+.ds-bottom-sheet{display:block;transform:none;transition:none}
+
+.ds-tabs__tab{position:relative;border-bottom-color:transparent!important}
+.ds-tabs__indicator{position:absolute;right:.65rem;bottom:-1px;left:.65rem;height:2px;border-radius:999px;background:var(--color-teal);pointer-events:none}
+.ds-tabs__panel{padding-top:1rem}
+
+.ds-stepper li span{position:relative;overflow:hidden}
+.ds-stepper__selection{position:absolute;inset:-1px;border-radius:50%;background:var(--color-teal);pointer-events:none}
+.ds-stepper__value{position:relative;z-index:1}
+.ds-stepper li.is-current span{border-color:var(--color-teal);background:var(--color-white);color:var(--color-white)}
+
+.ds-time-slot{will-change:auto}
+
+@media(max-width:767px){
+  .public-nav{display:flex}
+  .operations-sidebar{transition:none}
+}
+
+@media(prefers-reduced-motion:reduce){
+  [data-motion-reduced='true']{transform:none!important}
+  .ds-tabs__indicator,.ds-stepper__selection{transition:none!important}
+}
