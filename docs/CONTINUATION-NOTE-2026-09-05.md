@@ -1,0 +1,1 @@
+The continuation baseline was reset on 2026-09-05 after PR #41. Future chats should use `docs/CASTROS-SERVICES-RECOVERY-HANDOFF-2026-09-05.md` for current execution state and `docs/CASTROS-SERVICES-MASTER-HANDOFF.md` for historical architecture context.
