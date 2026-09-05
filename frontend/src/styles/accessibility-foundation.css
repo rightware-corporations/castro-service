@@ -12,5 +12,11 @@
 }
 
 @media(prefers-reduced-motion:reduce){
-  .ds-skip-link{transition:none}
+  html{scroll-behavior:auto!important}
+  *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;transition-delay:0s!important;animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important}
+  .ds-skip-link{transition:none!important}
+  .home-v2-link svg,.home-v2-experience,.public-v2-shell .public-nav a::after{transition:none!important;transform:none!important}
+  .ds-spinner{animation:none!important}
+  .ds-skeleton{animation:none!important;background-position:0 0!important}
+  [data-motion-reduced='true']{opacity:1!important;transform:none!important}
 }
