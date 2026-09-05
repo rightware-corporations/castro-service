@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -76,14 +76,17 @@ describe('public layout navigation', () => {
 
     expect(toggle).toHaveAttribute('aria-expanded', 'false')
     expect(toggle).toHaveAttribute('aria-controls', 'public-primary-navigation')
-    const navigation = screen.getByRole('navigation', { name: 'Navegação principal', hidden: true })
-    expect(navigation).toHaveAttribute('id', 'public-primary-navigation')
+    const navigation = document.getElementById('public-primary-navigation')
+    expect(navigation).not.toBeNull()
     expect(navigation).toHaveAttribute('aria-hidden', 'true')
+    expect(navigation).toHaveAttribute('inert')
 
     await user.click(toggle)
     const closeToggle = screen.getByRole('button', { name: 'Fechar menu' })
     expect(closeToggle).toHaveAttribute('aria-expanded', 'true')
     expect(navigation).not.toHaveAttribute('aria-hidden')
+    expect(navigation).not.toHaveAttribute('inert')
+    await waitFor(() => expect(screen.getByRole('navigation', { name: 'Navegação principal' })).toBeInTheDocument())
 
     await user.keyboard('{Escape}')
     expect(screen.getByRole('button', { name: 'Abrir menu' })).toHaveAttribute('aria-expanded', 'false')
@@ -98,7 +101,7 @@ describe('public layout navigation', () => {
     expect(trigger).toHaveAttribute('aria-expanded', 'false')
     await user.click(trigger)
     expect(trigger).toHaveAttribute('aria-expanded', 'true')
-    expect(screen.getByRole('navigation', { name: 'Navegação de operações' })).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByRole('navigation', { name: 'Navegação de operações' })).toBeInTheDocument())
     expect(screen.getByRole('link', { name: /Dashboard/i })).toHaveAttribute('href', '/app/dashboard')
     await user.keyboard('{Escape}')
     expect(trigger).toHaveAttribute('aria-expanded', 'false')
