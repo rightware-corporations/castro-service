@@ -2,136 +2,177 @@
 
 Use the following prompt verbatim when starting the next Castro’s Services chat.
 
-> IMPORTANT: until PR #36 is merged, the master handoff is on branch `feature/public-intent-context`, not yet on `main`.
-
 ```text
 Vamos continuar o projeto CASTRO’S SERVICES diretamente no repositório oficial:
 
 https://github.com/rightware-corporations/castro-service
 
-PRIMEIRO, antes de qualquer alteração, leia integralmente o handoff canónico nesta branch:
+ANTES DE QUALQUER ALTERAÇÃO:
+1. Leia integralmente:
+   docs/CASTROS-SERVICES-RECOVERY-HANDOFF-2026-09-05.md
+2. Consulte também o handoff histórico/arquitetural:
+   docs/CASTROS-SERVICES-MASTER-HANDOFF.md
+3. Faça fetch live da main, PRs e CI. Não confie apenas em SHAs históricos.
 
-branch/ref: feature/public-intent-context
-file: docs/CASTROS-SERVICES-MASTER-HANDOFF.md
+O recovery handoff é a autoridade para o estado atual e contém também os erros que aconteceram no ciclo anterior e que NÃO devem ser repetidos.
 
-Não procure esse ficheiro apenas na main enquanto o PR #36 ainda não tiver sido merged. Use explicitamente o ref `feature/public-intent-context`.
+ESTADO VERIFICADO NO MOMENTO DO HANDOFF:
+- main: a8d43f10416ba34374c04fc7a162891f7b58638b
+- último merge: PR #41 — fix: enforce canonical public design system
+- último main CI verificado: Integration CI #270 / run 33917360933
+- Backend quality gates: GREEN
+- Frontend quality gates: GREEN
+- PostgreSQL integration gates: GREEN
 
-Esse handoff é a autoridade de continuidade do projeto. Não me peça para repetir o contexto já documentado nele.
+PRs #36, #37, #38, #39, #40 e #41 JÁ FORAM MERGED. NÃO reabra trabalho antigo por memória.
 
-ARQUITETURA DE UTILIZADORES — REGRA ABSOLUTA:
-Existem exatamente 4 experiências/personas:
+ERROS IMPORTANTES DO CICLO ANTERIOR — NÃO REPETIR:
+1. Foi introduzido visual drift no website público ao trocar a composição editorial aprovada por um novo founder hero.
+2. O design system ficou visualmente inconsistente; o utilizador identificou mudança de tipografia/ritmo.
+3. O curso real de Oratória existia no backend, mas não aparecia no local mock preview, criando a impressão de que nada tinha sido implementado.
+4. Houve demasiado tempo gasto em ciclos repetidos de CI/PostgreSQL sem comunicação concreta de progresso.
+5. As instruções locais misturaram frontend, backend e Docker apesar de o utilizador querer apenas ver a UI.
+6. O utilizador estava a visualizar a branch antiga `feature/training-system-completion` e não a main já reparada por PR #40/#41.
+
+REGRA IMEDIATA:
+A próxima revisão visual deve partir da CURRENT MAIN, não da branch antiga de training.
+
+Se o repositório local estiver limpo, os comandos esperados são:
+
+git status
+git fetch origin
+git switch main
+git pull --ff-only origin main
+git log -1 --oneline
+
+Se houver ficheiros locais modificados, NÃO sobrescrever. Inspecione antes.
+
+PARA PRIMEIRA REVISÃO VISUAL LOCAL:
+Não exigir Docker/backend/PostgreSQL.
+Use frontend mock mode:
+
+cd frontend
+$env:VITE_API_BASE_URL=""
+$env:VITE_APP_SURFACE="ALL"
+npm ci
+npm run dev
+
+Abrir:
+http://localhost:5173
+
+O frontend Vite usa 5173.
+8080 é apenas o backend Spring Boot quando HTTP mode for intencionalmente ativado.
+
+VERIFICAR PRIMEIRO, ANTES DE NOVO DESENVOLVIMENTO:
+1. Homepage atual na main.
+2. Tipografia/design system canónico.
+3. `/formacao` deve mostrar o curso `Oratória e Comunicação Eficaz` em mock preview.
+4. Abrir o card do curso.
+5. Abrir detalhe do curso.
+6. Clicar `Inscrever-me`.
+7. Percorrer o fluxo de registration.
+8. Confirmar founder hierarchy sem transformar Castro’s numa marca pessoal.
+9. Confirmar consistência visual em Serviços, Formação, Espaços e Contacto.
+10. Só depois criar uma lista objetiva do que ainda falta.
+
+DESIGN SYSTEM — REGRA ABSOLUTA:
+- Instrument Serif = headings/editorial moments.
+- Manrope = body/UI/navigation/forms.
+- CASTRO’S continua a master brand.
+- Elizabeth Castro = Fundadora · Consultora · Formadora / trust anchor.
+- Não redesenhar hero/páginas inteiras só para adicionar uma feature.
+- Não introduzir outro sistema tipográfico.
+- Evitar generic SaaS, card farms, glassmorphism gratuito, neon, gradientes arbitrários, AI-slop e métricas/testemunhos falsos.
+- Não inventar biografia, factos, fotografias, métricas, capacidades, preços ou horários não confirmados.
+
+FOTO DA ELIZABETH:
+- não usar screenshot do Instagram como imagem final;
+- não fabricar/sintetizar likeness;
+- usar placeholder editorial até existir original aprovado;
+- `VITE_ELIZABETH_PORTRAIT_URL` é o ponto de configuração.
+
+ARQUITETURA DE UTILIZADORES — EXATAMENTE 4 EXPERIÊNCIAS:
 1. Cliente — público, sem login interno.
-2. Secretária / Operations — utilizadora diária, experiência /app.
-3. CEO / Owner — Elizabeth, experiência executiva /owner; não é operadora diária.
-4. RIGHTWARE Super Admin — identidade de plataforma separada; futuro RIGHTWARE Control Plane.
+2. Secretária / Operations — operação diária, `/app`.
+3. CEO / Owner — Elizabeth, experiência executiva `/owner`, não CRUD diário.
+4. RIGHTWARE Super Admin — identidade de plataforma separada / Control Plane.
 
-NÃO EXISTE PERSONA “GESTOR”. Não invente, não reintroduza e não crie uma quinta persona.
+NÃO EXISTE PERSONA “GESTOR”. Não criar quinta persona.
 
-A arquitetura de produção que devemos completar não é apenas o RIGHTWARE Control Plane. Ela inclui TODAS as superfícies:
+TRAINING SYSTEM:
+- `/formacao` usa cards reutilizáveis data-driven.
+- Cada novo curso muda dados, não formato/componente.
+- Course admin já suporta nome, descrição curta, modalidade, duração, horários, investimento/moeda, certificado, learning outcomes, featured e session labels.
+- telefone geral pertence à organização/PublicConfig, não ao curso.
+- `COURSE_SESSION` NÃO é booking exclusivo.
+- training usa `course_registrations` multi-participante.
+- fluxo esperado:
+  /formacao → card → detalhe → Inscrever-me → registration.
+- pagamento ainda não foi adicionado; deve entrar depois da recolha de dados/registration sem redesenhar o sistema de cards.
 
-A. PUBLIC WEB / CLIENTE
-- domínio público Castro’s;
-- homepage, serviços, formações, espaços, 360/configurador, contacto, pedidos, booking/registration;
-- sem navegação interna exposta;
-- sem login obrigatório para cliente público.
+SCHEDULING / CLINIC FLOW:
+O Clinic Flow serviu apenas como referência de UX para:
+- stepper/progress;
+- persistent summary;
+- date → real slot;
+- review/confirmation;
+- no-slot recovery;
+- contextual fallback.
 
-B. STAFF APP / SECRETÁRIA
-- superfície autenticada própria, por exemplo app.castrosservices.<domain>;
-- Secretária → /app;
-- dashboard operacional, calendário, pedidos, reservas/agendamentos, leads/clientes/contactos, tarefas, notificações, relatórios operacionais, catálogo, disponibilidade, bloqueios, conteúdo/media;
-- pode confirmar/cancelar/reagendar e bloquear horários ocupados por telefone/WhatsApp/offline;
-- NÃO cria roles/permissões nem administra a plataforma.
+NÃO copiar fake/random frontend slots, semântica clínica, médicos, branding ou horários hardcoded.
 
-C. STAFF APP / CEO/OWNER
-- mesma superfície autenticada de staff, mas experiência Owner → /owner;
-- dashboard executivo, agenda, atividade, leads/clientes, relatórios e sinais de atenção;
-- UX para ver/entender/decidir, não para executar CRUD diário;
-- não inventar KPIs/receita/métricas sem dados reais.
+SPACE e SERVICE agendável podem partilhar availability engine, mas:
+- SPACE = reserva exclusiva de recurso.
+- SERVICE = agendável apenas se configurado.
+- COURSE_SESSION = registration multi-participante, não booking exclusivo.
 
-D. RIGHTWARE CONTROL PLANE / SUPER ADMIN
-- superfície separada da Castro’s, alvo como ops.rightware.co.mz ou equivalente;
-- identidade de plataforma separada dos tenant users;
-- tenants/organizações, health, segurança, audit, suporte, plataforma;
-- cada RIGHTWARE admin com identidade própria futuramente;
-- não usar conta/password da CEO;
-- não transformar Super Admin numa role Castro;
-- preparar MFA/Zero Trust/support sessions auditáveis.
+CRM:
+Visitor → Lead → Qualified Lead → Customer → Returning Customer.
+- não criar ghost customers por browsing anónimo;
+- preservar origem/contexto/CTA/UTM na conversão;
+- requests têm responsável, follow-up, histórico/contexto;
+- same-org isolation é obrigatório;
+- Secretária opera follow-up;
+- CEO recebe visão executiva.
 
-E. API / TRUST BOUNDARIES
-- public API;
-- authenticated tenant/internal API;
-- platform API;
-- segurança não depende de URLs escondidas;
-- frontend guard é UX; backend + permissions + organization isolation + DB constraints são a segurança real;
-- rever cookies Secure/HttpOnly/SameSite, CSRF/CORS, rate limiting/WAF, MFA readiness e no-public-employee-signup para a topologia real.
+TRUST / SECURITY:
+- Public API, tenant/internal API e platform API são boundaries distintas.
+- Frontend guard é UX; segurança real fica no backend/permissões/tenant isolation/DB constraints.
+- Super Admin RIGHTWARE não é uma role Castro.
+- Não reutilizar conta/password da CEO para plataforma.
+- preservar CSRF/CORS/session separation e production-origin model.
 
-WORKFLOW GIT/GITHUB:
-- main é protegida.
-- Não commit direto em main.
-- Commits pequenos e separados por preocupação.
-- Não squash/rebase/force-push.
-- PR obrigatório.
-- Checks obrigatórios: Backend quality gates, Frontend quality gates, PostgreSQL integration gates.
-- 3/3 verde antes de merge.
-- Merge normal preservando commits.
-- Validar CI pós-merge 3/3.
-- Quando eu disser avança/continua/faça, execute no GitHub; não responda apenas com teoria.
+GIT/CI — ABSOLUTO:
+- nunca commit direto em main;
+- branch curta por bloco;
+- commits pequenos e rastreáveis;
+- PR obrigatório;
+- não squash/rebase/force-push;
+- Backend + Frontend + PostgreSQL = 3/3 GREEN antes do merge;
+- merge normal;
+- verificar main pós-merge = 3/3 GREEN.
 
-PRIORIDADE IMEDIATA — PR #36:
-O PR #36 chama-se `feat: connect scheduling, booking recovery, and training registrations`.
-A baseline main antes dele era:
-513c4828fe1dcd1fffa7a9e126c2163093b454db
-com CI pós-merge #234 3/3 verde.
+QUANDO CI FALHAR:
+fetch exact run → exact failed job → exact logs/test report → proven root cause → minimal fix → rerun.
+NÃO ficar horas a repetir hipótese genérica de “PostgreSQL connection”.
 
-Antes do handoff, o PR #36 tinha Backend e Frontend verdes e PostgreSQL integration vermelho no CI #238. O commit do handoff e este prompt alteram novamente o HEAD da branch e iniciam CI novo, por isso NÃO confie no SHA/CI histórico.
+QUANDO EU DISSER `avança`, `continua`, `faça`, `implementa`, `corrige`:
+EXECUTE usando estado live do GitHub. Não responda apenas com um plano já aprovado.
 
-FAÇA AGORA:
-1. Fetch live do PR #36 e obtenha o HEAD atual.
-2. Fetch dos workflow runs/jobs do HEAD atual.
-3. Se o CI atual estiver em execução, acompanhe-o; se falhar, leia os logs do job vermelho.
-4. Diagnostique especificamente o PostgreSQL integration gate com o erro real; não invente causa.
-5. Corrija somente os erros comprovados, em commits separados.
-6. Repita até Backend + Frontend + PostgreSQL = 3/3 verde no HEAD exato.
-7. Faça merge NORMAL do PR #36 preservando todos os commits.
-8. Obtenha o SHA da main depois do merge.
-9. Valide o CI pós-merge até 3/3 verde.
+ORDEM DA PRÓXIMA SESSÃO:
+A. Confirmar current main live.
+B. Colocar o meu repo local na current main sem destruir mudanças locais.
+C. Abrir frontend mock preview.
+D. Auditar visualmente e funcionalmente o estado reparado.
+E. Confirmar que o curso real aparece e o fluxo de inscrição funciona.
+F. Comparar o que existe com o design/system requirements já documentados.
+G. Produzir uma lista concreta de gaps restantes.
+H. Só então implementar o próximo bloco em feature branch.
+I. Depois P5 responsive/accessibility/visual QA.
+J. Depois P6 production-like smoke/security/content validation.
 
-REGRAS FUNCIONAIS IMPORTANTES JÁ DEFINIDAS:
-- Um único scheduling engine real pode servir SPACE e SERVICE agendável, com semânticas diferentes.
-- Espaço = reserva exclusiva de recurso.
-- Consultoria/serviço = agendamento apenas se explicitamente configurado como schedulable.
-- COURSE_SESSION NÃO usa booking exclusivo; usa course_registrations próprio e multi-participante.
-- Formação sem sessão = receber próximas datas / interesse contextual.
-- Formação corporativa = pedido contextual.
-- Secretária pode bloquear períodos ocupados por outros canais.
-- Backend é autoridade de slots; não aceitar horário manipulado fora do availability engine.
-- double booking deve ser protegido server-side + PostgreSQL.
-- no-slot deve oferecer próxima disponibilidade + pedir outro horário + telefone/WhatsApp contextual.
-- Google Calendar é opcional V2, apenas sync/mirror. Castro DB continua source of truth.
+A apresentação final continua a ser uma história conectada:
+Cliente descobre → request/booking/registration → Secretária gere → CRM preserva contexto → CEO acompanha → RIGHTWARE opera a plataforma separadamente.
 
-INTENT / CRM:
-- O sistema não deve pedir novamente algo que já sabe da jornada do utilizador.
-- Preservar contexto de origem/entidade/CTA/UTM quando houver conversão real.
-- Não criar ghost customers a partir de visitante anónimo.
-- Direção de lifecycle: Visitor → Lead → Qualified Lead → Customer → Returning Customer.
-- Pedidos devem evoluir para inbox comercial/operacional com contexto, interesse, responsável, follow-up e histórico.
-
-DEPOIS DE FECHAR PR #36, siga a ordem do handoff:
-A) Production Access & Trust Architecture COMPLETA para Cliente + Secretária + CEO + Super Admin + API boundaries;
-B) CRM/lifecycle/Requests/follow-up;
-C) media/conteúdo aprovado;
-D) P5 responsive/accessibility/visual QA nas quatro experiências;
-E) P6 production-like smoke/security/content validation;
-F) apresentação final.
-
-DESIGN:
-- Instrument Serif headings; Manrope body/UI.
-- profissional, institucional, editorial, premium e funcional.
-- evitar generic SaaS/card farms, glassmorphism gratuito, neon, gradientes arbitrários, AI slop, fake metrics/testimonials.
-- usar apenas factos/media reais aprovados pela Castro.
-
-A apresentação final deve contar uma história conectada:
-Cliente → pedido/agendamento/reserva/inscrição → Secretária gere → CEO acompanha → RIGHTWARE opera a plataforma.
-
-Comece agora pelo live audit do PR #36 e execute de verdade até fechar o blocker e o merge, reportando branch, commits, CI, merge SHA e CI pós-merge.
+Comece agora lendo os dois handoffs, fazendo live audit da main e ajudando-me primeiro a verificar o estado visual REAL da current main. Não faça redesign nem reabra PRs antigos.
 ```
