@@ -6,6 +6,7 @@ import { useCourses } from '../../courses/hooks'
 import { useServices } from '../../services/hooks'
 import { useSpacesPreview } from '../../spaces/hooks'
 import { EmptyState, ErrorState, LoadingState } from '../../../design-system/patterns/feedback-overlays'
+import { SectionReveal } from '../../../design-system/motion/SectionReveal'
 
 const experiences = [
   {
@@ -82,15 +83,17 @@ export function HomePublic() {
     </section>
 
     <section className="home-v2-experiences container" aria-labelledby="experiences-title">
-      <div className="home-v2-section-head">
-        <div><span className="eyebrow">TRÊS PORTAS DE ENTRADA</span><h2 id="experiences-title">Comece pelo que a sua realidade pede agora.</h2></div>
-        <p>A Castro’s reúne diferentes formas de apoiar pessoas e organizações — da conversa estratégica à formação e ao espaço onde o encontro acontece.</p>
-      </div>
-      <ExperienceSelector />
+      <SectionReveal>
+        <div className="home-v2-section-head">
+          <div><span className="eyebrow">TRÊS PORTAS DE ENTRADA</span><h2 id="experiences-title">Comece pelo que a sua realidade pede agora.</h2></div>
+          <p>A Castro’s reúne diferentes formas de apoiar pessoas e organizações — da conversa estratégica à formação e ao espaço onde o encontro acontece.</p>
+        </div>
+        <ExperienceSelector />
+      </SectionReveal>
     </section>
 
     <section className="home-v2-practice">
-      <div className="container home-v2-practice__grid">
+      <SectionReveal className="container home-v2-practice__grid">
         <div className="home-v2-practice__intro">
           <span className="eyebrow eyebrow--light">ÁREAS DE ATUAÇÃO</span>
           <h2>Clareza no atendimento. Ética na liderança. Formação com contexto.</h2>
@@ -100,7 +103,7 @@ export function HomePublic() {
         <div className="home-v2-practice__list">
           {practiceLines.map((line, index) => <div className="home-v2-practice__row" key={line}><span>0{index + 1}</span><strong>{line}</strong><ArrowUpRight size={18} aria-hidden="true" /></div>)}
         </div>
-      </div>
+      </SectionReveal>
     </section>
 
     <section className="home-v2-founder container" aria-labelledby="founder-title">
@@ -152,19 +155,21 @@ export function HomePublic() {
     </section>
 
     <section className="home-v2-process container">
-      <div className="home-v2-section-head home-v2-section-head--compact"><div><span className="eyebrow">COMO COMEÇAMOS</span><h2>Uma experiência simples. Sem saltar o contexto.</h2></div></div>
-      <div className="home-v2-process__steps">
-        <article><span>01</span><MessageCircle size={21} aria-hidden="true" /><h3>Converse</h3><p>Partilhe a necessidade, o desafio ou o tipo de encontro que pretende criar.</p></article>
-        <article><span>02</span><Compass size={21} aria-hidden="true" /><h3>Explore</h3><p>Conheça serviços, formação e espaços com informação organizada para decidir melhor.</p></article>
-        <article><span>03</span><ArrowUpRight size={21} aria-hidden="true" /><h3>Avance</h3><p>Siga para o pedido, configuração ou reserva quando a opção certa estiver clara.</p></article>
-      </div>
+      <SectionReveal>
+        <div className="home-v2-section-head home-v2-section-head--compact"><div><span className="eyebrow">COMO COMEÇAMOS</span><h2>Uma experiência simples. Sem saltar o contexto.</h2></div></div>
+        <div className="home-v2-process__steps">
+          <article><span>01</span><MessageCircle size={21} aria-hidden="true" /><h3>Converse</h3><p>Partilhe a necessidade, o desafio ou o tipo de encontro que pretende criar.</p></article>
+          <article><span>02</span><Compass size={21} aria-hidden="true" /><h3>Explore</h3><p>Conheça serviços, formação e espaços com informação organizada para decidir melhor.</p></article>
+          <article><span>03</span><ArrowUpRight size={21} aria-hidden="true" /><h3>Avance</h3><p>Siga para o pedido, configuração ou reserva quando a opção certa estiver clara.</p></article>
+        </div>
+      </SectionReveal>
     </section>
 
     <section className="home-v2-contact">
-      <div className="container home-v2-contact__inner">
+      <SectionReveal className="container home-v2-contact__inner">
         <div><span className="eyebrow eyebrow--light">PRÓXIMO PASSO</span><h2>Começamos pela conversa certa.</h2></div>
         <div><p>Conte-nos o que pretende desenvolver, organizar ou transformar. A experiência digital encaminha o pedido para o contexto certo.</p><Link className="ds-button home-v2-contact__button" to="/contacto">Falar com a Castro’s <ArrowUpRight size={18} /></Link></div>
-      </div>
+      </SectionReveal>
     </section>
   </div>
 }

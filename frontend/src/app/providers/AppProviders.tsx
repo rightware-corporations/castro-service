@@ -5,6 +5,7 @@ import { createPreviewAwareApiAdapter } from '../../api/client/previewAdapter'
 import { ApiError } from '../../api/client/errors'
 import type { AuthSession, Permission, PermissionContext } from '../../domain'
 import { createCan } from '../../domain/permissions'
+import { MotionProvider } from '../../design-system/motion/MotionProvider'
 
 const ApiContext = createContext<ApiAdapter | null>(null)
 const SessionContext = createContext<AuthSession | null>(null)
@@ -66,5 +67,5 @@ function SessionProviders({ api, children }: PropsWithChildren<{ api: ApiAdapter
 export function AppProviders({ children }: PropsWithChildren) {
   const queryClient = useMemo(() => new QueryClient(), [])
   const api = useMemo(() => createPreviewAwareApiAdapter(), [])
-  return <QueryClientProvider client={queryClient}><ApiContext.Provider value={api}><SessionProviders api={api}>{children}</SessionProviders></ApiContext.Provider></QueryClientProvider>
+  return <MotionProvider><QueryClientProvider client={queryClient}><ApiContext.Provider value={api}><SessionProviders api={api}>{children}</SessionProviders></ApiContext.Provider></QueryClientProvider></MotionProvider>
 }

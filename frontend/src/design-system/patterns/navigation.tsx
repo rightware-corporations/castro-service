@@ -1,5 +1,7 @@
-import { useState, type KeyboardEvent, type ReactNode } from 'react'
+import { useId, useState, type KeyboardEvent, type ReactNode } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import { Link } from 'react-router-dom'
+import { motionPresets, motionSprings } from '../motion/motionPresets'
 
 export function SkipLink({ href = '#main-content', label = 'Saltar para o conteúdo principal' }: { href?: string; label?: string }) { return <a className="ds-skip-link" href={href}>{label}</a> }
 
@@ -7,16 +9,21 @@ export function Breadcrumbs({ items }: { items: { label: string; href?: string }
 
 export function Tabs({ items, initialId }: { items: { id: string; label: string; content: ReactNode }[]; initialId?: string }) {
   const [activeId, setActiveId] = useState(initialId ?? items[0]?.id)
+  const instanceId = useId()
   const activeIndex = Math.max(0, items.findIndex((item) => item.id === activeId))
   const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (!items.length) return
     const nextIndex = event.key === 'ArrowRight' ? (activeIndex + 1) % items.length : event.key === 'ArrowLeft' ? (activeIndex - 1 + items.length) % items.length : event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1 : -1
     if (nextIndex >= 0) { event.preventDefault(); setActiveId(items[nextIndex].id); document.getElementById(`tab-${items[nextIndex].id}`)?.focus() }
   }
-  return <div className="ds-tabs"><div className="ds-tabs__list" role="tablist" aria-label="Secções">{items.map((item) => <button key={item.id} id={`tab-${item.id}`} className="ds-tabs__tab" type="button" role="tab" aria-selected={activeId === item.id} aria-controls={`panel-${item.id}`} tabIndex={activeId === item.id ? 0 : -1} onClick={() => setActiveId(item.id)} onKeyDown={onKeyDown}>{item.label}</button>)}</div>{items.map((item) => activeId === item.id && <div key={item.id} id={`panel-${item.id}`} role="tabpanel" tabIndex={0} aria-labelledby={`tab-${item.id}`}>{item.content}</div>)}</div>
+  const activeItem = items.find((item) => item.id === activeId)
+  return <div className="ds-tabs"><div className="ds-tabs__list" role="tablist" aria-label="Secções">{items.map((item) => <button key={item.id} id={`tab-${item.id}`} className="ds-tabs__tab" type="button" role="tab" aria-selected={activeId === item.id} aria-controls={`panel-${item.id}`} tabIndex={activeId === item.id ? 0 : -1} onClick={() => setActiveId(item.id)} onKeyDown={onKeyDown}>{item.label}{activeId === item.id ? <motion.span className="ds-tabs__indicator" layoutId={`ds-tabs-indicator-${instanceId}`} transition={motionSprings.selection} aria-hidden="true" /> : null}</button>)}</div><AnimatePresence mode="wait" initial={false}>{activeItem ? <motion.div className="ds-tabs__panel" key={activeItem.id} id={`panel-${activeItem.id}`} role="tabpanel" tabIndex={0} aria-labelledby={`tab-${activeItem.id}`} initial={motionPresets.fade.initial} animate={motionPresets.fade.animate} exit={motionPresets.fade.exit} transition={motionPresets.fade.transition}>{activeItem.content}</motion.div> : null}</AnimatePresence></div>
 }
 
-export function Stepper({ steps, current }: { steps: { id: string; label: string }[]; current: string }) { return <ol className="ds-stepper" aria-label="Progresso">{steps.map((step, index) => <li key={step.id} className={step.id === current ? 'is-current' : ''}><span>{index + 1}</span><strong>{step.label}</strong></li>)}</ol> }
+export function Stepper({ steps, current }: { steps: { id: string; label: string }[]; current: string }) {
+  const instanceId = useId()
+  return <ol className="ds-stepper" aria-label="Progresso">{steps.map((step, index) => <li key={step.id} className={step.id === current ? 'is-current' : ''}><span>{step.id === current ? <motion.i className="ds-stepper__selection" layoutId={`ds-stepper-indicator-${instanceId}`} transition={motionSprings.layout} aria-hidden="true" /> : null}<b className="ds-stepper__value">{index + 1}</b></span><strong>{step.label}</strong></li>)}</ol>
+}
 
 export function Pagination({ page, totalPages, onChange }: { page: number; totalPages: number; onChange: (page: number) => void }) { return <nav className="ds-pagination" aria-label="Paginação"><button className="ds-button ds-button--tertiary ds-button--sm" type="button" disabled={page <= 1} onClick={() => onChange(page - 1)}>Anterior</button><span>Página {page} de {totalPages}</span><button className="ds-button ds-button--tertiary ds-button--sm" type="button" disabled={page >= totalPages} onClick={() => onChange(page + 1)}>Seguinte</button></nav> }
 

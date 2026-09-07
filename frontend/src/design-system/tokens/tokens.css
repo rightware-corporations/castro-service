@@ -64,9 +64,12 @@
   --focus-ring: 0 0 0 3px rgb(34 187 174 / 30%);
   --ease-standard: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --motion-instant: 100ms;
   --motion-fast: 160ms;
   --motion-normal: 200ms;
+  --motion-standard: 240ms;
   --motion-slow: 280ms;
+  --motion-emphasis: 420ms;
   --control-sm: 2.25rem;
   --control-md: 3rem;
   --control-lg: 3.5rem;
