@@ -6,7 +6,6 @@
   background: var(--public-paper);
 }
 
-.public-v2-shell .container { max-width: 1320px; }
 .public-v2-shell .eyebrow { letter-spacing: .16em; }
 .eyebrow--light { color: #8fe0d7 !important; }
 
@@ -182,17 +181,6 @@
   z-index: 3;
   pointer-events: none;
 }
-.home-v2-orbit {
-  position: absolute;
-  border: 1px solid rgb(23 24 79 / 22%);
-  border-radius: 50%;
-}
-.home-v2-orbit--one { width: 34rem; height: 34rem; right: -11rem; top: -8rem; }
-.home-v2-orbit--two { width: 23rem; height: 23rem; left: -9rem; bottom: -6rem; border-color: rgb(34 187 174 / 32%); }
-.home-v2-node { position: absolute; z-index: 2; width: 1.05rem; height: 1.05rem; border-radius: 50%; background: var(--color-teal); box-shadow: 0 0 0 7px rgb(34 187 174 / 14%); }
-.home-v2-node--a { top: 19%; right: 25%; }
-.home-v2-node--b { top: 55%; left: 18%; background: var(--color-navy); box-shadow: 0 0 0 7px rgb(23 24 79 / 10%); }
-.home-v2-node--c { bottom: 14%; right: 18%; background: var(--color-green); box-shadow: 0 0 0 7px rgb(100 201 138 / 16%); }
 .home-v2-art__statement {
   position: absolute;
   z-index: 4;
@@ -229,7 +217,6 @@
   letter-spacing: .12em;
 }
 .home-v2-art__index span { display: grid; width: 2.1rem; height: 2.1rem; place-items: center; border: 1px solid rgb(23 24 79 / 20%); border-radius: 50%; }
-.home-v2-hero__scroll { display: flex; align-items: center; justify-content: flex-end; gap: .45rem; padding-block: .9rem; color: rgb(32 35 42 / 52%); font-size: .65rem; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
 
 /* Section heads */
 .home-v2-experiences { padding-block: clamp(6rem, 10vw, 10rem); }
@@ -397,7 +384,6 @@
   .home-v2-hero__art { min-height: 27rem; margin-inline: calc(var(--page-padding) * -1); }
   .home-v2-art__statement { right: 2rem; bottom: 2.5rem; left: 2rem; }
   .home-v2-art__statement strong { font-size: 3.2rem; }
-  .home-v2-hero__scroll { display: none; }
   .home-v2-experiences { padding-block: 5rem; }
   .home-v2-section-head h2, .home-v2-practice h2, .home-v2-live h2, .home-v2-space h2, .home-v2-process h2 { font-size: clamp(2.75rem, 12vw, 4rem); }
   .home-v2-experience { min-height: 17rem; padding: 1.5rem .2rem 1.6rem; }
@@ -431,8 +417,4 @@
   .home-v2-art__statement strong { font-size: 2.7rem; }
   .home-v2-art__index { top: 1.8rem; right: 1.8rem; }
   .home-v2-practice__row strong { font-size: 1.45rem; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .home-v2-link svg, .home-v2-experience, .public-v2-shell .public-nav a::after { transition: none !important; }
 }
