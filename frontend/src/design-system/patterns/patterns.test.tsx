@@ -130,6 +130,7 @@ describe('Design System behavior patterns', () => {
     render(<BookingStepper current="review" />)
     const current = screen.getByText('Rever').closest('li')
     expect(current).toHaveClass('is-current')
+    expect(current).toHaveAttribute('aria-current', 'step')
     expect(current?.querySelector('.ds-stepper__selection')).toBeInTheDocument()
   })
 
