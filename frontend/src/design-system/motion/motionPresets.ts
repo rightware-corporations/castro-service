@@ -65,4 +65,28 @@ export const motionPresets = {
     animate: { opacity: 1, y: 0 },
     transition: { duration: motionDurations.emphasis, ease: motionEasings.standard },
   },
+  heroSequence: {
+    hidden: { opacity: 1 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.065, delayChildren: 0.04 },
+    },
+  },
+  heroItem: {
+    hidden: { opacity: 0, y: 12 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: motionDurations.emphasis, ease: motionEasings.enter },
+    },
+  },
+  heroMedia: {
+    hidden: { opacity: 0, x: 12, scale: 0.985 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      scale: 1,
+      transition: { duration: motionDurations.emphasis, ease: motionEasings.enter, delay: 0.08 },
+    },
+  },
 } as const

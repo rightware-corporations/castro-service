@@ -58,6 +58,7 @@ describe('public layout navigation', () => {
     for (const brand of screen.getAllByRole('link', { name: 'Castro’s Services — início' })) {
       expect(brand).toHaveAttribute('href', '/')
     }
+    expect(document.querySelector('.public-header')).toHaveAttribute('data-scroll-state', 'top')
   })
 
   it('provides a skip link to a programmatically focusable main landmark', () => {
@@ -86,10 +87,23 @@ describe('public layout navigation', () => {
     expect(closeToggle).toHaveAttribute('aria-expanded', 'true')
     expect(navigation).not.toHaveAttribute('aria-hidden')
     expect(navigation).not.toHaveAttribute('inert')
+    expect(screen.getByRole('button', { name: 'Fechar menu ao tocar fora da navegação' })).toBeInTheDocument()
     await waitFor(() => expect(screen.getByRole('navigation', { name: 'Navegação principal' })).toBeInTheDocument())
 
     await user.keyboard('{Escape}')
     expect(screen.getByRole('button', { name: 'Abrir menu' })).toHaveAttribute('aria-expanded', 'false')
+    expect(document.activeElement).toBe(toggle)
+  })
+
+  it('closes the mobile menu through the scrim and restores focus to the trigger', async () => {
+    matchMediaForMobile(true)
+    const { user } = renderLayout()
+    const toggle = screen.getByRole('button', { name: 'Abrir menu' })
+
+    await user.click(toggle)
+    await user.click(screen.getByRole('button', { name: 'Fechar menu ao tocar fora da navegação' }))
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
     expect(document.activeElement).toBe(toggle)
   })
 

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { ReactNode } from 'react'
+import { motion, useReducedMotion } from 'motion/react'
 import { ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenText, Building2, Compass, GraduationCap, Handshake, MessageCircle, MoveRight, Sparkles } from 'lucide-react'
 import { usePublicConfig } from '../hooks'
 import { useCourses } from '../../courses/hooks'
@@ -7,6 +8,7 @@ import { useServices } from '../../services/hooks'
 import { useSpacesPreview } from '../../spaces/hooks'
 import { EmptyState, ErrorState, LoadingState } from '../../../design-system/patterns/feedback-overlays'
 import { SectionReveal } from '../../../design-system/motion/SectionReveal'
+import { motionPresets } from '../../../design-system/motion/motionPresets'
 
 const experiences = [
   {
@@ -48,36 +50,39 @@ export function HomePublic() {
   const coursesQuery = useCourses()
   const spacesQuery = useSpacesPreview()
   const founderPortraitUrl = import.meta.env.VITE_ELIZABETH_PORTRAIT_URL?.trim()
+  const reducedMotion = useReducedMotion()
 
   return <div className="home-v2">
     <section className="home-v2-hero">
       <div className="container home-v2-hero__grid">
-        <div className="home-v2-hero__copy">
-          <span className="eyebrow">CASTRO’S SERVICES · MAPUTO</span>
-          <h1>Onde pessoas, liderança e <em>experiência</em> se encontram.</h1>
-          <p className="home-v2-hero__lead">Consultoria, formação e espaços pensados para criar conversas mais claras, equipas mais preparadas e encontros com intenção.</p>
-          <div className="home-v2-hero__actions">
+        <motion.div className="home-v2-hero__copy" variants={motionPresets.heroSequence} initial={reducedMotion ? false : 'hidden'} animate="visible" data-motion-reduced={reducedMotion ? 'true' : 'false'}>
+          <motion.span className="eyebrow" variants={motionPresets.heroItem}>CASTRO’S SERVICES · MAPUTO</motion.span>
+          <motion.h1 variants={motionPresets.heroItem}>Onde pessoas, liderança e <em>experiência</em> se encontram.</motion.h1>
+          <motion.p className="home-v2-hero__lead" variants={motionPresets.heroItem}>Consultoria, formação e espaços pensados para criar conversas mais claras, equipas mais preparadas e encontros com intenção.</motion.p>
+          <motion.div className="home-v2-hero__actions" variants={motionPresets.heroItem}>
             <Link className="ds-button ds-button--primary home-v2-primary" to="/contacto">Começar uma conversa <ArrowUpRight size={17} /></Link>
             <Link className="home-v2-link" to="/servicos">Descobrir a Castro’s <ArrowDownRight size={17} /></Link>
-          </div>
-          <div className="home-v2-hero__meta" aria-label="Áreas Castro’s">
+          </motion.div>
+          <motion.div className="home-v2-hero__meta" aria-label="Áreas Castro’s" variants={motionPresets.heroItem}>
             <span>Consultoria</span><i aria-hidden="true" /><span>Formação</span><i aria-hidden="true" /><span>Espaços</span>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
-        <div className="home-v2-hero__art" aria-label="Composição visual inspirada na identidade Castro’s">
-          <div className="home-v2-orbit home-v2-orbit--one" aria-hidden="true" />
-          <div className="home-v2-orbit home-v2-orbit--two" aria-hidden="true" />
-          <div className="home-v2-node home-v2-node--a" aria-hidden="true" />
-          <div className="home-v2-node home-v2-node--b" aria-hidden="true" />
-          <div className="home-v2-node home-v2-node--c" aria-hidden="true" />
-          <div className="home-v2-art__statement">
-            <span>CASTRO’S</span>
+        <motion.div className="home-v2-hero__art home-v3-hero-media" aria-label="Composição editorial preparada para fotografia real da Castro’s Services" variants={motionPresets.heroMedia} initial={reducedMotion ? false : 'hidden'} animate="visible" data-motion-reduced={reducedMotion ? 'true' : 'false'}>
+          <div className="home-v3-hero-media__architecture" aria-hidden="true"><span /><span /><span /></div>
+          <div className="home-v3-hero-media__frame" role="img" aria-label="Área reservada para fotografia oficial da Castro’s Services">
+            <div className="home-v3-hero-media__placeholder">
+              <span>CASTRO’S SERVICES</span>
+              <strong>Fotografia oficial em preparação</strong>
+            </div>
+          </div>
+          <div className="home-v3-hero-media__areas" aria-hidden="true"><span>Consultoria</span><span>Formação</span><span>Espaços</span></div>
+          <div className="home-v3-hero-media__note">
+            <span>EXPERIÊNCIA CASTRO’S</span>
             <strong>Serviços que começam por compreender.</strong>
             <small>{configQuery.data?.businessTimezone ? `Experiência digital preparada para ${configQuery.data.businessTimezone}.` : 'Experiência digital em construção.'}</small>
           </div>
-          <div className="home-v2-art__index" aria-hidden="true"><span>01</span><span>02</span><span>03</span></div>
-        </div>
+        </motion.div>
       </div>
       <div className="container home-v2-hero__scroll"><span>Explore</span><ArrowDownRight size={16} /></div>
     </section>
