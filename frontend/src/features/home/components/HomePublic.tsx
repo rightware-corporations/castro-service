@@ -84,7 +84,6 @@ export function HomePublic() {
           </div>
         </motion.div>
       </div>
-      <div className="container home-v2-hero__scroll"><span>Explore</span><ArrowDownRight size={16} /></div>
     </section>
 
     <section className="home-v2-experiences container" aria-labelledby="experiences-title">
