@@ -47,7 +47,7 @@
   --layout-max-reading: 45rem;
   --container-sm: 40rem;
   --container-md: var(--layout-max-content);
-  --container-max: 1240px;
+  --container-max: var(--layout-max-wide);
 
   --gutter-desktop: 2rem;
   --gutter-tablet: 1.5rem;
@@ -127,11 +127,23 @@
   --touch-target: 2.75rem;
 }
 
+@media (min-width: 768px) and (max-width: 1279px) {
+  :root {
+    --page-padding: var(--gutter-tablet);
+  }
+}
+
 @media (max-width: 767px) {
   :root {
     --page-padding: var(--gutter-mobile);
     --gutter: 1rem;
     --space-8: 5.5rem;
     --text-2xl: 2rem;
+  }
+}
+
+@media (max-width: 359px) {
+  :root {
+    --page-padding: var(--gutter-narrow);
   }
 }
