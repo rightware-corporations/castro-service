@@ -19,6 +19,25 @@ export const motionSprings = {
   layout: { type: 'spring' as const, stiffness: 360, damping: 32, mass: 0.72 },
 } as const
 
+/*
+ * Castro Design Quality Contract v1 semantic motion levels.
+ * These aliases describe intent; existing presets keep product behavior stable.
+ */
+export const motionLevels = {
+  MICRO: {
+    durations: [motionDurations.instant, motionDurations.fast, motionDurations.normal],
+    maxRecommendedDisplacementPx: 4,
+  },
+  OBJECT: {
+    durations: [motionDurations.normal, motionDurations.standard, motionDurations.slow, motionDurations.emphasis],
+    recommendedScale: { min: 0.98, max: 1.02 },
+  },
+  SCENE: {
+    durations: [motionDurations.slow, motionDurations.emphasis],
+    recommendedStagger: { min: 0.04, max: 0.07 },
+  },
+} as const
+
 export const motionPresets = {
   fade: {
     initial: { opacity: 0 },

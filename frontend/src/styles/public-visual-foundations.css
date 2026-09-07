@@ -4,18 +4,8 @@
  * This layer adds scene rhythm, depth and focus behaviour without replacing
  * the approved public design system. It intentionally leaves Hero composition,
  * business content and route structure untouched for their dedicated phases.
+ * Scene tokens are owned by design-system/tokens/tokens.css.
  */
-
-.public-v2-shell {
-  --scene-paper: var(--color-off-white);
-  --scene-warm: rgb(241 222 174 / 24%);
-  --scene-warm-strong: rgb(241 222 174 / 42%);
-  --scene-ink: var(--color-deep-navy);
-  --scene-line: rgb(23 24 79 / 13%);
-  --scene-line-strong: rgb(23 24 79 / 20%);
-  --scene-shadow: 0 2rem 5rem rgb(16 19 59 / 8%);
-  --scene-focus-shadow: 0 2.25rem 4.5rem rgb(16 19 59 / 16%);
-}
 
 /* Scene continuity: alternate calm tonal fields instead of resetting to white. */
 .home-v2 :is(

@@ -23,4 +23,13 @@ describe('Design System primitives', () => {
     expect(field.getAttribute('aria-describedby')).toContain('email-error')
     expect(screen.getByRole('alert')).toHaveTextContent('Email inválido.')
   })
+
+  it('generates a stable accessible TextField id when the caller omits one', () => {
+    render(<TextField label="Nome" description="Nome completo." error="Campo obrigatório." />)
+    const field = screen.getByLabelText('Nome')
+    const id = field.getAttribute('id')
+    expect(id).toBeTruthy()
+    expect(field.getAttribute('aria-describedby')).toContain(`${id}-description`)
+    expect(field.getAttribute('aria-describedby')).toContain(`${id}-error`)
+  })
 })
