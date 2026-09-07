@@ -1,0 +1,53 @@
+name: Fix Public Spaces Explorer Workflow
+
+on:
+  push:
+    branches:
+      - feat/public-spaces-explorer-configurator
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: feat/public-spaces-explorer-configurator
+          fetch-depth: 0
+
+      - name: Repair state transition
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          target = Path('.github/workflows/public-spaces-explorer-configurator.yml')
+          text = target.read_text(encoding='utf-8')
+
+          effect = "            useEffect(() => { setActiveHotspotId('') }, [sceneId])\n"
+          if effect not in text:
+              raise SystemExit('Expected hotspot reset effect not found')
+          text = text.replace(effect, '', 1)
+
+          old = "            const selectScene = (id: string) => { setSelectedSceneId(id); setZoom(1) }\n"
+          new = "            const selectScene = (id: string) => { setSelectedSceneId(id); setActiveHotspotId(''); setZoom(1) }\n"
+          if old not in text:
+              raise SystemExit('Expected selectScene transition not found')
+          text = text.replace(old, new, 1)
+          target.write_text(text, encoding='utf-8')
+
+          Path('.github/workflows/fix-public-spaces-explorer-workflow.yml').unlink()
+          PY
+
+      - name: Verify and commit
+        shell: bash
+        run: |
+          git diff --check
+          git config user.name "rightware-corporations"
+          git config user.email "rightware123@gmail.com"
+          git add .github/workflows/public-spaces-explorer-configurator.yml .github/workflows/fix-public-spaces-explorer-workflow.yml
+          git commit -m "chore: fix explorer hotspot state transition"
+          git push origin HEAD:feat/public-spaces-explorer-configurator
