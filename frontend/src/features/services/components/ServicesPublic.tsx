@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { ArrowRight, ArrowUpRight, Clock3, Headphones, Scale, UsersRound, Presentation } from 'lucide-react'
 import { useService, useServices } from '../hooks'
 import { Alert, EmptyState, ErrorState, LoadingState } from '../../../design-system/patterns/feedback-overlays'
@@ -26,17 +28,71 @@ function ServicesIntro({ detail = false }: { detail?: boolean }) {
   </header>
 }
 
+function ServicesAreaExplorer() {
+  const [activeIndex, setActiveIndex] = useState(0)
+  const reducedMotion = useReducedMotion()
+  const activeArea = confirmedAreas[activeIndex]
+  const ActiveIcon = activeArea.icon
+  const contact = contactHref({
+    type: 'CONSULTATION',
+    sourceType: 'GENERAL',
+    cta: `SERVICES_AREA_${activeArea.number}`,
+    message: `Gostaria de conversar sobre ${activeArea.title}.`,
+  })
+
+  return <section className="services-experience" aria-labelledby="services-experience-title">
+    <div className="services-experience__head">
+      <div><span className="eyebrow">ÁREAS DE ATUAÇÃO</span><h2 id="services-experience-title">Explore pelo contexto, não por uma grelha de cartões.</h2></div>
+      <p>As áreas abaixo organizam a descoberta. Selecione uma para dar prioridade ao contexto e seguir para uma conversa quando fizer sentido.</p>
+    </div>
+
+    <div className="services-experience__grid">
+      <div className="services-experience__index" aria-label="Selecionar área de atuação">
+        {confirmedAreas.map((area, index) => {
+          const selected = index === activeIndex
+          const Icon = area.icon
+          return <button
+            key={area.number}
+            type="button"
+            className={`services-experience__option ${selected ? 'services-experience__option--active' : ''}`}
+            aria-pressed={selected}
+            onClick={() => setActiveIndex(index)}
+            onFocus={() => setActiveIndex(index)}
+          >
+            <span className="services-experience__number">{area.number}</span>
+            <span className="services-experience__option-title">{area.title}</span>
+            <Icon size={19} aria-hidden="true" />
+          </button>
+        })}
+      </div>
+
+      <div className="services-experience__focus" aria-live="polite">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.article
+            key={activeArea.number}
+            className="services-experience__focus-card"
+            initial={reducedMotion ? false : { opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reducedMotion ? { opacity: 1 } : { opacity: 0, y: -8 }}
+            transition={{ duration: reducedMotion ? 0 : 0.24 }}
+          >
+            <div className="services-experience__focus-top"><span>ÁREA {activeArea.number}</span><ActiveIcon size={26} aria-hidden="true" /></div>
+            <div className="services-experience__focus-copy"><h3>{activeArea.title}</h3><p>{activeArea.description}</p></div>
+            <Link className="services-experience__focus-link" to={contact}>Falar sobre esta área <ArrowUpRight size={18} /></Link>
+          </motion.article>
+        </AnimatePresence>
+      </div>
+    </div>
+  </section>
+}
+
 export function ServicesCatalog() {
   return <ServiceCollectionView resource={useServices()} />
 }
 
 export function ServiceCollectionView({ resource }: { resource: CollectionResource<Service> }) {
   return <div className="services-v2-page">
-    <section className="container public-v2-page"><ServicesIntro />
-      <div className="services-v2-areas" aria-label="Áreas de atuação Castro’s">
-        {confirmedAreas.map(({ number, title, description, icon: Icon }) => <article key={title} className="services-v2-area"><div className="services-v2-area__top"><span>{number}</span><Icon size={20} aria-hidden="true" /></div><h2>{title}</h2><p>{description}</p></article>)}
-      </div>
-    </section>
+    <section className="container public-v2-page"><ServicesIntro /><ServicesAreaExplorer /></section>
 
     <section className="services-v2-catalog">
       <div className="container services-v2-catalog__grid">

@@ -1,0 +1,349 @@
+/*
+ * Castro's Services public experience.
+ *
+ * Browse -> focus -> understand -> request.
+ * This layer deliberately avoids a generic card grid and keeps all business
+ * content sourced from the existing confirmed areas / published service data.
+ */
+
+.services-experience {
+  padding-top: clamp(1.5rem, 3vw, 2.5rem);
+  border-top: 1px solid var(--scene-line-strong);
+}
+
+.services-experience__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, .48fr);
+  gap: clamp(2.5rem, 7vw, 8rem);
+  align-items: end;
+  padding-bottom: clamp(2.75rem, 5vw, 4.5rem);
+}
+
+.services-experience__head h2 {
+  max-width: 12ch;
+  margin: .8rem 0 0;
+  color: var(--color-deep-navy);
+  font-family: var(--font-editorial);
+  font-size: clamp(2.8rem, 4.8vw, 5.2rem);
+  font-weight: 400;
+  letter-spacing: -.035em;
+  line-height: .98;
+}
+
+.services-experience__head > p {
+  max-width: 32rem;
+  margin: 0;
+  color: var(--color-muted);
+  font-size: .92rem;
+  line-height: 1.8;
+}
+
+.services-experience__grid {
+  display: grid;
+  grid-template-columns: minmax(20rem, .72fr) minmax(0, 1.28fr);
+  min-height: 34rem;
+  border-block: 1px solid var(--scene-line-strong);
+}
+
+.services-experience__index {
+  border-right: 1px solid var(--scene-line-strong);
+}
+
+.services-experience__option {
+  display: grid;
+  grid-template-columns: 3.25rem minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  width: 100%;
+  min-height: 7.4rem;
+  border: 0;
+  border-bottom: 1px solid var(--scene-line);
+  background: transparent;
+  padding: 1.25rem 1.4rem 1.25rem .2rem;
+  color: var(--color-deep-navy);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--motion-normal) var(--ease-standard),
+    color var(--motion-normal) var(--ease-standard),
+    padding var(--motion-normal) var(--ease-standard);
+}
+
+.services-experience__option:last-child {
+  border-bottom: 0;
+}
+
+.services-experience__option:hover,
+.services-experience__option:focus-visible,
+.services-experience__option--active {
+  background: rgb(241 222 174 / 20%);
+  padding-left: 1rem;
+}
+
+.services-experience__option:focus-visible {
+  position: relative;
+  z-index: 2;
+  outline: 2px solid var(--color-teal);
+  outline-offset: -2px;
+}
+
+.services-experience__option--active {
+  box-shadow: inset 3px 0 0 var(--color-teal);
+}
+
+.services-experience__number {
+  color: var(--color-teal);
+  font-size: .63rem;
+  font-weight: 850;
+  letter-spacing: .14em;
+}
+
+.services-experience__option-title {
+  max-width: 22rem;
+  font-family: var(--font-editorial);
+  font-size: clamp(1.35rem, 2vw, 2rem);
+  font-weight: 400;
+  line-height: 1.08;
+}
+
+.services-experience__option svg {
+  color: rgb(23 24 79 / 42%);
+  transition: color var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard);
+}
+
+.services-experience__option--active svg,
+.services-experience__option:hover svg,
+.services-experience__option:focus-visible svg {
+  color: var(--color-teal);
+  transform: translateX(2px);
+}
+
+.services-experience__focus {
+  position: relative;
+  overflow: hidden;
+  background: var(--scene-warm);
+}
+
+.services-experience__focus::before,
+.services-experience__focus::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.services-experience__focus::before {
+  inset: 0 auto 0 34%;
+  width: 1px;
+  background: var(--scene-line);
+}
+
+.services-experience__focus::after {
+  right: -8rem;
+  bottom: -11rem;
+  width: 24rem;
+  height: 24rem;
+  border: 1px solid rgb(23 24 79 / 10%);
+  border-radius: 50%;
+}
+
+.services-experience__focus-card {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100%;
+  padding: clamp(2rem, 4vw, 4.25rem);
+}
+
+.services-experience__focus-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  color: var(--color-teal);
+}
+
+.services-experience__focus-top span {
+  font-size: .64rem;
+  font-weight: 850;
+  letter-spacing: .15em;
+}
+
+.services-experience__focus-copy {
+  align-self: center;
+  max-width: 44rem;
+  padding-block: clamp(4rem, 8vw, 8rem);
+}
+
+.services-experience__focus-copy h3 {
+  max-width: 12ch;
+  margin: 0;
+  color: var(--color-deep-navy);
+  font-family: var(--font-editorial);
+  font-size: clamp(3.1rem, 5.5vw, 6rem);
+  font-weight: 400;
+  letter-spacing: -.04em;
+  line-height: .92;
+}
+
+.services-experience__focus-copy p {
+  max-width: 37rem;
+  margin: 1.5rem 0 0;
+  color: rgb(23 24 79 / 68%);
+  font-size: 1rem;
+  line-height: 1.85;
+}
+
+.services-experience__focus-link {
+  display: inline-flex;
+  justify-self: start;
+  gap: .7rem;
+  align-items: center;
+  border-bottom: 1px solid rgb(23 24 79 / 25%);
+  padding-bottom: .45rem;
+  color: var(--color-deep-navy);
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .02em;
+  text-decoration: none;
+}
+
+.services-experience__focus-link svg {
+  color: var(--color-teal);
+  transition: transform var(--motion-fast) var(--ease-standard);
+}
+
+.services-experience__focus-link:hover svg,
+.services-experience__focus-link:focus-visible svg {
+  transform: translate(2px, -2px);
+}
+
+/* Published service list: preserve the editorial index, strengthen focus. */
+.services-v2-list article {
+  position: relative;
+  transition:
+    background var(--motion-normal) var(--ease-standard),
+    padding var(--motion-normal) var(--ease-standard);
+}
+
+.services-v2-list article::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -1rem;
+  width: 2px;
+  background: var(--color-teal);
+  opacity: 0;
+  transform: scaleY(.35);
+  transition: opacity var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard);
+}
+
+.services-v2-list article:has(> a:hover),
+.services-v2-list article:has(> a:focus-visible) {
+  background: rgb(255 255 255 / 4%);
+  padding-inline: .75rem;
+}
+
+.services-v2-list article:has(> a:hover)::before,
+.services-v2-list article:has(> a:focus-visible)::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+.services-v2-list article > a {
+  transition:
+    background var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
+}
+
+.services-v2-list article > a:focus-visible {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 3px;
+}
+
+.services-v2-list article > a:hover,
+.services-v2-list article > a:focus-visible {
+  transform: translate(2px, -2px);
+}
+
+@media (max-width: 960px) {
+  .services-experience__head,
+  .services-experience__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .services-experience__head {
+    gap: 1.5rem;
+  }
+
+  .services-experience__head h2 {
+    max-width: 14ch;
+  }
+
+  .services-experience__index {
+    border-right: 0;
+    border-bottom: 1px solid var(--scene-line-strong);
+  }
+
+  .services-experience__focus-card {
+    min-height: 30rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .services-experience__head {
+    padding-bottom: 2rem;
+  }
+
+  .services-experience__head h2 {
+    font-size: clamp(2.55rem, 12vw, 3.8rem);
+  }
+
+  .services-experience__option {
+    grid-template-columns: 2.4rem minmax(0, 1fr) auto;
+    min-height: 6.25rem;
+    padding-right: .45rem;
+  }
+
+  .services-experience__option:hover,
+  .services-experience__option:focus-visible,
+  .services-experience__option--active {
+    padding-left: .65rem;
+  }
+
+  .services-experience__focus-card {
+    min-height: 28rem;
+    padding: 1.5rem;
+  }
+
+  .services-experience__focus-copy {
+    padding-block: 3.5rem;
+  }
+
+  .services-experience__focus-copy h3 {
+    font-size: clamp(2.75rem, 13vw, 4.3rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .services-experience__option,
+  .services-experience__option svg,
+  .services-experience__focus-link svg,
+  .services-v2-list article,
+  .services-v2-list article::before,
+  .services-v2-list article > a {
+    transition-duration: .01ms !important;
+  }
+
+  .services-experience__option--active svg,
+  .services-experience__option:hover svg,
+  .services-experience__option:focus-visible svg,
+  .services-experience__focus-link:hover svg,
+  .services-experience__focus-link:focus-visible svg,
+  .services-v2-list article > a:hover,
+  .services-v2-list article > a:focus-visible {
+    transform: none;
+  }
+}
