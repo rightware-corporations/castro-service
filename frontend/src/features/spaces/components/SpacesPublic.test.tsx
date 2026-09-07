@@ -1,8 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { SpaceDetail, SpacesCatalog } from './SpacesPublic'
+import { SpaceConfigurator, SpaceDetail, SpacesCatalog } from './SpacesPublic'
 
 const hookMocks = vi.hoisted(() => ({
   useSpaces: vi.fn(),
@@ -36,29 +36,40 @@ describe('public spaces navigation', () => {
   })
 
   it('links each published space to its detail and explorer routes', () => {
-    hookMocks.useSpaces.mockReturnValue({
-      isLoading: false,
-      isError: false,
-      data: { items: [space] },
-    })
-
+    hookMocks.useSpaces.mockReturnValue({ isLoading: false, isError: false, data: { items: [space] } })
     renderWithQuery(<MemoryRouter><SpacesCatalog /></MemoryRouter>)
-
     expect(screen.getByRole('link', { name: /Conhecer espaço/i })).toHaveAttribute('href', '/espacos/sala-reuniao')
     expect(screen.getByRole('link', { name: /^Explorar/i })).toHaveAttribute('href', '/espacos/sala-reuniao/explorar')
   })
 
   it('keeps the detail page connected to explorer, configurator and catalog routes', () => {
-    hookMocks.useSpace.mockReturnValue({
-      isLoading: false,
-      isError: false,
-      data: space,
-    })
-
+    hookMocks.useSpace.mockReturnValue({ isLoading: false, isError: false, data: space })
     renderWithQuery(<MemoryRouter initialEntries={['/espacos/sala-reuniao']}><SpaceDetail /></MemoryRouter>)
-
     expect(screen.getByRole('link', { name: 'Espaços' })).toHaveAttribute('href', '/espacos')
     expect(screen.getByRole('link', { name: /Explorar espaço/i })).toHaveAttribute('href', '/espacos/sala-reuniao/explorar')
     expect(screen.getByRole('link', { name: /Configurar encontro/i })).toHaveAttribute('href', '/espacos/sala-reuniao/configurar')
+  })
+
+  it('blocks invalid participant counts before booking', () => {
+    hookMocks.useSpace.mockReturnValue({ isLoading: false, isError: false, data: space })
+    renderWithQuery(<MemoryRouter initialEntries={['/espacos/sala-reuniao/configurar']}><SpaceConfigurator /></MemoryRouter>)
+    fireEvent.click(screen.getByRole('button', { name: /Reunião/i }))
+    const input = screen.getByLabelText('Participantes')
+    const proceed = screen.getByRole('button', { name: /Ver disponibilidade/i })
+    fireEvent.change(input, { target: { value: '0' } })
+    expect(screen.getByText(/pelo menos 1/i)).toBeInTheDocument()
+    expect(proceed).toBeDisabled()
+    fireEvent.change(input, { target: { value: '11' } })
+    expect(screen.getByText(/capacidade publicada de 10/i)).toBeInTheDocument()
+    expect(proceed).toBeDisabled()
+    fireEvent.change(input, { target: { value: '6' } })
+    expect(proceed).toBeEnabled()
+  })
+
+  it('does not trust an unknown purpose from the URL', () => {
+    hookMocks.useSpace.mockReturnValue({ isLoading: false, isError: false, data: space })
+    renderWithQuery(<MemoryRouter initialEntries={['/espacos/sala-reuniao/configurar?purpose=unknown&people=4']}><SpaceConfigurator /></MemoryRouter>)
+    expect(screen.getByText('A escolher')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Ver disponibilidade/i })).toBeDisabled()
   })
 })

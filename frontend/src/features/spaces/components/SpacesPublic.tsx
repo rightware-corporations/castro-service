@@ -36,7 +36,7 @@ export function SpacesCatalog() {
   </div>
 }
 
-function SpaceMediaPreview({ space, index, variant }: { space: Space; index?: number; variant: 'catalog' | 'detail' }) {
+function SpaceMediaPreview({ space, index, variant }: { space: Space; index?: number; variant: 'catalog' | 'detail' | 'config' }) {
   const scenes = useQuery({
     queryKey: ['public', 'spaces', space.id, 'scenes'],
     queryFn: () => spacePublicExperience.listScenes(space.id),
@@ -44,7 +44,7 @@ function SpaceMediaPreview({ space, index, variant }: { space: Space; index?: nu
     staleTime: 5 * 60 * 1000,
   })
   const scene = scenes.data?.[0]
-  const prefix = variant === 'detail' ? 'space-detail-v2' : 'space-v2-card'
+  const prefix = variant === 'detail' ? 'space-detail-v2' : variant === 'config' ? 'space-config-v2' : 'space-v2-card'
   const sceneCount = scenes.data?.length ?? 0
   const status = scenes.isLoading
     ? 'A preparar pré-visualização'
@@ -53,7 +53,7 @@ function SpaceMediaPreview({ space, index, variant }: { space: Space; index?: nu
       : scene
         ? `${sceneCount} ${sceneCount === 1 ? 'cena publicada' : 'cenas publicadas'}`
         : 'Imagem a publicar'
-  const label = variant === 'detail' ? 'EXPERIÊNCIA ESPACIAL' : `ESPAÇO ${String((index ?? 0) + 1).padStart(2, '0')}`
+  const label = variant === 'detail' ? 'EXPERIÊNCIA ESPACIAL' : variant === 'config' ? 'PRÉ-VISUALIZAÇÃO' : `ESPAÇO ${String((index ?? 0) + 1).padStart(2, '0')}`
 
   return <div className={`${prefix}__visual ${scene ? 'has-media' : 'is-empty'}`} aria-label={`Pré-visualização de ${space.name}`}>
     {scene ? <img className={`${prefix}__image`} src={scene.panoramaUrl} alt={scene.title ? `${scene.title} — ${space.name}` : `Vista panorâmica de ${space.name}`} loading={variant === 'detail' ? 'eager' : 'lazy'} draggable={false} /> : <div className={`${prefix}__media-empty`} aria-hidden="true" />}
@@ -95,41 +95,59 @@ export function SpaceExplorer() {
   const query = useSpace(slug)
   const [infoOpen, setInfoOpen] = useState(false)
   const [selectedSceneId, setSelectedSceneId] = useState('')
+  const [activeHotspotId, setActiveHotspotId] = useState('')
   const [zoom, setZoom] = useState(1)
   const canvasRef = useRef<HTMLDivElement>(null)
+  const infoTriggerRef = useRef<HTMLButtonElement>(null)
   const spaceId = query.data?.id ?? ''
   const scenes = useQuery({ queryKey: ['public', 'spaces', spaceId, 'scenes'], queryFn: () => spacePublicExperience.listScenes(spaceId), enabled: Boolean(spaceId) })
   const scene = scenes.data?.find((item) => item.id === selectedSceneId) ?? scenes.data?.[0]
   const sceneId = scene?.id ?? ''
   const hotspots = useQuery({ queryKey: ['public', 'spaces', spaceId, 'scenes', sceneId, 'hotspots'], queryFn: () => spacePublicExperience.listHotspots(spaceId, sceneId), enabled: Boolean(spaceId && sceneId) })
+  const activeHotspot = (hotspots.data ?? []).find((item) => item.id === activeHotspotId)
+
+  useEffect(() => {
+    if (!infoOpen) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      setInfoOpen(false)
+      infoTriggerRef.current?.focus()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [infoOpen])
 
   if (query.isLoading) return <section className="public-page container"><LoadingState label="A preparar o explorador." /></section>
   if (query.isError || !query.data) return <section className="public-page container"><ErrorState title="Não foi possível abrir este espaço." /></section>
   const space = query.data
+  const selectScene = (id: string) => { setSelectedSceneId(id); setActiveHotspotId(''); setZoom(1) }
   const nextScene = () => {
     const items = scenes.data ?? []
     if (!items.length) return
     const current = Math.max(items.findIndex((item) => item.id === scene?.id), 0)
-    setSelectedSceneId(items[(current + 1) % items.length].id)
-    setZoom(1)
+    selectScene(items[(current + 1) % items.length].id)
   }
   const fullScreen = () => { void canvasRef.current?.requestFullscreen?.() }
+  const closeInfo = () => { setInfoOpen(false); infoTriggerRef.current?.focus() }
+  const sceneCount = scenes.data?.length ?? 0
 
   return <div className="space-explorer-v2">
-    <div className="space-explorer-v2__top"><Link to={`/espacos/${space.slug}`}><ArrowLeft size={16} />Voltar</Link><span>{space.name}</span><button type="button" onClick={() => setInfoOpen((value) => !value)} aria-expanded={infoOpen}>Informação</button></div>
-    <div ref={canvasRef} className="space-explorer-v2__canvas" aria-label="Explorador panorâmico do espaço" style={{ overflow: 'hidden' }}>
+    <div className="space-explorer-v2__top"><Link to={`/espacos/${space.slug}`}><ArrowLeft size={16} />Voltar</Link><span>{space.name}</span><button ref={infoTriggerRef} type="button" onClick={() => setInfoOpen((value) => !value)} aria-expanded={infoOpen} aria-controls="space-explorer-information">Informação</button></div>
+    <div ref={canvasRef} className="space-explorer-v2__canvas" aria-label="Explorador panorâmico do espaço">
       {scenes.isLoading && <LoadingState label="A carregar cenas do espaço." />}
       {scenes.isError && <ErrorState title="Não foi possível carregar as cenas deste espaço." />}
-      {!scenes.isLoading && !scenes.isError && !scene && <div className="space-explorer-v2__empty"><span className="eyebrow eyebrow--light">EXPLORADOR 360</span><strong>Panorama ainda não publicado.</strong><p>O explorador ficará disponível quando existir uma cena real publicada para este espaço.</p></div>}
+      {!scenes.isLoading && !scenes.isError && !scene && <div className="space-explorer-v2__empty"><span className="eyebrow eyebrow--light">EXPLORADOR</span><strong>Panorama ainda não publicado.</strong><p>O explorador ficará disponível quando existir uma cena real publicada para este espaço.</p></div>}
       {scene && <>
-        <img src={scene.panoramaUrl} alt={scene.title ? `Panorama: ${scene.title}` : `Panorama de ${space.name}`} draggable={false} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${zoom})`, transition: 'transform 160ms ease', transformOrigin: 'center' }} />
-        {(hotspots.data ?? []).map((hotspot) => <button key={hotspot.id} type="button" title={[hotspot.title, hotspot.description, hotspot.resourceName].filter(Boolean).join(' — ')} aria-label={hotspot.title} onClick={() => hotspot.targetSceneId && setSelectedSceneId(hotspot.targetSceneId)} disabled={!hotspot.targetSceneId} style={{ position: 'absolute', left: `${yawPercent(hotspot.yaw)}%`, top: `${pitchPercent(hotspot.pitch)}%`, transform: 'translate(-50%, -50%)', zIndex: 4, borderRadius: 999, minWidth: 32, minHeight: 32, padding: '6px 10px', border: '1px solid currentColor', cursor: hotspot.targetSceneId ? 'pointer' : 'default' }}>{hotspot.targetSceneId ? '↗' : 'i'}<span className="sr-only"> {hotspot.title}</span></button>)}
-        <div className="space-explorer-v2__empty" style={{ pointerEvents: 'none', background: 'transparent' }}><span className="eyebrow eyebrow--light">{scene.title || 'CENA PANORÂMICA'}</span></div>
+        <img className="space-explorer-v2__panorama" src={scene.panoramaUrl} alt={scene.title ? `Panorama: ${scene.title}` : `Panorama de ${space.name}`} draggable={false} style={{ transform: `scale(${zoom})` }} />
+        <div className="space-explorer-v2__scene-label" aria-live="polite"><span>{scene.title || 'CENA PANORÂMICA'}</span><small>{sceneCount} {sceneCount === 1 ? 'cena publicada' : 'cenas publicadas'}</small></div>
+        {(hotspots.data ?? []).map((hotspot) => <button key={hotspot.id} className={`space-explorer-v2__hotspot ${activeHotspotId === hotspot.id ? 'is-active' : ''}`} type="button" aria-label={hotspot.targetSceneId ? `${hotspot.title}. Abrir outra cena.` : `${hotspot.title}. Ver informação.`} onClick={() => hotspot.targetSceneId ? selectScene(hotspot.targetSceneId) : setActiveHotspotId((value) => value === hotspot.id ? '' : hotspot.id)} style={{ left: `${yawPercent(hotspot.yaw)}%`, top: `${pitchPercent(hotspot.pitch)}%` }}><span aria-hidden="true">{hotspot.targetSceneId ? '↗' : 'i'}</span></button>)}
+        {activeHotspot && <div className="space-explorer-v2__hotspot-card" role="status"><span className="eyebrow eyebrow--light">PONTO DO ESPAÇO</span><strong>{activeHotspot.title}</strong>{activeHotspot.description && <p>{activeHotspot.description}</p>}{activeHotspot.resourceName && <small>{activeHotspot.resourceName}</small>}<button type="button" onClick={() => setActiveHotspotId('')}>Fechar</button></div>}
+        {sceneCount > 1 && <nav className="space-explorer-v2__scenes" aria-label="Cenas publicadas">{(scenes.data ?? []).map((item, index) => <button key={item.id} type="button" aria-pressed={item.id === scene.id} onClick={() => selectScene(item.id)}><span>{String(index + 1).padStart(2, '0')}</span><strong>{item.title || `Cena ${index + 1}`}</strong></button>)}</nav>}
       </>}
-      <div className="space-explorer-v2__controls" aria-label="Controlos do explorador"><button type="button" aria-label="Cena seguinte" onClick={nextScene} disabled={(scenes.data?.length ?? 0) < 2}><RotateCw size={18} /></button><button type="button" aria-label="Aumentar zoom" onClick={() => setZoom((value) => Math.min(2, value + 0.15))} disabled={!scene}><Plus size={18} /></button><button type="button" aria-label="Diminuir zoom" onClick={() => setZoom((value) => Math.max(1, value - 0.15))} disabled={!scene}><Minus size={18} /></button><button type="button" aria-label="Ecrã inteiro" onClick={fullScreen}><Maximize2 size={18} /></button></div>
-      <div className="space-explorer-v2__hint"><Expand size={15} /><span>{scene ? `${scenes.data?.length ?? 1} cena(s) publicada(s) · hotspots ativos quando configurados.` : 'Sem panorama publicado.'}</span></div>
+      <div className="space-explorer-v2__controls" aria-label="Controlos do explorador"><button type="button" aria-label="Cena seguinte" onClick={nextScene} disabled={sceneCount < 2}><RotateCw size={18} /></button><button type="button" aria-label="Aumentar zoom" onClick={() => setZoom((value) => Math.min(2, value + 0.15))} disabled={!scene || zoom >= 2}><Plus size={18} /></button><button type="button" aria-label="Diminuir zoom" onClick={() => setZoom((value) => Math.max(1, value - 0.15))} disabled={!scene || zoom <= 1}><Minus size={18} /></button><button type="button" aria-label="Ecrã inteiro" onClick={fullScreen}><Maximize2 size={18} /></button></div>
+      <div className="space-explorer-v2__hint"><Expand size={15} /><span>{scene ? 'Use os pontos publicados para conhecer detalhes ou mudar de cena.' : 'Sem panorama publicado.'}</span></div>
     </div>
-    <aside className={`space-explorer-v2__info ${infoOpen ? 'space-explorer-v2__info--open' : ''}`}><button type="button" onClick={() => setInfoOpen(false)} aria-label="Fechar informação">Fechar</button><span className="eyebrow">SOBRE O ESPAÇO</span><h2>{space.name}</h2><p>{space.description ?? 'Conteúdo detalhado pendente.'}</p><div><small>Capacidade</small><strong>{formatCapacity(space)}</strong></div>{space.location && <div><small>Localização</small><strong>{space.location}</strong></div>}{scene && <div><small>Cena atual</small><strong>{scene.title || 'Sem título'}</strong></div>}<Link className="ds-button ds-button--primary" to={`/espacos/${space.slug}/configurar`}>Configurar este espaço <ArrowRight size={16} /></Link></aside>
+    {infoOpen && <aside id="space-explorer-information" className="space-explorer-v2__info" aria-label={`Informação sobre ${space.name}`}><button type="button" onClick={closeInfo} aria-label="Fechar informação">Fechar</button><span className="eyebrow">SOBRE O ESPAÇO</span><h2>{space.name}</h2><p>{space.description ?? 'Conteúdo detalhado pendente.'}</p><div><small>Capacidade</small><strong>{formatCapacity(space)}</strong></div>{space.location && <div><small>Localização</small><strong>{space.location}</strong></div>}{scene && <div><small>Cena atual</small><strong>{scene.title || 'Sem título'}</strong></div>}<Link className="ds-button ds-button--primary" to={`/espacos/${space.slug}/configurar`}>Configurar este espaço <ArrowRight size={16} /></Link></aside>}
   </div>
 }
 
@@ -138,7 +156,7 @@ export function SpaceConfigurator() {
   const query = useSpace(slug)
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [purpose, setPurpose] = useState(searchParams.get('purpose') ?? '')
+  const [purpose, setPurpose] = useState(parsePurpose(searchParams.get('purpose')))
   const initialPeople = parsePeople(searchParams.get('people'))
   const [people, setPeople] = useState<number | ''>(initialPeople)
 
@@ -152,7 +170,10 @@ export function SpaceConfigurator() {
   if (query.isLoading) return <section className="public-page container"><LoadingState label="A preparar configuração." /></section>
   if (query.isError || !query.data) return <section className="public-page container"><ErrorState title="Não foi possível configurar este espaço." /></section>
   const space = query.data
+  const peopleTooLow = typeof people === 'number' && people < 1
   const peopleTooHigh = typeof people === 'number' && space.capacityMax !== undefined && people > space.capacityMax
+  const peopleInvalid = peopleTooLow || peopleTooHigh
+  const peopleError = peopleTooLow ? 'O número de participantes deve ser pelo menos 1.' : peopleTooHigh ? `O valor ultrapassa a capacidade publicada de ${space.capacityMax}.` : ''
   const purposeLabel = purposeOptions.find((item) => item.value === purpose)?.label
   const bookingParams = new URLSearchParams()
   if (purpose) bookingParams.set('purpose', purpose)
@@ -164,10 +185,10 @@ export function SpaceConfigurator() {
     <section className="container space-config-v2__layout">
       <div className="space-config-v2__controls">
         <div className="space-config-v2__section"><div className="space-config-v2__section-title"><span>01</span><div><h2>Qual é o tipo de encontro?</h2><p>Esta escolha descreve a intenção; não altera regras comerciais.</p></div></div><div className="space-config-v2__purpose">{purposeOptions.map(({ value, label, icon: Icon }) => <button className={purpose === value ? 'is-selected' : ''} key={value} type="button" onClick={() => setPurpose(value)} aria-pressed={purpose === value}><Icon size={19} /><span>{label}</span><ArrowUpRight size={15} /></button>)}</div></div>
-        <div className="space-config-v2__section"><div className="space-config-v2__section-title"><span>02</span><div><h2>Quantas pessoas?</h2><p>{space.capacityMax !== undefined ? `O espaço publicado indica capacidade máxima de ${space.capacityMax}.` : 'Indique o número previsto de participantes.'}</p></div></div><label className="space-config-v2__people"><span>Participantes</span><input type="number" min="1" max={space.capacityMax} value={people} onChange={(event) => setPeople(event.target.value === '' ? '' : Number(event.target.value))} aria-invalid={peopleTooHigh} />{peopleTooHigh && <small>O valor ultrapassa a capacidade publicada para este espaço.</small>}</label></div>
-        <div className="space-config-v2__section space-config-v2__pending"><div className="space-config-v2__section-title"><span>03</span><div><h2>Layout & recursos</h2><p>As opções publicadas serão ligadas ao configurador sem assumir equipamento ou regras que não estejam aprovadas.</p></div></div></div>
+        <div className="space-config-v2__section"><div className="space-config-v2__section-title"><span>02</span><div><h2>Quantas pessoas?</h2><p>{space.capacityMax !== undefined ? `O espaço publicado indica capacidade máxima de ${space.capacityMax}.` : 'Indique o número previsto de participantes.'}</p></div></div><label className="space-config-v2__people"><span>Participantes</span><input type="number" min="1" max={space.capacityMax} value={people} onChange={(event) => setPeople(event.target.value === '' ? '' : Number(event.target.value))} aria-invalid={peopleInvalid} aria-describedby={peopleInvalid ? 'space-config-people-error' : undefined} />{peopleInvalid && <small id="space-config-people-error">{peopleError}</small>}</label></div>
+        <div className="space-config-v2__section space-config-v2__pending"><div className="space-config-v2__section-title"><span>03</span><div><h2>Layout & recursos</h2><p>As opções serão apresentadas quando existirem configurações reais publicadas para este espaço.</p><small className="space-config-v2__pending-label">AINDA NÃO PUBLICADO</small></div></div></div>
       </div>
-      <aside className="space-config-v2__summary"><div className="space-config-v2__preview" aria-hidden="true"><span /><span /><span /></div><span className="eyebrow">RESUMO</span><h2>{space.name}</h2><dl><div><dt>Finalidade</dt><dd>{purposeLabel ?? 'A escolher'}</dd></div><div><dt>Participantes</dt><dd>{people === '' ? 'A indicar' : people}</dd></div><div><dt>Capacidade</dt><dd>{formatCapacity(space)}</dd></div></dl><Button disabled={!purpose || people === '' || peopleTooHigh} onClick={() => navigate(bookingHref)}>Ver disponibilidade <ArrowRight size={16} /></Button><small>A disponibilidade será calculada pelo backend no próximo passo.</small></aside>
+      <aside className="space-config-v2__summary"><SpaceMediaPreview space={space} variant="config" /><span className="eyebrow">RESUMO</span><h2>{space.name}</h2><dl><div><dt>Finalidade</dt><dd>{purposeLabel ?? 'A escolher'}</dd></div><div><dt>Participantes</dt><dd>{people === '' ? 'A indicar' : people}</dd></div><div><dt>Capacidade</dt><dd>{formatCapacity(space)}</dd></div></dl><Button disabled={!purpose || people === '' || peopleInvalid} onClick={() => navigate(bookingHref)}>Ver disponibilidade <ArrowRight size={16} /></Button><small>A disponibilidade será calculada pelo sistema no próximo passo.</small></aside>
     </section>
   </div>
 }
@@ -180,6 +201,10 @@ function formatCapacity(space: Space) {
   if (space.capacityMax !== undefined) return `Até ${space.capacityMax} pessoas`
   if (space.capacityMin !== undefined) return `A partir de ${space.capacityMin} pessoas`
   return 'A confirmar'
+}
+
+function parsePurpose(value: string | null) {
+  return purposeOptions.some((option) => option.value === value) ? value ?? '' : ''
 }
 
 function parsePeople(value: string | null): number | '' {
