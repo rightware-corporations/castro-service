@@ -1,8 +1,10 @@
 # Castro’s Services — Visual & Interaction System
 
-Status: **Foundation v0.1**
+Status: **Foundation v0.2 — governed by Design Quality Contract v1**
 
-This document records the approved public-experience direction for Castro’s Services. It complements the existing design system; it does not replace product truth, backend contracts, booking rules, permissions, content approval or the public design lock.
+This document records the approved public-experience direction for Castro’s Services. Concrete grid, measure, rhythm, scene, focus, media, responsive, motion, performance, accessibility and CSS-ownership rules are governed by `docs/CASTRO_DESIGN_QUALITY_CONTRACT_V1.md`.
+
+This system complements the existing design system; it does not replace product truth, backend contracts, booking rules, permissions or content approval.
 
 ## 1. Experience objective
 
@@ -80,7 +82,7 @@ Purpose: clarify the next action with less visual spectacle as user commitment i
 
 The scene system should alternate tonal surfaces deliberately instead of repeatedly resetting to pure white.
 
-Current foundation variables are additive aliases over approved design tokens:
+Canonical scene variables are design-system tokens:
 
 - `--scene-paper`
 - `--scene-warm`
@@ -91,7 +93,7 @@ Current foundation variables are additive aliases over approved design tokens:
 - `--scene-shadow`
 - `--scene-focus-shadow`
 
-These variables must remain derived from the Castro’s palette. They are not authorization for a second color system.
+These variables remain derived from the Castro’s palette. They are not authorization for a second color system.
 
 ## 5. Interaction language
 
@@ -105,12 +107,13 @@ Every interaction should communicate at least one of the following:
 - where the user is moving;
 - what action follows.
 
-Interaction levels:
+Implementation motion levels are:
 
-1. **Micro feedback** — hover, press, focus, tabs, buttons, slots.
-2. **Object motion** — service, course or space gains priority.
-3. **Scene motion** — scene reveal, hierarchy shift and restrained depth.
-4. **Continuity motion** — selection to detail, configuration, availability and booking.
+1. **MICRO** — hover, press, focus, tabs, buttons, slots.
+2. **OBJECT** — service, course or space gains priority; drawers/sheets; configuration changes.
+3. **SCENE** — scene reveal, hierarchy shift and restrained narrative continuity.
+
+Continuity between selection, detail, configuration, availability and booking may combine OBJECT and SCENE motion, but product state remains owned by React/domain logic.
 
 Motion follows state. Motion never becomes product state.
 
@@ -138,7 +141,7 @@ Target journey:
 
 `BROWSE → FOCUS → UNDERSTAND → REQUEST`
 
-Services should evolve toward an editorial index/focus model rather than identical generic cards.
+The dedicated Services visual phase now implements the editorial index/focus model while preserving real published service data and routing.
 
 ### Training
 
@@ -146,7 +149,7 @@ Target journey:
 
 `DISCOVER → INSPECT → SESSION → REGISTER`
 
-Training must retain real course/session metadata and have a distinct identity from Services and Spaces.
+The dedicated Training visual phase now gives format discovery and published training a distinct identity while preserving real course/session metadata.
 
 ### Spaces
 
@@ -154,7 +157,7 @@ Target journey:
 
 `DISCOVER → FOCUS → DETAIL → EXPLORE → CONFIGURE → AVAILABILITY → BOOK`
 
-Approved real photography should progressively gain authority as the visitor moves deeper into the journey.
+Approved real photography should progressively gain authority as the visitor moves deeper into the journey. This remains the next major public visual phase after the Design Quality Contract is established.
 
 ### Booking
 
@@ -180,11 +183,13 @@ When approved media arrives, the system should support:
 
 The existing `VITE_ELIZABETH_PORTRAIT_URL` remains the controlled portrait entry point.
 
+Detailed ratios, crop rules, loading policy and image budgets live in `CASTRO_DESIGN_QUALITY_CONTRACT_V1.md`.
+
 ## 9. Motion language
 
 The existing Functional Motion Foundation remains authoritative for base timing and reduced-motion behaviour.
 
-Categories:
+Functional categories remain:
 
 - ENTER
 - EXIT
@@ -199,6 +204,8 @@ Categories:
 - SUCCESS
 - ERROR
 
+Implementation levels are MICRO / OBJECT / SCENE.
+
 Use transform and opacity first. Avoid large displacement, continuous autoplay, aggressive parallax and scroll hijacking.
 
 ## 10. Reduced motion
@@ -211,6 +218,8 @@ When `prefers-reduced-motion: reduce` is active:
 - preserve state feedback;
 - make essential transitions immediate or nearly immediate;
 - preserve focus, keyboard behaviour and click/touch targets.
+
+Global ownership belongs to MotionProvider plus the accessibility foundation; feature styles should contain only feature-specific reduced-motion exceptions.
 
 ## 11. Responsive principles
 
@@ -228,20 +237,31 @@ For each major pattern decide deliberately:
 
 Desktop-only hover behaviour must never be required to understand or complete a task.
 
+The concrete acceptance widths and recomposition rules are defined by the Design Quality Contract.
+
 ## 12. Current implementation foundation
 
-The first public-visual-foundation layer deliberately does **not** redesign the Hero or alter business logic.
+Completed public visual phases:
 
-It currently establishes:
+- Functional Motion Foundation;
+- Public Visual Foundations;
+- Navigation + Hero;
+- Services;
+- Training.
+
+The current foundation establishes:
 
 - continuous tonal scene fields on selected Homepage sections;
 - a stronger focus model for the three primary experience entries;
-- editorial treatment for published Service/Training content;
+- an editorial/spatial Hero prepared for approved real photography;
+- contextual public navigation;
+- an editorial focus model for Services;
+- a Training-specific discovery/catalog experience;
 - spatial depth for the Space teaser while retaining the honest placeholder;
 - a connected visual rhythm for the process sequence;
-- explicit reduced-motion fallbacks for new transforms.
+- explicit reduced-motion fallbacks.
 
-Hero, Navigation, Services, Training, Spaces, Explorer/Configurator and Booking receive dedicated implementation phases after this foundation is validated.
+Before Spaces, the Design Quality Contract consolidates the transversal rules and begins reducing historical cascade dependency without redesigning pages.
 
 ## 13. Reference-system rule
 
@@ -273,4 +293,5 @@ Before accepting a visual change, verify:
 - reduced motion remains usable;
 - content remains truthful;
 - performance cost is proportionate;
-- business logic and backend truth remain unchanged.
+- business logic and backend truth remain unchanged;
+- the owning feature/design-system layer owns the rule rather than relying on a new final override.
