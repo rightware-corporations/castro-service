@@ -39,6 +39,18 @@ function useMediaQuery(query: string) {
   return matches
 }
 
+function useScrolled(threshold = 24) {
+  const [scrolled, setScrolled] = useState(() => typeof window !== 'undefined' && window.scrollY > threshold)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const update = () => setScrolled(window.scrollY > threshold)
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    return () => window.removeEventListener('scroll', update)
+  }, [threshold])
+  return scrolled
+}
+
 function useEscapeToClose(open: boolean, enabled: boolean, onClose: () => void) {
   useEffect(() => {
     if (!open || !enabled) return
@@ -60,9 +72,10 @@ export function PublicLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuTriggerRef = useRef<HTMLButtonElement>(null)
   const isMobile = useMediaQuery('(max-width: 767px)')
+  const scrolled = useScrolled()
   const closeMenu = () => { setMenuOpen(false); menuTriggerRef.current?.focus() }
   useEscapeToClose(menuOpen, isMobile, closeMenu)
-  return <div className="public-layout public-v2-shell"><SkipLink /><header className="public-header"><div className="container public-header__inner"><Brand /><motion.nav id="public-primary-navigation" className={`public-nav ${menuOpen ? 'public-nav--open' : ''}`} aria-label="Navegação principal" aria-hidden={isMobile && !menuOpen ? true : undefined} inert={isMobile && !menuOpen} initial={false} animate={isMobile ? (menuOpen ? 'open' : 'closed') : 'desktop'} variants={motionPresets.mobileMenu}>{publicLinks.map((link) => <NavLink key={link.to} to={link.to} onClick={() => setMenuOpen(false)}>{link.label}</NavLink>)}<Link className="button button--nav public-header__cta" to="/contacto" onClick={() => setMenuOpen(false)}>Falar connosco <ChevronRight size={16} /></Link></motion.nav><button ref={menuTriggerRef} className="icon-button public-menu-toggle" type="button" onClick={() => setMenuOpen((open) => !open)} aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'} aria-expanded={menuOpen} aria-controls="public-primary-navigation">{menuOpen ? <X size={22} /> : <Menu size={22} />}</button></div></header><main id="main-content" tabIndex={-1}><Outlet /></main><footer className="public-footer public-footer--v2"><div className="container public-footer__v2-grid"><div className="public-footer__brand-block"><Brand inverse /><p>Consultoria, formação e espaços reunidos numa experiência pensada para pessoas e organizações.</p></div><nav className="public-footer__nav" aria-label="Navegação do rodapé"><span className="public-footer__label">Explorar</span>{publicLinks.map((link) => <Link key={link.to} to={link.to}>{link.label}<ArrowUpRight size={14} aria-hidden="true" /></Link>)}</nav><div className="public-footer__closing"><span className="public-footer__label">Castro’s Services</span><p>Atendimento ao Cliente · Ética e Liderança Organizacional · Palestras, Workshops e Formação · Treinamento Corporativo Personalizado.</p></div></div><div className="container public-footer__baseline"><span>Castro’s Services</span><span>Consultoria · Formação · Espaços</span></div></footer></div>
+  return <div className="public-layout public-v2-shell"><SkipLink /><header className={`public-header ${scrolled ? 'public-header--scrolled' : ''}`} data-scroll-state={scrolled ? 'scrolled' : 'top'}><div className="container public-header__inner"><Brand /><motion.nav id="public-primary-navigation" className={`public-nav ${menuOpen ? 'public-nav--open' : ''}`} aria-label="Navegação principal" aria-hidden={isMobile && !menuOpen ? true : undefined} inert={isMobile && !menuOpen} initial={false} animate={isMobile ? (menuOpen ? 'open' : 'closed') : 'desktop'} variants={motionPresets.mobileMenu}>{publicLinks.map((link) => <NavLink key={link.to} to={link.to} onClick={() => setMenuOpen(false)}>{link.label}</NavLink>)}<Link className="button button--nav public-header__cta" to="/contacto" onClick={() => setMenuOpen(false)}>Falar connosco <ChevronRight size={16} /></Link></motion.nav><button ref={menuTriggerRef} className="icon-button public-menu-toggle" type="button" onClick={() => setMenuOpen((open) => !open)} aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'} aria-expanded={menuOpen} aria-controls="public-primary-navigation">{menuOpen ? <X size={22} /> : <Menu size={22} />}</button></div></header><AnimatePresence initial={false}>{menuOpen && isMobile ? <motion.button className="public-nav-scrim" type="button" onClick={closeMenu} aria-label="Fechar menu" initial={motionPresets.scrim.initial} animate={motionPresets.scrim.animate} exit={motionPresets.scrim.exit} transition={motionPresets.scrim.transition} /> : null}</AnimatePresence><main id="main-content" tabIndex={-1}><Outlet /></main><footer className="public-footer public-footer--v2"><div className="container public-footer__v2-grid"><div className="public-footer__brand-block"><Brand inverse /><p>Consultoria, formação e espaços reunidos numa experiência pensada para pessoas e organizações.</p></div><nav className="public-footer__nav" aria-label="Navegação do rodapé"><span className="public-footer__label">Explorar</span>{publicLinks.map((link) => <Link key={link.to} to={link.to}>{link.label}<ArrowUpRight size={14} aria-hidden="true" /></Link>)}</nav><div className="public-footer__closing"><span className="public-footer__label">Castro’s Services</span><p>Atendimento ao Cliente · Ética e Liderança Organizacional · Palestras, Workshops e Formação · Treinamento Corporativo Personalizado.</p></div></div><div className="container public-footer__baseline"><span>Castro’s Services</span><span>Consultoria · Formação · Espaços</span></div></footer></div>
 }
 
 export function AuthLayout() { return <div className="auth-layout"><SkipLink /><header className="auth-layout__header"><Brand inverse /></header><main id="main-content" tabIndex={-1}><Outlet /></main></div> }
