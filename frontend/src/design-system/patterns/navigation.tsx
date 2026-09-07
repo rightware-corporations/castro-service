@@ -22,7 +22,7 @@ export function Tabs({ items, initialId }: { items: { id: string; label: string;
 
 export function Stepper({ steps, current }: { steps: { id: string; label: string }[]; current: string }) {
   const instanceId = useId()
-  return <ol className="ds-stepper" aria-label="Progresso">{steps.map((step, index) => <li key={step.id} className={step.id === current ? 'is-current' : ''}><span>{step.id === current ? <motion.i className="ds-stepper__selection" layoutId={`ds-stepper-indicator-${instanceId}`} transition={motionSprings.layout} aria-hidden="true" /> : null}<b className="ds-stepper__value">{index + 1}</b></span><strong>{step.label}</strong></li>)}</ol>
+  return <ol className="ds-stepper" aria-label="Progresso">{steps.map((step, index) => <li key={step.id} className={step.id === current ? 'is-current' : ''} aria-current={step.id === current ? 'step' : undefined}><span>{step.id === current ? <motion.i className="ds-stepper__selection" layoutId={`ds-stepper-indicator-${instanceId}`} transition={motionSprings.layout} aria-hidden="true" /> : null}<b className="ds-stepper__value">{index + 1}</b></span><strong>{step.label}</strong></li>)}</ol>
 }
 
 export function Pagination({ page, totalPages, onChange }: { page: number; totalPages: number; onChange: (page: number) => void }) { return <nav className="ds-pagination" aria-label="Paginação"><button className="ds-button ds-button--tertiary ds-button--sm" type="button" disabled={page <= 1} onClick={() => onChange(page - 1)}>Anterior</button><span>Página {page} de {totalPages}</span><button className="ds-button ds-button--tertiary ds-button--sm" type="button" disabled={page >= totalPages} onClick={() => onChange(page + 1)}>Seguinte</button></nav> }
