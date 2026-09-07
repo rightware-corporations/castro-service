@@ -14,6 +14,7 @@
   --color-warning: #8a6200;
   --color-danger: #a12626;
   --color-info: #1d5e82;
+
   --font-ui: 'Manrope', system-ui, sans-serif;
   --font-editorial: 'Instrument Serif', Georgia, serif;
   --font-weight-regular: 400;
@@ -30,6 +31,7 @@
   --line-tight: 1.1;
   --line-normal: 1.6;
   --line-relaxed: 1.75;
+
   --space-1: 0.5rem;
   --space-2: 1rem;
   --space-3: 1.5rem;
@@ -38,15 +40,60 @@
   --space-6: 4rem;
   --space-7: 5rem;
   --space-8: 8rem;
+
+  /* Design Quality Contract v1 — semantic layout authority. */
+  --layout-max-wide: 82.5rem;
+  --layout-max-content: 64rem;
+  --layout-max-reading: 45rem;
   --container-sm: 40rem;
-  --container-md: 64rem;
+  --container-md: var(--layout-max-content);
   --container-max: 1240px;
+
+  --gutter-desktop: 2rem;
+  --gutter-tablet: 1.5rem;
+  --gutter-mobile: 1.25rem;
+  --gutter-narrow: 1rem;
   --gutter: 1.5rem;
-  --page-padding: 2rem;
+  --page-padding: var(--gutter-desktop);
+
+  --measure-display: 12ch;
+  --measure-heading: 14ch;
+  --measure-heading-wide: 18ch;
+  --measure-lead: 38rem;
+  --measure-copy: 42rem;
+  --measure-prose: 46rem;
+  --measure-support: 32rem;
+
+  --rhythm-content-gap: var(--space-3);
+  --rhythm-group-gap: var(--space-4);
+  --rhythm-transition-gap: clamp(2.5rem, 4vw, 4rem);
+  --rhythm-scene-small: clamp(3.5rem, 5vw, 5rem);
+  --rhythm-scene-medium: clamp(4.5rem, 7vw, 7rem);
+  --rhythm-scene-large: clamp(6rem, 9vw, 9rem);
+  --rhythm-hero: clamp(5rem, 9vw, 8rem);
+
+  /* Scene aliases derive only from the approved Castro palette. */
+  --scene-paper: var(--color-off-white);
+  --scene-warm: rgb(241 222 174 / 24%);
+  --scene-warm-strong: rgb(241 222 174 / 42%);
+  --scene-ink: var(--color-deep-navy);
+  --scene-line: rgb(23 24 79 / 13%);
+  --scene-line-strong: rgb(23 24 79 / 20%);
+  --scene-shadow: 0 2rem 5rem rgb(16 19 59 / 8%);
+  --scene-focus-shadow: 0 2.25rem 4.5rem rgb(16 19 59 / 16%);
+
+  /* Media composition ratios; source media may retain a different native ratio. */
+  --media-ratio-portrait: 4 / 5;
+  --media-ratio-editorial: 3 / 2;
+  --media-ratio-landscape: 16 / 10;
+  --media-ratio-wide: 16 / 9;
+  --media-ratio-panorama: 2 / 1;
+
   --breakpoint-sm: 480px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
+
   --radius-none: 0;
   --radius-control: 0.625rem;
   --radius-card: 0.75rem;
@@ -55,13 +102,16 @@
   --shadow-sm: 0 2px 8px rgb(16 19 59 / 6%);
   --shadow-md: 0 12px 32px rgb(16 19 59 / 10%);
   --shadow-lg: 0 24px 64px rgb(16 19 59 / 16%);
+
   --z-header: 20;
   --z-dropdown: 30;
   --z-bottom-nav: 40;
   --z-scrim: 50;
   --z-drawer: 60;
   --z-dialog: 70;
+
   --focus-ring: 0 0 0 3px rgb(34 187 174 / 30%);
+
   --ease-standard: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --motion-instant: 100ms;
@@ -70,6 +120,7 @@
   --motion-standard: 240ms;
   --motion-slow: 280ms;
   --motion-emphasis: 420ms;
+
   --control-sm: 2.25rem;
   --control-md: 3rem;
   --control-lg: 3.5rem;
@@ -78,7 +129,7 @@
 
 @media (max-width: 767px) {
   :root {
-    --page-padding: 1.25rem;
+    --page-padding: var(--gutter-mobile);
     --gutter: 1rem;
     --space-8: 5.5rem;
     --text-2xl: 2rem;
