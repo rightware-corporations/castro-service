@@ -36,13 +36,39 @@ export function SpacesCatalog() {
   </div>
 }
 
+function SpaceMediaPreview({ space, index, variant }: { space: Space; index?: number; variant: 'catalog' | 'detail' }) {
+  const scenes = useQuery({
+    queryKey: ['public', 'spaces', space.id, 'scenes'],
+    queryFn: () => spacePublicExperience.listScenes(space.id),
+    enabled: Boolean(space.id),
+    staleTime: 5 * 60 * 1000,
+  })
+  const scene = scenes.data?.[0]
+  const prefix = variant === 'detail' ? 'space-detail-v2' : 'space-v2-card'
+  const sceneCount = scenes.data?.length ?? 0
+  const status = scenes.isLoading
+    ? 'A preparar pré-visualização'
+    : scenes.isError
+      ? 'Pré-visualização indisponível'
+      : scene
+        ? `${sceneCount} ${sceneCount === 1 ? 'cena publicada' : 'cenas publicadas'}`
+        : 'Imagem a publicar'
+  const label = variant === 'detail' ? 'EXPERIÊNCIA ESPACIAL' : `ESPAÇO ${String((index ?? 0) + 1).padStart(2, '0')}`
+
+  return <div className={`${prefix}__visual ${scene ? 'has-media' : 'is-empty'}`} aria-label={`Pré-visualização de ${space.name}`}>
+    {scene ? <img className={`${prefix}__image`} src={scene.panoramaUrl} alt={scene.title ? `${scene.title} — ${space.name}` : `Vista panorâmica de ${space.name}`} loading={variant === 'detail' ? 'eager' : 'lazy'} draggable={false} /> : <div className={`${prefix}__media-empty`} aria-hidden="true" />}
+    <div className={`${prefix}__media-overlay`}><span>{label}</span><small>{status}</small></div>
+  </div>
+}
+
 function SpaceCatalogItem({ space, index }: { space: Space; index: number }) {
+  const summary = space.summary ?? space.description
   return <article className="space-v2-card">
-    <div className="space-v2-card__visual" aria-hidden="true"><span>{String(index + 1).padStart(2, '0')}</span><div className="space-v2-card__room"><i /><i /><i /></div><small>MEDIA PUBLICADA NO EXPLORADOR</small></div>
+    <SpaceMediaPreview space={space} index={index} variant="catalog" />
     <div className="space-v2-card__content">
       <div className="space-v2-card__meta"><span>ESPAÇO</span>{space.location && <span><MapPin size={14} />{space.location}</span>}</div>
       <h2>{space.name}</h2>
-      {space.description && <p>{space.description}</p>}
+      {summary && <p>{summary}</p>}
       <div className="space-v2-card__facts">{space.capacityMin !== undefined || space.capacityMax !== undefined ? <span><UsersRound size={16} />{formatCapacity(space)}</span> : <span><UsersRound size={16} />Capacidade a confirmar</span>}</div>
       <div className="space-v2-card__actions"><Link className="ds-button ds-button--primary" to={`/espacos/${space.slug}`}>Conhecer espaço <ArrowRight size={16} /></Link><Link className="home-v2-link" to={`/espacos/${space.slug}/explorar`}>Explorar <Eye size={16} /></Link></div>
     </div>
@@ -59,7 +85,7 @@ export function SpaceDetail() {
   return <div className="space-detail-v2">
     <section className="container public-v2-page"><Breadcrumbs items={[{ label: 'Espaços', href: '/espacos' }, { label: space.name }]} />
       <header className="space-detail-v2__hero"><div><span className="eyebrow">CASTRO’S · ESPAÇO</span><h1>{space.name}</h1><p>{space.description ?? 'A descrição detalhada será apresentada quando o conteúdo do espaço estiver publicado.'}</p></div><div className="space-detail-v2__index"><span>ESPAÇO</span>{space.location && <p><MapPin size={15} />{space.location}</p>}</div></header>
-      <div className="space-detail-v2__stage"><div className="space-detail-v2__visual" aria-label="Área de apresentação do espaço"><div className="space-detail-v2__architecture" aria-hidden="true"><span /><span /><span /><i /><i /></div><div className="space-detail-v2__visual-label"><strong>EXPERIÊNCIA ESPACIAL</strong><small>As cenas panorâmicas publicadas podem ser abertas no explorador.</small></div></div><aside className="space-detail-v2__panel"><span className="eyebrow">INFORMAÇÃO</span><h2>Prepare o encontro antes de chegar.</h2><div className="space-detail-v2__facts"><div><small>Capacidade</small><strong>{formatCapacity(space)}</strong></div>{space.location && <div><small>Localização</small><strong>{space.location}</strong></div>}</div><Link className="ds-button ds-button--primary" to={`/espacos/${space.slug}/explorar`}>Explorar espaço <Eye size={17} /></Link><Link className="ds-button ds-button--secondary" to={`/espacos/${space.slug}/configurar`}>Configurar encontro <ArrowRight size={17} /></Link></aside></div>
+      <div className="space-detail-v2__stage"><SpaceMediaPreview space={space} variant="detail" /><aside className="space-detail-v2__panel"><span className="eyebrow">INFORMAÇÃO</span><h2>Prepare o encontro antes de chegar.</h2><div className="space-detail-v2__facts"><div><small>Capacidade</small><strong>{formatCapacity(space)}</strong></div>{space.location && <div><small>Localização</small><strong>{space.location}</strong></div>}</div><Link className="ds-button ds-button--primary" to={`/espacos/${space.slug}/explorar`}>Explorar espaço <Eye size={17} /></Link><Link className="ds-button ds-button--secondary" to={`/espacos/${space.slug}/configurar`}>Configurar encontro <ArrowRight size={17} /></Link></aside></div>
     </section>
   </div>
 }

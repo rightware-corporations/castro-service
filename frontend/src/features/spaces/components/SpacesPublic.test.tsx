@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -23,6 +24,11 @@ const space = {
   capacityMax: 10,
 }
 
+function renderWithQuery(element: React.ReactElement) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(<QueryClientProvider client={queryClient}>{element}</QueryClientProvider>)
+}
+
 describe('public spaces navigation', () => {
   beforeEach(() => {
     hookMocks.useSpaces.mockReset()
@@ -36,7 +42,7 @@ describe('public spaces navigation', () => {
       data: { items: [space] },
     })
 
-    render(<MemoryRouter><SpacesCatalog /></MemoryRouter>)
+    renderWithQuery(<MemoryRouter><SpacesCatalog /></MemoryRouter>)
 
     expect(screen.getByRole('link', { name: /Conhecer espaço/i })).toHaveAttribute('href', '/espacos/sala-reuniao')
     expect(screen.getByRole('link', { name: /^Explorar/i })).toHaveAttribute('href', '/espacos/sala-reuniao/explorar')
@@ -49,7 +55,7 @@ describe('public spaces navigation', () => {
       data: space,
     })
 
-    render(<MemoryRouter initialEntries={['/espacos/sala-reuniao']}><SpaceDetail /></MemoryRouter>)
+    renderWithQuery(<MemoryRouter initialEntries={['/espacos/sala-reuniao']}><SpaceDetail /></MemoryRouter>)
 
     expect(screen.getByRole('link', { name: 'Espaços' })).toHaveAttribute('href', '/espacos')
     expect(screen.getByRole('link', { name: /Explorar espaço/i })).toHaveAttribute('href', '/espacos/sala-reuniao/explorar')
