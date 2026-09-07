@@ -1,5 +1,6 @@
 import { MemoryRouter } from 'react-router-dom'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { CourseCollectionView, CourseDetailView, CourseSessionsView } from './CoursesPublic'
 
@@ -7,7 +8,7 @@ const course = { id: 'course-1', slug: 'course-1', name: '[CONTENT TBD]', summar
 const emptySessions = { isLoading: false, isError: false, data: { items: [] } }
 
 describe('public training', () => {
-  it('renders catalog loading and success states through the reusable course card', () => {
+  it('renders catalog loading and success states through the published training list', () => {
     const { rerender } = render(<MemoryRouter><CourseCollectionView resource={{ isLoading: true, isError: false }} /></MemoryRouter>)
     expect(screen.getByRole('status')).toHaveTextContent('A carregar formação.')
     rerender(<MemoryRouter><CourseCollectionView resource={{ isLoading: false, isError: false, data: { items: [course] } }} /></MemoryRouter>)
@@ -16,6 +17,25 @@ describe('public training', () => {
     expect(screen.getByRole('link', { name: /Ver curso e inscrição/i })).toHaveAttribute('href', '/formacao/course-1')
     expect(screen.queryByText('878 665 180')).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Formação para a minha organização/i }).getAttribute('href')).toContain('CORPORATE_TRAINING')
+  })
+
+  it('lets visitors focus a training format without changing the published catalog', async () => {
+    const user = userEvent.setup()
+    render(<MemoryRouter><CourseCollectionView resource={{ isLoading: false, isError: false, data: { items: [course] } }} /></MemoryRouter>)
+
+    const workshop = screen.getByRole('button', { name: /Palestras & Workshops/i })
+    const personalized = screen.getByRole('button', { name: /Treinamento Personalizado/i })
+
+    expect(workshop).toHaveAttribute('aria-pressed', 'true')
+    expect(personalized).toHaveAttribute('aria-pressed', 'false')
+
+    await user.click(personalized)
+
+    expect(workshop).toHaveAttribute('aria-pressed', 'false')
+    expect(personalized).toHaveAttribute('aria-pressed', 'true')
+    expect(await screen.findByRole('heading', { name: 'Treinamento Personalizado' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Ver formação publicada/i })).toHaveAttribute('href', '#formacao-publicada')
+    expect(screen.getByRole('link', { name: '[CONTENT TBD]' })).toHaveAttribute('href', '/formacao/course-1')
   })
 
   it('renders catalog empty and API error states', () => {

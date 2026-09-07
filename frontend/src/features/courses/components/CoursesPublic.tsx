@@ -1,10 +1,33 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { motion, useReducedMotion } from 'motion/react'
 import { ArrowRight, ArrowUpRight, CalendarDays, Presentation, Sparkles, UsersRound } from 'lucide-react'
 import { useCourse, useCourseSessions, useCourses } from '../hooks'
 import { EmptyState, ErrorState, LoadingState } from '../../../design-system/patterns/feedback-overlays'
 import { Breadcrumbs } from '../../../design-system/patterns/navigation'
 import type { Course, CourseSession } from '../../../domain/models'
 import { contactHref } from '../../contact/intent'
+
+const trainingFormats = [
+  {
+    number: '01',
+    title: 'Palestras & Workshops',
+    description: 'Encontros para provocar reflexão, partilhar práticas e criar linguagem comum dentro das organizações.',
+    icon: Presentation,
+  },
+  {
+    number: '02',
+    title: 'Formação',
+    description: 'Experiências de aprendizagem estruturadas para desenvolver capacidades e apoiar o trabalho das equipas.',
+    icon: UsersRound,
+  },
+  {
+    number: '03',
+    title: 'Treinamento Personalizado',
+    description: 'Formação corporativa preparada a partir do contexto e das necessidades específicas da organização.',
+    icon: Sparkles,
+  },
+] as const
 
 function CoursesIntro({ detailTitle }: { detailTitle?: string }) {
   return <header className="courses-v2-intro">
@@ -13,27 +36,70 @@ function CoursesIntro({ detailTitle }: { detailTitle?: string }) {
   </header>
 }
 
+function TrainingFormatExplorer() {
+  const [activeIndex, setActiveIndex] = useState(0)
+  const reducedMotion = useReducedMotion()
+  const activeFormat = trainingFormats[activeIndex]
+  const ActiveIcon = activeFormat.icon
+
+  return <section className="training-experience" aria-labelledby="training-experience-title">
+    <div className="training-experience__head">
+      <div><span className="eyebrow">FORMATOS</span><h2 id="training-experience-title">Escolha o formato que melhor acompanha o contexto.</h2></div>
+      <p>Os formatos organizam a descoberta sem transformar a formação numa grelha de produtos. O catálogo publicado continua a apresentar apenas cursos realmente disponíveis.</p>
+    </div>
+
+    <div className="training-experience__grid">
+      <div className="training-experience__index" aria-label="Selecionar formato de formação">
+        {trainingFormats.map((format, index) => {
+          const selected = index === activeIndex
+          const Icon = format.icon
+          return <button
+            key={format.number}
+            type="button"
+            className={`training-experience__option ${selected ? 'training-experience__option--active' : ''}`}
+            aria-pressed={selected}
+            onClick={() => setActiveIndex(index)}
+            onFocus={() => setActiveIndex(index)}
+          >
+            <span className="training-experience__number">{format.number}</span>
+            <span className="training-experience__option-title">{format.title}</span>
+            <Icon size={19} aria-hidden="true" />
+          </button>
+        })}
+      </div>
+
+      <div className="training-experience__focus" aria-live="polite">
+        <motion.article
+          key={activeFormat.number}
+          className="training-experience__focus-card"
+          initial={reducedMotion ? false : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reducedMotion ? 0 : 0.22 }}
+        >
+          <div className="training-experience__focus-top"><span>FORMATO {activeFormat.number}</span><ActiveIcon size={27} aria-hidden="true" /></div>
+          <div className="training-experience__focus-copy"><h3>{activeFormat.title}</h3><p>{activeFormat.description}</p></div>
+          <a className="training-experience__focus-link" href="#formacao-publicada">Ver formação publicada <ArrowRight size={17} /></a>
+        </motion.article>
+      </div>
+    </div>
+  </section>
+}
+
 export function CoursesCatalog() { return <CourseCollectionView resource={useCourses()} /> }
 
 export function CourseCollectionView({ resource }: { resource: { isLoading: boolean; isError: boolean; data?: { items: Course[] } } }) {
   const corporateHref = contactHref({ type: 'TRAINING_INFO', cta: 'CORPORATE_TRAINING', message: 'Gostaria de conversar sobre uma formação para a minha organização.' })
   return <div className="courses-v2-page">
-    <section className="container public-v2-page"><CoursesIntro />
-      <div className="courses-v2-formats">
-        <article><div><Presentation size={21} aria-hidden="true" /><span>01</span></div><h2>Palestras & Workshops</h2><p>Encontros para provocar reflexão, partilhar práticas e criar linguagem comum dentro das organizações.</p></article>
-        <article><div><UsersRound size={21} aria-hidden="true" /><span>02</span></div><h2>Formação</h2><p>Experiências de aprendizagem estruturadas para desenvolver capacidades e apoiar o trabalho das equipas.</p></article>
-        <article><div><Sparkles size={21} aria-hidden="true" /><span>03</span></div><h2>Treinamento Personalizado</h2><p>Formação corporativa preparada a partir do contexto e das necessidades específicas da organização.</p></article>
-      </div>
-    </section>
+    <section className="container public-v2-page"><CoursesIntro /><TrainingFormatExplorer /></section>
 
-    <section className="courses-v2-catalog">
-      <div className="container courses-v2-catalog__grid">
-        <div><span className="eyebrow">FORMAÇÃO PUBLICADA</span><h2>Escolha um ponto de partida.</h2><p>Consulte as formações disponíveis, os detalhes de cada curso, o investimento e o caminho para inscrição.</p></div>
-        <div>
+    <section className="training-catalog" id="formacao-publicada">
+      <div className="container training-catalog__grid">
+        <div className="training-catalog__heading"><span className="eyebrow">FORMAÇÃO PUBLICADA</span><h2>Escolha um ponto de partida.</h2><p>Consulte as formações disponíveis, os detalhes de cada curso, o investimento e o caminho para inscrição.</p></div>
+        <div className="training-catalog__content">
           {resource.isLoading && <LoadingState label="A carregar formação." />}
           {resource.isError && <ErrorState title="Não foi possível carregar a formação." />}
           {!resource.isLoading && !resource.isError && !resource.data?.items.length && <EmptyState title="Catálogo em preparação">A oferta será apresentada aqui quando as formações estiverem publicadas.</EmptyState>}
-          {resource.data?.items.length ? <div className="course-system-grid">{resource.data.items.map((course, index) => <CourseCatalogCard key={course.slug} course={course} index={index} />)}</div> : null}
+          {resource.data?.items.length ? <div className="training-catalog__list">{resource.data.items.map((course, index) => <CourseCatalogRow key={course.slug} course={course} index={index} />)}</div> : null}
         </div>
       </div>
     </section>
@@ -44,18 +110,18 @@ export function CourseCollectionView({ resource }: { resource: { isLoading: bool
   </div>
 }
 
-function CourseCatalogCard({ course, index }: { course: Course; index: number }) {
+function CourseCatalogRow({ course, index }: { course: Course; index: number }) {
   const detailHref = `/formacao/${encodeURIComponent(course.slug)}`
   const infoHref = contactHref({ type: 'TRAINING_INFO', sourceType: 'TRAINING', entityId: course.id, cta: 'TRAINING_INFO', message: `Gostaria de receber informação sobre ${course.name}.` })
-  return <article className="course-system-card">
-    <div className="course-system-card__top"><span>FORMAÇÃO · {String(index + 1).padStart(2, '0')}</span>{course.featured && <strong>Em destaque</strong>}</div>
-    <div className="course-system-card__content"><h3><Link to={detailHref}>{course.name}</Link></h3><p>{course.summary || course.description || 'Detalhes desta formação serão apresentados na página do curso.'}</p></div>
-    <dl className="course-system-card__facts">
+  return <article className="training-catalog__item">
+    <div className="training-catalog__item-index"><span>{String(index + 1).padStart(2, '0')}</span>{course.featured && <strong>Em destaque</strong>}</div>
+    <div className="training-catalog__item-main"><h3><Link to={detailHref}>{course.name}</Link></h3><p>{course.summary || course.description || 'Detalhes desta formação serão apresentados na página do curso.'}</p></div>
+    <dl className="training-catalog__facts">
       <div><dt>Modalidade</dt><dd>{course.modality ? humanize(course.modality) : 'A confirmar'}</dd></div>
       <div><dt>Duração</dt><dd>{course.durationLabel || 'A confirmar'}</dd></div>
       <div><dt>Investimento</dt><dd>{formatInvestment(course.investmentAmount, course.investmentCurrency)}</dd></div>
     </dl>
-    <div className="course-system-card__actions"><Link className="ds-button ds-button--primary" to={detailHref}>Ver curso e inscrição <ArrowRight size={16} /></Link><Link className="text-link" to={infoHref}>Pedir informação</Link></div>
+    <div className="training-catalog__actions"><Link className="ds-button ds-button--primary" to={detailHref}>Ver curso e inscrição <ArrowRight size={16} /></Link><Link className="text-link" to={infoHref}>Pedir informação</Link></div>
   </article>
 }
 
