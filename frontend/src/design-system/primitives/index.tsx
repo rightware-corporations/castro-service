@@ -1,4 +1,4 @@
-import { forwardRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
+import { forwardRef, useId, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 import { LoaderCircle } from 'lucide-react'
 
 export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'destructive' | 'icon'
@@ -13,33 +13,45 @@ export const IconButton = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<HTM
 })
 
 export function Field({ id, label, description, required, error, children }: { id?: string; label: string; description?: string; required?: boolean; error?: string; children: ReactNode }) {
-  const descriptionId = description ? `${id}-description` : undefined
-  const errorId = error ? `${id}-error` : undefined
+  const descriptionId = description && id ? `${id}-description` : undefined
+  const errorId = error && id ? `${id}-error` : undefined
   return <div className="ds-field"><label className="ds-field__label" htmlFor={id}>{label}{required && <span aria-hidden="true"> *</span>}</label>{description && <span className="ds-field__description" id={descriptionId}>{description}</span>}{children}{error && <span className="ds-field__error" id={errorId} role="alert">{error}</span>}</div>
 }
 
 export const TextField = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement> & { label: string; description?: string; error?: string; required?: boolean }>(function TextField({ id, label, description, error, required, ...props }, ref) {
-  return <Field id={id} label={label} description={description} error={error} required={required}><input ref={ref} id={id} className="ds-control" aria-invalid={Boolean(error)} aria-describedby={[description && `${id}-description`, error && `${id}-error`].filter(Boolean).join(' ') || undefined} {...props} /></Field>
+  const generatedId = useId()
+  const controlId = id ?? generatedId
+  return <Field id={controlId} label={label} description={description} error={error} required={required}><input ref={ref} id={controlId} className="ds-control" aria-invalid={Boolean(error)} aria-describedby={[description && `${controlId}-description`, error && `${controlId}-error`].filter(Boolean).join(' ') || undefined} {...props} /></Field>
 })
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<HTMLTextAreaElement> & { label: string; description?: string; error?: string; required?: boolean }>(function Textarea({ id, label, description, error, required, ...props }, ref) {
-  return <Field id={id} label={label} description={description} error={error} required={required}><textarea ref={ref} id={id} className="ds-control ds-control--textarea" aria-invalid={Boolean(error)} aria-describedby={[description && `${id}-description`, error && `${id}-error`].filter(Boolean).join(' ') || undefined} {...props} /></Field>
+  const generatedId = useId()
+  const controlId = id ?? generatedId
+  return <Field id={controlId} label={label} description={description} error={error} required={required}><textarea ref={ref} id={controlId} className="ds-control ds-control--textarea" aria-invalid={Boolean(error)} aria-describedby={[description && `${controlId}-description`, error && `${controlId}-error`].filter(Boolean).join(' ') || undefined} {...props} /></Field>
 })
 
 export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement> & { label: string; description?: string; error?: string; required?: boolean }>(function Select({ id, label, description, error, required, children, ...props }, ref) {
-  return <Field id={id} label={label} description={description} error={error} required={required}><select ref={ref} id={id} className="ds-control" aria-invalid={Boolean(error)} aria-describedby={[description && `${id}-description`, error && `${id}-error`].filter(Boolean).join(' ') || undefined} {...props}>{children}</select></Field>
+  const generatedId = useId()
+  const controlId = id ?? generatedId
+  return <Field id={controlId} label={label} description={description} error={error} required={required}><select ref={ref} id={controlId} className="ds-control" aria-invalid={Boolean(error)} aria-describedby={[description && `${controlId}-description`, error && `${controlId}-error`].filter(Boolean).join(' ') || undefined} {...props}>{children}</select></Field>
 })
 
 export function Checkbox({ id, label, description, ...props }: InputHTMLAttributes<HTMLInputElement> & { label: string; description?: string }) {
-  return <label className="ds-choice" htmlFor={id}><input id={id} type="checkbox" {...props} /><span><strong>{label}</strong>{description && <small>{description}</small>}</span></label>
+  const generatedId = useId()
+  const controlId = id ?? generatedId
+  return <label className="ds-choice" htmlFor={controlId}><input id={controlId} type="checkbox" {...props} /><span><strong>{label}</strong>{description && <small>{description}</small>}</span></label>
 }
 
 export function Radio({ id, name, label, description, ...props }: InputHTMLAttributes<HTMLInputElement> & { label: string; description?: string }) {
-  return <label className="ds-choice" htmlFor={id}><input id={id} name={name} type="radio" {...props} /><span><strong>{label}</strong>{description && <small>{description}</small>}</span></label>
+  const generatedId = useId()
+  const controlId = id ?? generatedId
+  return <label className="ds-choice" htmlFor={controlId}><input id={controlId} name={name} type="radio" {...props} /><span><strong>{label}</strong>{description && <small>{description}</small>}</span></label>
 }
 
 export function Switch({ id, label, description, ...props }: InputHTMLAttributes<HTMLInputElement> & { label: string; description?: string }) {
-  return <label className="ds-switch" htmlFor={id}><input id={id} role="switch" type="checkbox" {...props} /><span className="ds-switch__track" aria-hidden="true"><span /></span><span><strong>{label}</strong>{description && <small>{description}</small>}</span></label>
+  const generatedId = useId()
+  const controlId = id ?? generatedId
+  return <label className="ds-switch" htmlFor={controlId}><input id={controlId} role="switch" type="checkbox" {...props} /><span className="ds-switch__track" aria-hidden="true"><span /></span><span><strong>{label}</strong>{description && <small>{description}</small>}</span></label>
 }
 
 export const SearchInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement> & { label?: string }>(function SearchInput({ label = 'Pesquisar', ...props }, ref) {
