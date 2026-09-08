@@ -13,10 +13,10 @@ import { contactSchema, requestTypeOptions, type ContactFormValues } from '../sc
 import { contextFromSearch, type RequestIntentContext } from '../intent'
 
 const intentCards = [
-  { icon: Handshake, title: 'Consultoria', text: 'Quando existe um desafio, uma decisão ou um contexto organizacional a compreender.' },
-  { icon: Building2, title: 'Proposta corporativa', text: 'Quando a conversa envolve uma organização, equipa ou necessidade específica.' },
-  { icon: GraduationCap, title: 'Formação', text: 'Para palestras, workshops, formação ou treinamento corporativo personalizado.' },
-  { icon: MessageCircle, title: 'Contacto geral', text: 'Quando ainda não é necessário enquadrar o pedido numa área específica.' },
+  { icon: Handshake, title: 'Consultoria', text: 'Quando existe um desafio, uma decisão ou um contexto organizacional a compreender.', topics: ['Atendimento ao cliente', 'Ética', 'Liderança'] },
+  { icon: Building2, title: 'Proposta corporativa', text: 'Quando a conversa envolve uma organização, equipa ou necessidade específica.', topics: ['Equipas', 'Necessidade específica', 'Contexto organizacional'] },
+  { icon: GraduationCap, title: 'Formação', text: 'Para palestras, workshops, formação ou treinamento corporativo personalizado.', topics: ['Palestras', 'Workshops', 'Treinamento corporativo'] },
+  { icon: MessageCircle, title: 'Contacto geral', text: 'Quando ainda não é necessário enquadrar o pedido numa área específica.', topics: ['Serviços', 'Formação', 'Espaços'] },
 ]
 
 const requestTypes = new Set<RequestType>(['CONSULTATION', 'CORPORATE_PROPOSAL', 'TRAINING_INFO', 'SPACE_INFO', 'GENERAL'])
@@ -71,7 +71,7 @@ export function ContactForm({ submitRequest, isPending, isSuccess, error }: { su
     </section>
 
     <section className="container contact-v2-intents" aria-label="Tipos de conversa">
-      {intentCards.map(({ icon: Icon, title, text }, index) => <article key={title}><div><span>0{index + 1}</span><Icon size={19} aria-hidden="true" /></div><h2>{title}</h2><p>{text}</p></article>)}
+      {intentCards.map(({ icon: Icon, title, text, topics }, index) => <article key={title}><div><span>0{index + 1}</span><Icon size={19} aria-hidden="true" /></div><h2>{title}</h2><p>{text}</p><ul className="contact-v2-intent-topics" aria-label={`Temas de ${title}`}>{topics.map((topic) => <li key={topic}>{topic}</li>)}</ul></article>)}
     </section>
 
     <section className="contact-v2-form-region">
