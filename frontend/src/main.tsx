@@ -26,6 +26,7 @@ import './features/courses/training-active-knowledge.css'
 import './styles/founder-launch.css'
 import './styles/home-founder.css'
 import './styles/public-design-lock.css'
+import './features/home/home-spatial-stage-v3.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
