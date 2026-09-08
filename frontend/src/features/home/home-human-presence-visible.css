@@ -1,0 +1,175 @@
+/*
+ * CASTRO’S Experience 2.0 — visible Human Presence correction.
+ *
+ * This layer intentionally creates an unmistakable first-viewport change on
+ * the public home while keeping the approved CASTRO’S identity. It is loaded
+ * after the public design lock so the user can verify the production block
+ * visually without relying on placeholder-copy differences.
+ */
+
+.home-v2-hero {
+  background:
+    linear-gradient(90deg, var(--color-deep-navy) 0 56%, var(--color-off-white) 56% 100%);
+  border-bottom: 0;
+}
+
+.home-v2-hero::before {
+  width: 28rem;
+  height: 28rem;
+  top: -18rem;
+  left: 42%;
+  border-color: rgb(34 187 174 / 22%);
+  border-radius: 0;
+  transform: rotate(28deg);
+}
+
+.home-v2-hero__grid {
+  grid-template-columns: minmax(0, 1.2fr) minmax(24rem, .8fr);
+  gap: clamp(2.5rem, 5vw, 6rem);
+  min-height: min(860px, calc(100svh - 5.65rem));
+}
+
+.home-v2-hero__copy {
+  padding-block: clamp(5.5rem, 9vw, 8.5rem);
+  padding-right: clamp(1.5rem, 4vw, 4rem);
+}
+
+.home-v2-hero__copy .eyebrow {
+  color: var(--color-teal);
+}
+
+.home-v2-hero__copy h1 {
+  max-width: 9.5ch;
+  margin-top: 1.45rem;
+  color: #fff;
+  font-size: clamp(4.8rem, 8vw, 8.9rem);
+  line-height: .86;
+}
+
+.home-v2-hero__copy h1 em {
+  color: var(--color-warm-cream, var(--color-cream));
+}
+
+.home-v2-hero__lead {
+  max-width: 35rem;
+  color: rgb(255 255 255 / 72%);
+}
+
+.home-v2-hero__actions .home-v2-primary {
+  border: 1px solid var(--color-teal);
+  background: var(--color-teal);
+  color: var(--color-deep-navy);
+}
+
+.home-v2-hero__actions .home-v2-link {
+  color: #fff;
+}
+
+.home-v2-hero__meta {
+  color: rgb(255 255 255 / 58%);
+}
+
+.home-v2-hero__copy::after {
+  right: 0;
+  bottom: 13%;
+  height: 38%;
+  background: linear-gradient(to bottom, transparent, rgb(255 255 255 / 20%), transparent);
+}
+
+.home-v3-hero-media {
+  align-self: center;
+  min-height: clamp(34rem, 72vh, 43rem);
+  margin-block: clamp(2rem, 4vw, 4rem);
+  border: 1px solid rgb(23 24 79 / 12%);
+  box-shadow: 0 2.5rem 7rem rgb(16 19 59 / 14%);
+}
+
+.home-v3-hero-media__frame {
+  top: 7%;
+  right: 8%;
+  bottom: 22%;
+  left: 8%;
+}
+
+.home-v3-hero-media__placeholder strong {
+  font-size: clamp(1.8rem, 2.8vw, 3rem);
+}
+
+.home-v3-hero-media__note {
+  background: rgb(250 249 245 / 96%);
+  backdrop-filter: none;
+}
+
+.home-v2-hero + .home-v2-experiences {
+  position: relative;
+  z-index: 2;
+  background: var(--color-off-white);
+}
+
+@media (max-width: 1050px) {
+  .home-v2-hero {
+    background:
+      linear-gradient(90deg, var(--color-deep-navy) 0 52%, var(--color-off-white) 52% 100%);
+  }
+
+  .home-v2-hero__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(21rem, .82fr);
+    gap: 2rem;
+  }
+
+  .home-v2-hero__copy h1 {
+    font-size: clamp(4.2rem, 7.8vw, 7rem);
+  }
+}
+
+@media (max-width: 820px) {
+  .home-v2-hero {
+    background: var(--color-deep-navy);
+  }
+
+  .home-v2-hero__grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .home-v2-hero__copy {
+    padding-block: 5rem 4rem;
+    padding-right: 0;
+  }
+
+  .home-v2-hero__copy h1 {
+    max-width: 10ch;
+    font-size: clamp(4rem, 12vw, 6.2rem);
+  }
+
+  .home-v3-hero-media {
+    width: 100%;
+    margin: 0 0 2rem;
+    min-height: 32rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .home-v2-hero__copy {
+    padding-block: 4rem 3.25rem;
+  }
+
+  .home-v2-hero__copy h1 {
+    font-size: clamp(3.55rem, 16vw, 5rem);
+  }
+
+  .home-v2-hero__actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .home-v2-hero__meta {
+    padding-top: 2.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-v2-hero::before {
+    transform: rotate(28deg);
+  }
+}
