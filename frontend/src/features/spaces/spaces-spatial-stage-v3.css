@@ -1,0 +1,412 @@
+/* CASTRO’S Visual System 3.0 — Spaces / Spatial Experience */
+
+.spaces-v2-page,
+.space-detail-v2 {
+  --space-bg: #10133b;
+  --space-ink: #faf9f5;
+  --space-muted: rgb(250 249 245 / 66%);
+  --space-line: rgb(250 249 245 / 13%);
+  --space-teal: #22bbae;
+  --space-cream: #f1deae;
+
+  background: var(--space-bg);
+  color: var(--space-ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.spaces-v2-page {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 82% 10%, rgb(34 187 174 / 14%), transparent 27rem),
+    radial-gradient(circle at 16% 48%, rgb(241 222 174 / 8%), transparent 32rem),
+    var(--space-bg);
+}
+
+.spaces-v2-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .26;
+  background-image:
+    linear-gradient(rgb(250 249 245 / 3.6%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(250 249 245 / 3.6%) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to bottom, black, transparent 82%);
+}
+
+.spaces-v2-page :is(.spaces-v2-intro, .spaces-v2-catalog, .spaces-v2-experience-band) {
+  position: relative;
+  z-index: 1;
+}
+
+.spaces-v2-page .spaces-v2-intro {
+  min-height: 70vh;
+  grid-template-columns: minmax(0, 1.2fr) minmax(18rem, .8fr);
+  align-items: end;
+  padding-block: clamp(6rem, 10vw, 10rem) clamp(5rem, 8vw, 8rem);
+}
+
+.spaces-v2-page .spaces-v2-intro h1 {
+  max-width: 9.8ch;
+  color: var(--space-ink);
+  font-family: inherit;
+  font-size: clamp(4.6rem, 8.6vw, 9rem);
+  font-weight: 650;
+  letter-spacing: -.08em;
+  line-height: .87;
+}
+
+.spaces-v2-page .spaces-v2-intro h1 em {
+  color: var(--space-cream);
+  font-family: inherit;
+  font-style: normal;
+  font-weight: inherit;
+}
+
+.spaces-v2-page .spaces-v2-intro__side {
+  border-top-color: var(--space-line);
+}
+
+.spaces-v2-page .spaces-v2-intro__side > span,
+.spaces-v2-page .space-v2-card__meta,
+.space-detail-v2 .space-detail-v2__index {
+  color: var(--space-teal);
+}
+
+.spaces-v2-page .spaces-v2-intro__side p,
+.spaces-v2-page .space-v2-card__content > p,
+.space-detail-v2 .space-detail-v2__hero p {
+  color: var(--space-muted);
+}
+
+.spaces-v2-page .spaces-v2-list {
+  gap: clamp(6rem, 10vw, 11rem);
+}
+
+.spaces-v2-page .space-v2-card {
+  position: relative;
+  grid-template-columns: minmax(0, 1.28fr) minmax(19rem, .72fr);
+  min-height: 44rem;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.spaces-v2-page .space-v2-card::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 7% 2% 2% 5%;
+  border: 1px solid var(--space-line);
+  border-radius: 2rem;
+  background: rgb(250 249 245 / 2.5%);
+  box-shadow: 0 2.5rem 7rem rgb(4 6 24 / 24%);
+  transform: rotate(-1.4deg);
+}
+
+.spaces-v2-page .space-v2-card:nth-child(even)::before {
+  transform: rotate(1.4deg);
+}
+
+.spaces-v2-page .space-v2-card__visual {
+  min-height: 44rem;
+  border: 1px solid var(--space-line);
+  border-radius: 1.6rem;
+  background:
+    radial-gradient(circle at 70% 22%, rgb(34 187 174 / 16%), transparent 34%),
+    rgb(250 249 245 / 3%);
+  box-shadow: 0 2.2rem 6rem rgb(4 6 24 / 32%);
+  transform: rotate(-1.3deg);
+}
+
+.spaces-v2-page .space-v2-card:nth-child(even) .space-v2-card__visual {
+  transform: rotate(1.3deg);
+}
+
+.spaces-v2-page .space-v2-card__media-empty {
+  border-color: var(--space-line);
+  background:
+    radial-gradient(circle at 72% 28%, rgb(241 222 174 / 14%), transparent 27%),
+    rgb(250 249 245 / 3%);
+}
+
+.spaces-v2-page .space-v2-card__media-overlay {
+  border-top-color: var(--space-line);
+  color: var(--space-ink);
+}
+
+.spaces-v2-page .space-v2-card__content {
+  padding: clamp(2.5rem, 5vw, 5rem);
+}
+
+.spaces-v2-page .space-v2-card__content h2 {
+  color: var(--space-ink);
+  font-family: inherit;
+  font-size: clamp(3rem, 5.4vw, 5.8rem);
+  font-weight: 600;
+  letter-spacing: -.07em;
+  line-height: .92;
+}
+
+.spaces-v2-page .space-v2-card__facts {
+  border-color: var(--space-line);
+}
+
+.spaces-v2-page .space-v2-card__facts span {
+  color: var(--space-ink);
+}
+
+.spaces-v2-page .space-v2-card__actions .ds-button--primary {
+  border-radius: 999px;
+  background: var(--space-cream);
+  color: var(--space-bg);
+}
+
+.spaces-v2-page .space-v2-card__actions .home-v2-link {
+  color: var(--space-ink);
+}
+
+.spaces-v2-page .spaces-v2-experience-band {
+  background: transparent;
+  color: var(--space-ink);
+}
+
+.spaces-v2-page .spaces-v2-experience-band > .container {
+  position: relative;
+  border: 1px solid var(--space-line);
+  border-radius: 1.8rem;
+  background: rgb(250 249 245 / 3%);
+  margin-bottom: 6rem;
+  padding-inline: clamp(2rem, 5vw, 5rem);
+}
+
+.spaces-v2-page .spaces-v2-experience-band h2 {
+  color: var(--space-ink);
+  font-family: inherit;
+  font-size: clamp(3rem, 5.5vw, 5.8rem);
+  font-weight: 600;
+  letter-spacing: -.07em;
+  line-height: .93;
+}
+
+.spaces-v2-page .spaces-v2-experience-flow {
+  border-top-color: var(--space-line);
+}
+
+.spaces-v2-page .spaces-v2-experience-flow span {
+  color: var(--space-teal);
+}
+
+.spaces-v2-page .spaces-v2-experience-flow strong {
+  color: var(--space-ink);
+}
+
+.space-detail-v2 .public-v2-page {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 82% 12%, rgb(34 187 174 / 13%), transparent 26rem),
+    var(--space-bg);
+}
+
+.space-detail-v2 .space-detail-v2__hero {
+  padding-block: clamp(5rem, 9vw, 9rem) 4rem;
+}
+
+.space-detail-v2 .space-detail-v2__hero h1 {
+  max-width: 9ch;
+  color: var(--space-ink);
+  font-family: inherit;
+  font-size: clamp(4.4rem, 8vw, 8.4rem);
+  font-weight: 650;
+  letter-spacing: -.078em;
+  line-height: .88;
+}
+
+.space-detail-v2 .space-detail-v2__index {
+  border-top-color: var(--space-line);
+}
+
+.space-detail-v2 .space-detail-v2__stage {
+  grid-template-columns: minmax(0, 1.35fr) minmax(19rem, .65fr);
+  min-height: 48rem;
+  border: 1px solid var(--space-line);
+  border-radius: 1.8rem;
+  background: rgb(250 249 245 / 2.5%);
+  box-shadow: 0 2.8rem 8rem rgb(4 6 24 / 30%);
+  overflow: hidden;
+}
+
+.space-detail-v2 .space-detail-v2__visual {
+  min-height: 48rem;
+  background:
+    radial-gradient(circle at 70% 22%, rgb(34 187 174 / 16%), transparent 34%),
+    rgb(250 249 245 / 3%);
+}
+
+.space-detail-v2 .space-detail-v2__media-empty {
+  border-color: var(--space-line);
+  background: rgb(250 249 245 / 3%);
+}
+
+.space-detail-v2 .space-detail-v2__media-overlay {
+  border-top-color: var(--space-line);
+  color: var(--space-ink);
+}
+
+.space-detail-v2 .space-detail-v2__panel h2 {
+  color: var(--space-ink);
+  font-family: inherit;
+  font-size: clamp(2.8rem, 4.5vw, 5rem);
+  font-weight: 600;
+  letter-spacing: -.065em;
+}
+
+.space-detail-v2 .space-detail-v2__facts {
+  border-top-color: var(--space-line);
+}
+
+.space-detail-v2 .space-detail-v2__facts small {
+  color: var(--space-muted);
+}
+
+.space-detail-v2 .space-detail-v2__facts strong {
+  color: var(--space-ink);
+}
+
+.space-detail-v2 .space-detail-v2__panel .ds-button--primary {
+  background: var(--space-cream);
+  color: var(--space-bg);
+}
+
+.space-detail-v2 .space-detail-v2__panel .ds-button--secondary {
+  border-color: var(--space-line);
+  color: var(--space-ink);
+  background: transparent;
+}
+
+/* Explorer remains a real full-viewport spatial tool, now visually aligned. */
+.space-explorer-v2 {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #080b27;
+}
+
+.space-explorer-v2__top {
+  border-bottom-color: rgb(250 249 245 / 12%);
+  background: rgb(8 11 39 / 82%);
+}
+
+.space-explorer-v2__top > span {
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: -.035em;
+}
+
+.space-explorer-v2__canvas {
+  background:
+    radial-gradient(circle at 72% 28%, rgb(34 187 174 / 10%), transparent 30rem),
+    #080b27;
+}
+
+.space-explorer-v2__empty strong,
+.space-explorer-v2__hotspot-card strong,
+.space-explorer-v2__info h2 {
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: -.055em;
+}
+
+.space-explorer-v2__hotspot {
+  border-color: rgb(250 249 245 / 72%);
+  background: rgb(8 11 39 / 82%);
+  box-shadow: 0 0 0 .5rem rgb(34 187 174 / 9%);
+}
+
+.space-explorer-v2__hotspot:hover,
+.space-explorer-v2__hotspot.is-active {
+  border-color: var(--space-teal, #22bbae);
+  background: #22bbae;
+  color: #080b27;
+}
+
+.space-explorer-v2__hotspot-card,
+.space-explorer-v2__info {
+  border-color: rgb(250 249 245 / 13%);
+  background: rgb(8 11 39 / 91%);
+  box-shadow: 0 2rem 6rem rgb(0 0 0 / 34%);
+  backdrop-filter: blur(22px);
+}
+
+.space-explorer-v2__scene-label {
+  border-left-color: #22bbae;
+  background: rgb(8 11 39 / 68%);
+}
+
+.space-explorer-v2__controls button,
+.space-explorer-v2__scenes button {
+  border-color: rgb(250 249 245 / 13%);
+  background: rgb(8 11 39 / 74%);
+}
+
+.space-explorer-v2__scenes button[aria-pressed='true'] {
+  border-color: #22bbae;
+  background: rgb(34 187 174 / 15%);
+}
+
+@media (max-width: 980px) {
+  .spaces-v2-page .spaces-v2-intro,
+  .spaces-v2-page .space-v2-card,
+  .spaces-v2-page .spaces-v2-experience-band > .container,
+  .space-detail-v2 .space-detail-v2__hero,
+  .space-detail-v2 .space-detail-v2__stage {
+    grid-template-columns: 1fr;
+  }
+
+  .spaces-v2-page .space-v2-card:nth-child(even) .space-v2-card__visual {
+    order: initial;
+  }
+
+  .spaces-v2-page .space-v2-card__content {
+    padding-inline: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .spaces-v2-page .spaces-v2-intro {
+    min-height: auto;
+    padding-block: 5rem 4rem;
+  }
+
+  .spaces-v2-page .spaces-v2-intro h1,
+  .space-detail-v2 .space-detail-v2__hero h1 {
+    font-size: clamp(3.4rem, 16vw, 5.8rem);
+  }
+
+  .spaces-v2-page .space-v2-card,
+  .spaces-v2-page .space-v2-card__visual,
+  .space-detail-v2 .space-detail-v2__stage,
+  .space-detail-v2 .space-detail-v2__visual {
+    min-height: 31rem;
+  }
+
+  .spaces-v2-page .space-v2-card::before,
+  .spaces-v2-page .space-v2-card__visual,
+  .spaces-v2-page .space-v2-card:nth-child(even) .space-v2-card__visual {
+    transform: none;
+  }
+
+  .spaces-v2-page .spaces-v2-experience-band > .container {
+    margin-inline: var(--page-padding);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spaces-v2-page .space-v2-card::before,
+  .spaces-v2-page .space-v2-card__visual,
+  .space-explorer-v2__panorama {
+    transition: none !important;
+    transform: none !important;
+  }
+}

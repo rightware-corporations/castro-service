@@ -1,34 +1,36 @@
 /*
- * Castro's public design-system lock.
+ * CASTRO’S public compatibility bridge.
  *
- * The public experience must use one visual language across legacy V2 pages
- * and the newer founder/course surfaces. Headings are editorial
- * (Instrument Serif); body/UI remains Manrope. Keep this file loaded last so
- * feature styles cannot silently drift away from the canonical tokens.
+ * Visual System 3.0 is now authoritative for the public surface. This file remains
+ * temporarily because legacy launch/course/insights classes still depend on its
+ * structural hooks, but it no longer locks the product to Instrument Serif or a
+ * light-paper visual language. Remove this bridge when those legacy selectors are
+ * fully retired.
  */
 
 .public-v2-shell {
-  background: var(--color-off-white);
-  color: var(--color-charcoal);
-  font-family: var(--font-ui);
+  background: var(--color-deep-navy);
+  color: var(--color-white);
+  font-family: var(--font-sans, Inter, ui-sans-serif, system-ui, sans-serif);
 }
 
 .public-v2-shell :is(.launch-about, .launch-insights-page, .launch-course-detail) {
-  background: var(--public-paper, var(--color-off-white));
-  color: var(--color-charcoal);
+  background: var(--color-deep-navy);
+  color: var(--color-white);
 }
 
 .public-v2-shell :is(.launch-about, .launch-insights-page, .launch-course-detail) :is(h1, h2, h3) {
-  color: var(--color-deep-navy);
-  font-family: var(--font-editorial);
-  font-weight: var(--font-weight-regular);
-  letter-spacing: -0.035em;
+  color: inherit;
+  font-family: inherit;
+  font-weight: 620;
+  letter-spacing: -0.055em;
 }
 
 .public-v2-shell :is(.launch-about, .launch-insights-page, .launch-course-detail) :is(h1, h2, h3) em {
+  color: var(--color-warm-cream, #f1deae);
   font-family: inherit;
+  font-style: normal;
   font-weight: inherit;
-  font-style: italic;
 }
 
 .public-v2-shell :is(
@@ -36,6 +38,7 @@
   .launch-course-detail__registration,
   .launch-insights-page__course
 ) {
+  border-color: rgb(250 249 245 / 14%);
   background: var(--color-deep-navy);
   color: var(--color-white);
 }
@@ -54,31 +57,30 @@
   .launch-course-detail__registration-button,
   .launch-insights-page__button
 ) {
-  background: var(--color-teal) !important;
+  border-color: var(--color-warm-cream, #f1deae) !important;
+  background: var(--color-warm-cream, #f1deae) !important;
   color: var(--color-deep-navy) !important;
 }
 
 .public-v2-shell .launch-founder-portrait__placeholder {
+  border-color: rgb(250 249 245 / 14%);
   background: var(--color-deep-navy);
   color: var(--color-white);
 }
 
+.public-v2-shell .launch-founder-portrait__placeholder span,
+.public-v2-shell .course-system-card__content h3 {
+  font-family: inherit;
+  font-weight: 620;
+}
+
 .public-v2-shell .launch-founder-portrait__placeholder span {
   color: var(--color-teal);
-  font-family: var(--font-editorial);
-  font-weight: var(--font-weight-regular);
 }
 
-/* Keep course cards on the same editorial hierarchy as the surrounding page. */
-.public-v2-shell .course-system-card__content h3 {
-  font-family: var(--font-editorial);
-  font-weight: var(--font-weight-regular);
-}
-
-/* Prevent accidental return of oversized UI-style headings on smaller screens. */
 @media (max-width: 767px) {
   .public-v2-shell :is(.launch-about__hero, .launch-course-detail__hero, .launch-insights-page__hero) h1 {
-    font-size: clamp(3rem, 15vw, 4.75rem);
-    line-height: 0.94;
+    font-size: clamp(3.4rem, 16vw, 5.4rem);
+    line-height: 0.9;
   }
 }
