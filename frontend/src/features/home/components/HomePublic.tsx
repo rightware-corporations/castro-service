@@ -73,14 +73,14 @@ export function HomePublic() {
           <div className="home-v3-hero-media__frame" role="img" aria-label="Área reservada para fotografia oficial da Castro’s Services">
             <div className="home-v3-hero-media__placeholder">
               <span>CASTRO’S SERVICES</span>
-              <strong>Fotografia oficial em preparação</strong>
+              <strong>Pessoa. Conhecimento. Espaço.</strong>
             </div>
           </div>
-          <div className="home-v3-hero-media__areas" aria-hidden="true"><span>Consultoria</span><span>Formação</span><span>Espaços</span></div>
+          <div className="home-v3-hero-media__areas" aria-hidden="true"><span>Pessoa</span><span>Conhecimento</span><span>Espaço</span></div>
           <div className="home-v3-hero-media__note">
-            <span>EXPERIÊNCIA CASTRO’S</span>
-            <strong>Serviços que começam por compreender.</strong>
-            <small>{configQuery.data?.businessTimezone ? `Experiência digital preparada para ${configQuery.data.businessTimezone}.` : 'Experiência digital em construção.'}</small>
+            <span>PRESENÇA HUMANA</span>
+            <strong>A experiência começa por compreender quem está do outro lado.</strong>
+            <small>{configQuery.data?.businessTimezone ? `Experiência digital preparada para ${configQuery.data.businessTimezone}.` : 'Fotografia oficial em preparação.'}</small>
           </div>
         </motion.div>
       </div>

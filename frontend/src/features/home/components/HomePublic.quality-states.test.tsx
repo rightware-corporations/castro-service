@@ -64,7 +64,7 @@ describe('homepage public quality states', () => {
 
     renderHome()
 
-    expect(screen.getByText('Experiência digital em construção.')).toBeInTheDocument()
+    expect(screen.getByText('Fotografia oficial em preparação.')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /Onde pessoas, liderança e experiência se encontram/i })).toBeInTheDocument()
     expect(screen.queryByText(/espaço\(s\) disponível\(eis\) no catálogo/i)).not.toBeInTheDocument()
   })
