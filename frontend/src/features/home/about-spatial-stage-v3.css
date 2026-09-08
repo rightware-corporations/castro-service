@@ -1,0 +1,186 @@
+/* Visual System 3.0 — About / Human Presence */
+.launch-about {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-deep-navy);
+  color: #fff;
+  font-family: var(--font-sans);
+}
+
+.launch-about::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 78% 18%, rgb(34 187 174 / 13%), transparent 28rem),
+    radial-gradient(circle at 18% 58%, rgb(241 222 174 / 7%), transparent 30rem);
+}
+
+.launch-about__hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(24rem, .9fr);
+  min-height: calc(100svh - 5.65rem);
+  align-items: center;
+  gap: clamp(3rem, 8vw, 8rem);
+  padding-block: clamp(5rem, 9vw, 9rem);
+}
+
+.launch-about__hero::after {
+  content: 'PRESENÇA / CONFIANÇA / ESTRUTURA';
+  position: absolute;
+  top: 2rem;
+  right: 0;
+  color: rgb(255 255 255 / 22%);
+  font-size: .62rem;
+  font-weight: 800;
+  letter-spacing: .2em;
+}
+
+.launch-about__hero h1,
+.launch-about__founder h2,
+.launch-about__pillars h3,
+.launch-about__cta h2 {
+  font-family: var(--font-sans);
+  letter-spacing: -.06em;
+}
+
+.launch-about__hero h1 {
+  max-width: 9.5ch;
+  margin: 1rem 0 1.6rem;
+  color: #fff;
+  font-size: clamp(4.8rem, 8vw, 8.8rem);
+  font-weight: 620;
+  line-height: .88;
+}
+.launch-about__hero h1 em { color: var(--color-cream); font-style: normal; font-weight: inherit; }
+.launch-about__hero p { max-width: 42rem; color: rgb(255 255 255 / 64%); font-size: 1.05rem; line-height: 1.8; }
+
+.launch-founder-portrait--about {
+  position: relative;
+  min-height: 38rem;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  transform: translateY(2rem) rotate(1.5deg);
+}
+.launch-founder-portrait--about::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -1.3rem 1.8rem 1.2rem -1.6rem;
+  border: 1px solid rgb(241 222 174 / 22%);
+  border-radius: 48% 52% 46% 54% / 42% 48% 52% 58%;
+  transform: rotate(-5deg);
+}
+.launch-founder-portrait--about::after {
+  content: '';
+  position: absolute;
+  z-index: -2;
+  width: 11rem;
+  aspect-ratio: 1;
+  top: -4rem;
+  right: -3rem;
+  border: 1px solid rgb(34 187 174 / 24%);
+  border-radius: 50%;
+}
+.launch-founder-portrait--about img,
+.launch-founder-portrait--about .launch-founder-portrait__placeholder {
+  width: 100%;
+  min-height: 38rem;
+  object-fit: cover;
+  border-radius: 1.2rem;
+  background: linear-gradient(150deg, rgb(255 255 255 / 9%), rgb(255 255 255 / 2%));
+  box-shadow: 0 3rem 7rem rgb(0 0 0 / 30%);
+}
+.launch-founder-portrait--about figcaption {
+  position: absolute;
+  right: -1rem;
+  bottom: -1.5rem;
+  left: 8%;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 1rem;
+  background: rgb(7 10 34 / 78%);
+  color: #fff;
+  padding: 1.2rem 1.4rem;
+  backdrop-filter: blur(20px);
+}
+.launch-founder-portrait--about figcaption span { color: rgb(255 255 255 / 54%); }
+
+.launch-about__founder {
+  position: relative;
+  background: transparent;
+  border-top: 1px solid rgb(255 255 255 / 12%);
+  border-bottom: 1px solid rgb(255 255 255 / 12%);
+}
+.launch-about__founder-grid {
+  min-height: 36rem;
+  align-items: center;
+}
+.launch-about__founder h2 { color: #fff; font-size: clamp(3.4rem, 6vw, 6.4rem); font-weight: 600; line-height: .92; }
+.launch-about__founder p { color: rgb(255 255 255 / 62%); }
+
+.launch-about__pillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  padding-block: clamp(6rem, 10vw, 10rem);
+}
+.launch-about__pillars article {
+  min-height: 26rem;
+  border: 1px solid rgb(255 255 255 / 13%);
+  border-right: 0;
+  background: transparent;
+  color: #fff;
+  padding: clamp(2rem, 4vw, 4rem);
+  transition: transform var(--motion-emphasis) var(--ease-standard), background var(--motion-normal) var(--ease-standard);
+}
+.launch-about__pillars article:last-child { border-right: 1px solid rgb(255 255 255 / 13%); }
+.launch-about__pillars article:nth-child(2) { transform: translateY(2.2rem); background: rgb(241 222 174 / 7%); }
+.launch-about__pillars article:hover,
+.launch-about__pillars article:focus-within { transform: translateY(-.7rem); background: rgb(255 255 255 / 5%); }
+.launch-about__pillars article:nth-child(2):hover,
+.launch-about__pillars article:nth-child(2):focus-within { transform: translateY(1.4rem); }
+.launch-about__pillars h3 { color: #fff; font-size: clamp(2.1rem, 3.4vw, 3.7rem); line-height: .96; }
+.launch-about__pillars p { color: rgb(255 255 255 / 58%); }
+
+.launch-about__cta {
+  position: relative;
+  min-height: 32rem;
+  align-items: center;
+  border-top: 1px solid rgb(255 255 255 / 14%);
+}
+.launch-about__cta::before {
+  content: '';
+  position: absolute;
+  right: 2%;
+  width: 23rem;
+  aspect-ratio: 1;
+  border: 1px solid rgb(34 187 174 / 20%);
+  border-radius: 50%;
+}
+.launch-about__cta h2 { color: #fff; max-width: 11ch; font-size: clamp(3rem, 5.5vw, 5.8rem); line-height: .94; }
+.launch-about__cta .ds-button { border-radius: 999px; background: var(--color-cream); color: var(--color-deep-navy); }
+
+@media (max-width: 900px) {
+  .launch-about__hero { grid-template-columns: 1fr; min-height: auto; }
+  .launch-about__hero::after { left: 0; right: auto; }
+  .launch-founder-portrait--about { min-height: 31rem; transform: none; }
+  .launch-founder-portrait--about img,
+  .launch-founder-portrait--about .launch-founder-portrait__placeholder { min-height: 31rem; }
+  .launch-about__pillars { grid-template-columns: 1fr; gap: 1rem; }
+  .launch-about__pillars article,
+  .launch-about__pillars article:nth-child(2) { min-height: auto; border-right: 1px solid rgb(255 255 255 / 13%); transform: none; }
+}
+
+@media (max-width: 560px) {
+  .launch-about__hero h1 { font-size: clamp(3.5rem, 17vw, 5.5rem); }
+  .launch-founder-portrait--about figcaption { right: 0; left: 0; }
+  .launch-about__cta::before { width: 14rem; opacity: .5; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .launch-founder-portrait--about,
+  .launch-about__pillars article { transition: none !important; transform: none !important; }
+}
