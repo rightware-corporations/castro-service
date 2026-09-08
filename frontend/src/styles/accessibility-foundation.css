@@ -1,6 +1,16 @@
 .ds-skip-link{position:fixed;z-index:10000;top:.75rem;left:.75rem;transform:translateY(calc(-100% - 1.5rem));border:2px solid currentColor;border-radius:var(--radius-control);background:var(--color-white);padding:.7rem 1rem;color:var(--color-deep-navy);font-size:var(--text-sm);font-weight:800;text-decoration:none;transition:transform var(--motion-fast) var(--ease-standard)}
 .ds-skip-link:focus-visible{transform:translateY(0)}
 
+/* Public V3 keeps one high-contrast keyboard focus treatment across dark and cream stages. */
+.public-v2-shell :is(a,button,input,select,textarea,summary,[tabindex]):focus-visible{
+  outline:2px solid #faf9f5;
+  outline-offset:3px;
+  box-shadow:0 0 0 5px #10133b;
+}
+.public-v2-shell :is(input,select,textarea):focus-visible{
+  border-color:#22bbae;
+}
+
 @media(max-width:767px){
   .operations-sidebar{visibility:hidden}
   .operations-sidebar--open{visibility:visible}
@@ -16,6 +26,18 @@
   *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;transition-delay:0s!important;animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important}
   .ds-skip-link{transition:none!important}
   .home-v2-link svg,.home-v2-experience,.public-v2-shell .public-nav a::after{transition:none!important;transform:none!important}
+  .public-v2-shell :is(
+    .home-v2-founder__portrait,
+    .home-v2-live__column--cream,
+    .home-v2-space__visual,
+    .services-experience__focus,
+    .service-detail-v2__aside,
+    .launch-founder-portrait--about,
+    .launch-about__pillars article,
+    .contact-v2-intents article,
+    .booking-v2-card,
+    .booking-v2-summary
+  ){transform:none!important}
   .ds-spinner{animation:none!important}
   .ds-skeleton{animation:none!important;background-position:0 0!important}
   [data-motion-reduced='true']{opacity:1!important;transform:none!important}
