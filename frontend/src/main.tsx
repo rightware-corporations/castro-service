@@ -30,6 +30,7 @@ import './features/home/home-spatial-stage-v3.css'
 import './styles/public-visual-system-v3.css'
 import './features/courses/training-spatial-stage-v3.css'
 import './features/spaces/spaces-spatial-stage-v3.css'
+import './features/services/services-spatial-stage-v3.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
