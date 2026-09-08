@@ -1,0 +1,494 @@
+/*
+ * CASTRO’S Visual System 3.0 — Spatial Stage
+ *
+ * Reference principle: use the compositional discipline of VEXEL (continuous
+ * environment, large sans typography, floating layers, restrained motion),
+ * translated to CASTRO’S palette and human/spatial business context.
+ *
+ * This layer is intentionally scoped to the public home while the new system
+ * is validated. It does not change data, routes, booking, API contracts or
+ * internal operations surfaces.
+ */
+
+.home-v2 {
+  --stage-bg: #10133b;
+  --stage-ink: #faf9f5;
+  --stage-muted: rgb(250 249 245 / 66%);
+  --stage-faint: rgb(250 249 245 / 10%);
+  --stage-line: rgb(250 249 245 / 14%);
+  --stage-teal: #22bbae;
+  --stage-cream: #f1deae;
+  --stage-shadow: 0 2.4rem 7rem rgb(4 6 24 / 34%);
+
+  position: relative;
+  overflow: hidden;
+  background: var(--stage-bg);
+  color: var(--stage-ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  isolation: isolate;
+}
+
+.home-v2::before {
+  content: '';
+  position: fixed;
+  z-index: -2;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 78% 13%, rgb(34 187 174 / 14%), transparent 27rem),
+    radial-gradient(circle at 18% 42%, rgb(241 222 174 / 8%), transparent 31rem),
+    var(--stage-bg);
+}
+
+.home-v2::after {
+  content: '';
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  opacity: .42;
+  background-image:
+    linear-gradient(rgb(250 249 245 / 3.6%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(250 249 245 / 3.6%) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to bottom, black, transparent 78%);
+}
+
+.home-v2 .container {
+  width: min(100% - (var(--page-padding) * 2), 86rem);
+}
+
+.home-v2 .eyebrow {
+  color: var(--stage-teal);
+  font-family: inherit;
+  font-size: .68rem;
+  font-weight: 750;
+  letter-spacing: .22em;
+}
+
+/* Hero: one continuous stage, not a split card composition. */
+.home-v2-hero {
+  min-height: calc(100svh - 5.65rem);
+  overflow: visible;
+  border: 0;
+  background: transparent;
+}
+
+.home-v2-hero::before {
+  display: none;
+}
+
+.home-v2-hero__grid {
+  position: relative;
+  display: grid;
+  min-height: calc(100svh - 5.65rem);
+  grid-template-columns: minmax(0, 1.15fr) minmax(25rem, .85fr);
+  align-items: center;
+  gap: clamp(3rem, 8vw, 9rem);
+  padding-block: clamp(4.5rem, 8vw, 8rem);
+}
+
+.home-v2-hero__grid::before {
+  content: 'CASTRO’S / PESSOA · CONHECIMENTO · ESPAÇO';
+  position: absolute;
+  top: 2.2rem;
+  right: 0;
+  color: rgb(250 249 245 / 35%);
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+}
+
+.home-v2-hero__copy {
+  z-index: 3;
+  display: block;
+  padding: 0;
+}
+
+.home-v2-hero__copy::after {
+  display: none;
+}
+
+.home-v2-hero__copy h1 {
+  max-width: 10.6ch;
+  margin: 1.35rem 0 1.8rem;
+  color: var(--stage-ink);
+  font-family: inherit;
+  font-size: clamp(4.6rem, 8vw, 8.7rem);
+  font-weight: 650;
+  letter-spacing: -.075em;
+  line-height: .88;
+}
+
+.home-v2-hero__copy h1 em {
+  color: var(--stage-cream);
+  font-family: inherit;
+  font-style: normal;
+  font-weight: inherit;
+}
+
+.home-v2-hero__lead {
+  max-width: 41rem;
+  color: var(--stage-muted);
+  font-size: clamp(1rem, 1.35vw, 1.18rem);
+  line-height: 1.75;
+}
+
+.home-v2-hero__actions {
+  margin-top: 2.5rem;
+}
+
+.home-v2 .home-v2-primary {
+  min-height: 3.4rem;
+  border: 1px solid var(--stage-cream);
+  border-radius: 999px;
+  background: var(--stage-cream);
+  color: var(--stage-bg);
+  box-shadow: 0 1.2rem 3.2rem rgb(4 6 24 / 20%);
+  padding-inline: 1.55rem;
+}
+
+.home-v2 .home-v2-link {
+  color: var(--stage-ink);
+}
+
+.home-v2-hero__meta {
+  margin-top: 3rem;
+  padding-top: 0;
+  color: rgb(250 249 245 / 45%);
+}
+
+.home-v2-hero__meta i {
+  background: var(--stage-teal);
+}
+
+/* The media composition floats inside the same stage. */
+.home-v2 .home-v3-hero-media {
+  position: relative;
+  min-height: min(68vh, 43rem);
+  overflow: visible;
+  border: 0;
+  background: transparent;
+}
+
+.home-v2 .home-v3-hero-media::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 8% -8% 4% 7%;
+  border: 1px solid rgb(250 249 245 / 12%);
+  border-radius: 52% 48% 42% 58% / 45% 42% 58% 55%;
+  background:
+    radial-gradient(circle at 48% 42%, rgb(34 187 174 / 18%), transparent 42%),
+    rgb(250 249 245 / 2%);
+  box-shadow: var(--stage-shadow);
+  transform: rotate(-4deg);
+}
+
+.home-v2 .home-v3-hero-media::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: 12rem;
+  aspect-ratio: 1;
+  top: -1rem;
+  right: -2rem;
+  border: 1px solid rgb(241 222 174 / 26%);
+  border-radius: 50%;
+  background: rgb(241 222 174 / 3%);
+}
+
+.home-v2 .home-v3-hero-media__architecture {
+  inset: -2% -4%;
+}
+
+.home-v2 .home-v3-hero-media__architecture span {
+  border-color: rgb(250 249 245 / 10%);
+  border-radius: 50%;
+}
+
+.home-v2 .home-v3-hero-media__architecture span:nth-child(1) {
+  inset: 7% 2% 12% 7%;
+  transform: rotate(8deg);
+}
+
+.home-v2 .home-v3-hero-media__architecture span:nth-child(2) {
+  width: 64%;
+  height: 64%;
+  top: 18%;
+  right: 8%;
+  border-color: rgb(34 187 174 / 22%);
+  transform: rotate(-10deg);
+}
+
+.home-v2 .home-v3-hero-media__architecture span:nth-child(3) {
+  width: 44%;
+  height: 44%;
+  right: 31%;
+  bottom: 4%;
+  border-color: rgb(241 222 174 / 19%);
+  background: transparent;
+}
+
+.home-v2 .home-v3-hero-media__frame {
+  top: 8%;
+  right: 9%;
+  bottom: 15%;
+  left: 8%;
+  border: 1px solid rgb(250 249 245 / 14%);
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at 72% 24%, rgb(241 222 174 / 16%), transparent 30%),
+    linear-gradient(155deg, rgb(250 249 245 / 8%), rgb(250 249 245 / 2%));
+  box-shadow: var(--stage-shadow);
+  backdrop-filter: blur(16px);
+  transform: rotate(2deg);
+}
+
+.home-v2 .home-v3-hero-media__frame::before {
+  inset: 7%;
+  border-color: rgb(250 249 245 / 9%);
+  border-radius: .85rem;
+}
+
+.home-v2 .home-v3-hero-media__frame::after {
+  background: rgb(250 249 245 / 8%);
+}
+
+.home-v2 .home-v3-hero-media__placeholder {
+  border-top-color: rgb(250 249 245 / 18%);
+}
+
+.home-v2 .home-v3-hero-media__placeholder span {
+  color: rgb(250 249 245 / 47%);
+}
+
+.home-v2 .home-v3-hero-media__placeholder strong {
+  color: var(--stage-ink);
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: -.04em;
+}
+
+.home-v2 .home-v3-hero-media__areas {
+  top: 0;
+  right: 0;
+  color: rgb(250 249 245 / 42%);
+}
+
+.home-v2 .home-v3-hero-media__note {
+  right: 5%;
+  bottom: 2%;
+  left: 3%;
+  border: 1px solid rgb(250 249 245 / 12%);
+  border-radius: 1rem;
+  background: rgb(7 10 34 / 72%);
+  color: var(--stage-ink);
+  box-shadow: 0 1.4rem 4rem rgb(4 6 24 / 32%);
+  backdrop-filter: blur(22px);
+  transform: translateY(1.8rem) rotate(-1deg);
+}
+
+.home-v2 .home-v3-hero-media__note strong {
+  color: var(--stage-ink);
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: -.025em;
+}
+
+.home-v2 .home-v3-hero-media__note small {
+  color: rgb(250 249 245 / 45%);
+}
+
+/* Subsequent home scenes stay in one visual environment. */
+.home-v2 :is(.home-v2-experiences, .home-v2-founder, .home-v2-live, .home-v2-space, .home-v2-process) {
+  position: relative;
+  background: transparent;
+  color: var(--stage-ink);
+}
+
+.home-v2 :is(.home-v2-experiences, .home-v2-founder, .home-v2-live, .home-v2-space, .home-v2-process) :is(h2, h3) {
+  color: var(--stage-ink);
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: -.055em;
+}
+
+.home-v2 .home-v2-section-head > p,
+.home-v2 .home-v2-founder__copy > p,
+.home-v2 .home-v2-space__copy > p {
+  color: var(--stage-muted);
+}
+
+.home-v2-experience-grid {
+  border-top-color: var(--stage-line);
+}
+
+.home-v2 .home-v2-experience {
+  min-height: 24rem;
+  border-right-color: var(--stage-line);
+  color: var(--stage-ink);
+  background: transparent;
+}
+
+.home-v2 .home-v2-experience:hover,
+.home-v2 .home-v2-experience:focus-visible {
+  background: rgb(250 249 245 / 6%);
+  transform: translateY(-8px);
+}
+
+.home-v2 .home-v2-practice,
+.home-v2 .home-v2-contact {
+  position: relative;
+  background: transparent;
+  color: var(--stage-ink);
+}
+
+.home-v2 .home-v2-practice::before,
+.home-v2 .home-v2-contact::before {
+  content: '';
+  position: absolute;
+  inset: 1.5rem var(--page-padding);
+  z-index: 0;
+  border: 1px solid var(--stage-line);
+  border-radius: 1.5rem;
+  background: rgb(250 249 245 / 3.5%);
+  box-shadow: 0 2rem 6rem rgb(4 6 24 / 17%);
+}
+
+.home-v2 .home-v2-practice > *,
+.home-v2 .home-v2-contact > * {
+  position: relative;
+  z-index: 1;
+}
+
+.home-v2 .home-v2-live__column {
+  border-color: var(--stage-line);
+  background: transparent;
+  color: var(--stage-ink);
+}
+
+.home-v2 .home-v2-live__column--cream {
+  background: rgb(241 222 174 / 7%);
+}
+
+.home-v2 .home-v2-live__items,
+.home-v2 .home-v2-live__items a,
+.home-v2 .home-v2-practice__list,
+.home-v2 .home-v2-practice__row {
+  border-color: var(--stage-line);
+}
+
+.home-v2 .home-v2-live__items a,
+.home-v2 .home-v2-space__features span {
+  color: var(--stage-ink);
+}
+
+.home-v2 .home-v2-space__visual {
+  border: 1px solid var(--stage-line);
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at 68% 24%, rgb(34 187 174 / 14%), transparent 32%),
+    rgb(250 249 245 / 3%);
+  box-shadow: var(--stage-shadow);
+  transform: rotate(-1.5deg);
+}
+
+.home-v2 .home-v2-contact__button {
+  border-radius: 999px;
+  background: var(--stage-cream);
+  color: var(--stage-bg);
+}
+
+@media (max-width: 980px) {
+  .home-v2-hero__grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding-top: 5rem;
+  }
+
+  .home-v2-hero__copy h1 {
+    max-width: 11ch;
+    font-size: clamp(4rem, 11vw, 7rem);
+  }
+
+  .home-v2 .home-v3-hero-media {
+    min-height: 35rem;
+  }
+
+  .home-v2-hero__grid::before {
+    left: 0;
+    right: auto;
+  }
+}
+
+@media (max-width: 767px) {
+  .home-v2 {
+    --stage-shadow: 0 1.5rem 4rem rgb(4 6 24 / 28%);
+  }
+
+  .home-v2::after {
+    background-size: 48px 48px;
+  }
+
+  .home-v2-hero__grid {
+    min-height: auto;
+    padding-block: 5rem 3rem;
+  }
+
+  .home-v2-hero__grid::before {
+    top: 1.4rem;
+    max-width: 82vw;
+    line-height: 1.6;
+  }
+
+  .home-v2-hero__copy h1 {
+    max-width: 9.8ch;
+    font-size: clamp(3.45rem, 17vw, 5.8rem);
+    line-height: .9;
+  }
+
+  .home-v2-hero__actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .home-v2 .home-v3-hero-media {
+    min-height: 29rem;
+    margin-top: 1rem;
+  }
+
+  .home-v2 .home-v3-hero-media__frame {
+    top: 10%;
+    right: 3%;
+    bottom: 19%;
+    left: 3%;
+  }
+
+  .home-v2 .home-v3-hero-media__note {
+    right: 1%;
+    bottom: 1%;
+    left: 1%;
+    transform: translateY(.7rem);
+  }
+
+  .home-v2 .home-v2-practice::before,
+  .home-v2 .home-v2-contact::before {
+    inset-inline: .6rem;
+    border-radius: 1rem;
+  }
+
+  .home-v2 .home-v2-space__visual {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-v2 .home-v2-experience,
+  .home-v2 .home-v3-hero-media__frame,
+  .home-v2 .home-v3-hero-media__note,
+  .home-v2 .home-v2-space__visual {
+    transition: none !important;
+    transform: none !important;
+  }
+}
