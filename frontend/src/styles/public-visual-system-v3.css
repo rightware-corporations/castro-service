@@ -264,6 +264,42 @@
   padding-left: 1rem;
 }
 
+/* Public system states belong to the same stage instead of falling back to generic white cards. */
+.public-v2-shell .ds-state {
+  min-height: 11rem;
+  border: 1px solid var(--v3-line);
+  border-radius: 1.25rem;
+  background: rgb(250 249 245 / 3%);
+  color: var(--v3-muted);
+  box-shadow: none;
+}
+
+.public-v2-shell .ds-state h3 {
+  color: var(--v3-ink);
+  font-family: var(--font-sans);
+  font-weight: 620;
+  letter-spacing: -.035em;
+}
+
+.public-v2-shell .ds-state svg {
+  color: var(--v3-teal);
+}
+
+.public-v2-shell .ds-state--error {
+  border-color: rgb(241 222 174 / 28%);
+  background: rgb(241 222 174 / 5%);
+}
+
+.public-v2-shell .ds-alert {
+  border-color: var(--v3-line);
+  background: rgb(250 249 245 / 4%);
+  color: var(--v3-ink);
+}
+
+.public-v2-shell .ds-alert span {
+  color: var(--v3-muted);
+}
+
 /* Contact closes the same stage rather than introducing another visual system. */
 .public-v2-shell .home-v2-contact::before {
   border-radius: 2rem;
@@ -332,6 +368,11 @@
 
   .public-v2-shell .home-v2-space__visual {
     min-height: 25rem;
+  }
+
+  .public-v2-shell .ds-state {
+    min-height: 9rem;
+    border-radius: 1rem;
   }
 }
 
