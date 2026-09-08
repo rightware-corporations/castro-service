@@ -31,6 +31,9 @@ import './styles/public-visual-system-v3.css'
 import './features/courses/training-spatial-stage-v3.css'
 import './features/spaces/spaces-spatial-stage-v3.css'
 import './features/services/services-spatial-stage-v3.css'
+import './features/home/about-spatial-stage-v3.css'
+import './features/contact/contact-spatial-stage-v3.css'
+import './features/booking/booking-spatial-stage-v3.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
