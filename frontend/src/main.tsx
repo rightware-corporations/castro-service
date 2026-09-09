@@ -26,7 +26,6 @@ import './features/courses/training-active-knowledge.css'
 import './styles/founder-launch.css'
 import './styles/home-founder.css'
 import './styles/public-design-lock.css'
-import './features/home/home-spatial-stage-v3.css'
 import './styles/public-visual-system-v3.css'
 import './features/spaces/spaces-spatial-stage-v3.css'
 import './features/home/about-spatial-stage-v3.css'
@@ -35,9 +34,9 @@ import './features/booking/booking-spatial-stage-v3.css'
 import './styles/public-v3-critical-refinement.css'
 import './styles/public-v3-product-finish.css'
 import './styles/public-v3-testimonial-proof.css'
-import './styles/public-v3-home-experience-rebuild.css'
 import './features/services/services-spatial-stage-v3.css'
 import './features/courses/training-spatial-stage-v3.css'
+import './features/home/home-spatial-stage-v3.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
