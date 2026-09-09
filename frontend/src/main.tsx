@@ -35,6 +35,7 @@ import './features/home/about-spatial-stage-v3.css'
 import './features/contact/contact-spatial-stage-v3.css'
 import './features/booking/booking-spatial-stage-v3.css'
 import './styles/public-v3-critical-refinement.css'
+import './styles/public-v3-product-finish.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
