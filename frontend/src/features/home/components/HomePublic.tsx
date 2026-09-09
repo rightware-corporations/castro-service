@@ -1,131 +1,56 @@
+import { Link } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'motion/react'
-import {
-  ArrowRight,
-  ArrowUpRight,
-  BookOpenText,
-  Building2,
-  CheckCircle2,
-  Compass,
-  GraduationCap,
-  Handshake,
-  MessageCircle,
-  Quote,
-} from 'lucide-react'
+import { ArrowDownRight, ArrowLeft, ArrowRight, ArrowUpRight, BookOpenText, Building2, Compass, GraduationCap, Handshake, MessageCircle, MoveRight, Quote, Sparkles } from 'lucide-react'
 import { usePublicConfig } from '../hooks'
 import { useCourses } from '../../courses/hooks'
 import { useServices } from '../../services/hooks'
 import { useSpacesPreview } from '../../spaces/hooks'
 import { EmptyState, ErrorState, LoadingState } from '../../../design-system/patterns/feedback-overlays'
+import { SectionReveal } from '../../../design-system/motion/SectionReveal'
+import { motionPresets } from '../../../design-system/motion/motionPresets'
 
-const paths = [
-  { id: 'services', number: '01', label: 'Serviços', eyebrow: 'CONSULTORIA & DESENVOLVIMENTO', title: 'Quando o desafio começa nas relações e na liderança.', description: 'Atendimento ao cliente, ética, liderança e desenvolvimento organizacional a partir do contexto real de cada organização.', themes: ['Atendimento', 'Ética', 'Liderança'], href: '/servicos', action: 'Explorar serviços', icon: Handshake },
-  { id: 'training', number: '02', label: 'Formação', eyebrow: 'PALESTRAS · WORKSHOPS · FORMAÇÃO', title: 'Quando a equipa precisa aprender, praticar e avançar.', description: 'Experiências de aprendizagem para pessoas e equipas, com formatos publicados e percursos corporativos preparados para necessidades específicas.', themes: ['Palestras', 'Workshops', 'Treinamento'], href: '/formacao', action: 'Explorar formação', icon: GraduationCap },
-  { id: 'spaces', number: '03', label: 'Espaços', eyebrow: 'ENCONTRO & EXPERIÊNCIA', title: 'Quando o próprio lugar precisa apoiar o encontro.', description: 'Espaços para reuniões, formação e workshops, com informação que conduz da descoberta até ao pedido ou reserva.', themes: ['Reuniões', 'Formação', 'Workshops'], href: '/espacos', action: 'Conhecer os espaços', icon: Compass },
-] as const
+const experiences = [
+  { number: '01', title: 'Serviços', eyebrow: 'CONSULTORIA & DESENVOLVIMENTO', description: 'Atendimento ao cliente, ética, liderança e soluções construídas em torno do contexto de cada organização.', topics: ['Atendimento', 'Ética', 'Liderança'], href: '/servicos', icon: Handshake },
+  { number: '02', title: 'Formação', eyebrow: 'PALESTRAS · WORKSHOPS · FORMAÇÃO', description: 'Momentos de aprendizagem e treinamento corporativo preparados para pessoas, equipas e organizações.', topics: ['Palestras', 'Workshops', 'Treinamento'], href: '/formacao', icon: GraduationCap },
+  { number: '03', title: 'Espaços', eyebrow: 'ENCONTRO & EXPERIÊNCIA', description: 'Um espaço físico para reuniões, formação, workshops e outros encontros que pedem foco e proximidade.', topics: ['Reuniões', 'Formação', 'Workshops'], href: '/espacos', icon: Compass },
+]
 
-const proofFixtures = [
-  { context: 'Formação', quote: 'Depoimento real em recolha.', detail: 'Participante e organização serão apresentados após autorização.' },
-  { context: 'Consultoria', quote: 'Depoimento real em recolha.', detail: 'Cliente e contexto serão apresentados após autorização.' },
-  { context: 'Espaços', quote: 'Depoimento real em recolha.', detail: 'Organização e tipo de encontro serão apresentados após autorização.' },
-] as const
+const practiceLines = ['Atendimento ao Cliente', 'Ética & Liderança Organizacional', 'Palestras, Workshops & Formação', 'Treinamento Corporativo Personalizado']
 
-type PublishedItem = { slug: string; name: string }
-type PublishedResource = { isLoading: boolean; isError: boolean; data?: { items: PublishedItem[] } }
+// Development fixtures intentionally avoid invented endorsements. Replace with approved client quotes before publication.
+const testimonialFixtures = [
+  { id: 'training', context: 'Formação', person: 'Cliente a confirmar', role: 'Participante · Organização a confirmar', quote: 'Depoimento real de formação será apresentado aqui após validação e autorização do cliente.', detail: 'Experiência de aprendizagem · conteúdo pendente de aprovação' },
+  { id: 'consulting', context: 'Consultoria', person: 'Cliente a confirmar', role: 'Organização a confirmar', quote: 'Esta cena está preparada para uma voz real sobre atendimento, liderança ou desenvolvimento organizacional.', detail: 'Consultoria · conteúdo pendente de aprovação' },
+  { id: 'spaces', context: 'Espaços', person: 'Cliente a confirmar', role: 'Organização / evento a confirmar', quote: 'O espaço reserva aqui lugar para a experiência de quem realizou uma reunião, formação ou workshop na Castro’s.', detail: 'Espaço · conteúdo pendente de aprovação' },
+]
 
 export function HomePublic() {
-  const configQuery = usePublicConfig()
-  const servicesQuery = useServices()
-  const coursesQuery = useCourses()
-  const spacesQuery = useSpacesPreview()
-  const reducedMotion = useReducedMotion()
-  const founderPortraitUrl = import.meta.env.VITE_ELIZABETH_PORTRAIT_URL?.trim()
-  const [activePath, setActivePath] = useState(0)
-  const currentPath = paths[activePath]
-  const CurrentIcon = currentPath.icon
-
-  return (
-    <main className="castros-home">
-      <section className="castros-home__hero">
-        <div className="container castros-home__hero-inner">
-          <motion.div className="castros-home__hero-copy" initial={reducedMotion ? false : { opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reducedMotion ? 0 : 0.55 }}>
-            <span className="eyebrow">CASTRO’S SERVICES · MAPUTO</span>
-            <h1>Pessoas. Conhecimento. Espaço.</h1>
-            <p>Consultoria, formação e espaços para organizações que precisam transformar contexto em decisões, aprendizagem e encontros com intenção.</p>
-            <div className="castros-home__hero-actions">
-              <Link className="ds-button ds-button--primary" to="/contacto">Começar uma conversa <ArrowUpRight size={17} /></Link>
-              <Link className="castros-home__text-link" to="/sobre">Conhecer a Castro’s <ArrowRight size={17} /></Link>
-            </div>
-          </motion.div>
-          <div className="castros-home__hero-stage" aria-label="Visão geral da experiência Castro’s">
-            <div className="castros-home__hero-index"><span>01</span><span>02</span><span>03</span></div>
-            <div className="castros-home__hero-wordmark" aria-hidden="true">CASTRO’S</div>
-            <div className="castros-home__hero-orbit" aria-hidden="true" />
-            <div className="castros-home__hero-note"><span>PRESENÇA HUMANA</span><strong>Começar pelo contexto antes de escolher a solução.</strong><small>{configQuery.data?.businessTimezone ? `Operação preparada para ${configQuery.data.businessTimezone}.` : 'Maputo · Moçambique'}</small></div>
-          </div>
-        </div>
-      </section>
-
-      <section className="castros-home__path" aria-labelledby="castros-path-title">
-        <div className="container">
-          <div className="castros-home__section-heading"><div><span className="eyebrow">ESCOLHER O PONTO DE PARTIDA</span><h2 id="castros-path-title">Três caminhos. Uma experiência contínua.</h2></div><p>Selecione a área mais próxima da sua necessidade. A cena muda e conduz diretamente ao próximo passo real.</p></div>
-          <div className="castros-home__path-grid">
-            <nav className="castros-home__path-nav" aria-label="Áreas Castro’s">
-              {paths.map((path, index) => <button key={path.id} type="button" aria-pressed={index === activePath} onClick={() => setActivePath(index)} onFocus={() => setActivePath(index)}><span>{path.number}</span><strong>{path.label}</strong><path.icon size={20} aria-hidden="true" /></button>)}
-            </nav>
-            <motion.article key={currentPath.id} className="castros-home__path-focus" initial={reducedMotion ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-              <div className="castros-home__path-focus-top"><span>{currentPath.eyebrow}</span><CurrentIcon size={28} aria-hidden="true" /></div>
-              <div><h3>{currentPath.title}</h3><p>{currentPath.description}</p></div>
-              <div className="castros-home__path-themes">{currentPath.themes.map((theme) => <span key={theme}><CheckCircle2 size={14} />{theme}</span>)}</div>
-              <Link className="ds-button ds-button--primary" to={currentPath.href}>{currentPath.action} <ArrowRight size={16} /></Link>
-            </motion.article>
-          </div>
-        </div>
-      </section>
-
-      <section className="castros-home__founder" aria-labelledby="castros-founder-title">
-        <div className="container castros-home__founder-grid">
-          <div className="castros-home__founder-media">
-            {founderPortraitUrl ? <img src={founderPortraitUrl} alt="Elizabeth Castro, fundadora da Castro’s" /> : <div className="castros-home__founder-placeholder" role="img" aria-label="Retrato oficial de Elizabeth Castro em preparação"><strong>EC</strong><span>Retrato oficial em preparação</span></div>}
-            <div className="castros-home__founder-caption"><strong>Elizabeth Castro</strong><span>Fundadora · Consultora · Formadora</span></div>
-          </div>
-          <div className="castros-home__founder-copy"><span className="eyebrow">AUTORIDADE HUMANA</span><h2 id="castros-founder-title">A experiência tem rosto, método e presença.</h2><p>Elizabeth Castro dá origem à Castro’s Services e conduz uma atuação centrada em comunicação, liderança e desenvolvimento organizacional.</p><p>A plataforma não substitui essa relação: organiza o caminho até à conversa, à formação ou ao espaço certo.</p><Link className="castros-home__text-link" to="/sobre">Conhecer Elizabeth e a Castro’s <ArrowRight size={17} /></Link></div>
-        </div>
-      </section>
-
-      <section className="castros-home__published" aria-label="Conteúdo publicado">
-        <div className="container castros-home__published-grid">
-          <PublishedLane icon={<Handshake size={21} />} eyebrow="SERVIÇOS PUBLICADOS" title="Do contexto para um serviço concreto." query={servicesQuery} href="/servicos" empty="Os serviços publicados aparecerão aqui quando estiverem disponíveis." />
-          <PublishedLane icon={<BookOpenText size={21} />} eyebrow="FORMAÇÃO PUBLICADA" title="Aprendizagem com um próximo passo claro." query={coursesQuery} href="/formacao" empty="As formações publicadas aparecerão aqui quando estiverem disponíveis." />
-        </div>
-      </section>
-
-      <section className="castros-home__proof" aria-labelledby="castros-proof-title">
-        <div className="container castros-home__proof-grid">
-          <div><span className="eyebrow">PROVA HUMANA</span><h2 id="castros-proof-title">Sem depoimentos inventados.</h2><p>A estrutura está pronta. A publicação espera apenas testemunhos reais e autorizados.</p></div>
-          <div className="castros-home__proof-list">{proofFixtures.map((item, index) => <article key={item.context}><span>0{index + 1}</span><Quote size={20} aria-hidden="true" /><div><strong>{item.context}</strong><p>{item.quote}</p><small>{item.detail}</small></div></article>)}</div>
-        </div>
-      </section>
-
-      <section className="castros-home__space" aria-labelledby="castros-space-title">
-        <div className="container castros-home__space-grid">
-          <div className="castros-home__space-stage" role="img" aria-label="Área visual preparada para fotografia ou panorama real do espaço Castro’s"><div className="castros-home__space-lines" aria-hidden="true"><span /><span /><span /></div><div className="castros-home__space-status"><span>ESPAÇO CASTRO’S</span><strong>{spacesQuery.data?.items.length ? `${spacesQuery.data.items.length} espaço(s) publicado(s)` : 'Media oficial em preparação'}</strong></div></div>
-          <div className="castros-home__space-copy"><span className="eyebrow">ESPAÇOS</span><h2 id="castros-space-title">O ambiente também participa da experiência.</h2><p>Reuniões, formação e workshops precisam de um lugar que apoie foco, proximidade e intenção.</p><div className="castros-home__space-tags"><span><Building2 size={17} /> Reuniões</span><span><GraduationCap size={17} /> Formação</span><span><Compass size={17} /> Workshops</span></div><Link className="ds-button ds-button--secondary" to="/espacos">Explorar espaços <ArrowRight size={16} /></Link></div>
-        </div>
-      </section>
-
-      <section className="castros-home__process" aria-labelledby="castros-process-title">
-        <div className="container"><div className="castros-home__section-heading"><div><span className="eyebrow">COMO COMEÇAMOS</span><h2 id="castros-process-title">Contexto primeiro. Decisão depois.</h2></div></div><div className="castros-home__process-list"><article><span>01</span><MessageCircle size={20} /><h3>Converse</h3><p>Partilhe a necessidade, o desafio ou o encontro que pretende criar.</p></article><article><span>02</span><Compass size={20} /><h3>Explore</h3><p>Compare serviços, formação e espaços com informação útil para decidir.</p></article><article><span>03</span><ArrowUpRight size={20} /><h3>Avance</h3><p>Siga para contacto, inscrição ou reserva quando o caminho estiver claro.</p></article></div></div>
-      </section>
-
-      <section className="castros-home__closing"><div className="container castros-home__closing-inner"><div><span className="eyebrow">PRÓXIMO PASSO</span><h2>Não precisa chegar com a resposta pronta.</h2></div><div><p>Comece pelo contexto. A Castro’s ajuda a transformar isso num próximo passo claro.</p><Link className="ds-button ds-button--primary" to="/contacto">Falar com a Castro’s <ArrowUpRight size={17} /></Link></div></div></section>
-    </main>
-  )
+  const configQuery = usePublicConfig(); const servicesQuery = useServices(); const coursesQuery = useCourses(); const spacesQuery = useSpacesPreview()
+  const founderPortraitUrl = import.meta.env.VITE_ELIZABETH_PORTRAIT_URL?.trim(); const reducedMotion = useReducedMotion()
+  return <div className="home-v2">
+    <section className="home-v2-hero"><div className="container home-v2-hero__grid">
+      <motion.div className="home-v2-hero__copy" variants={motionPresets.heroSequence} initial={reducedMotion ? false : 'hidden'} animate="visible" data-motion-reduced={reducedMotion ? 'true' : 'false'}><motion.span className="eyebrow" variants={motionPresets.heroItem}>CASTRO’S SERVICES · MAPUTO</motion.span><motion.h1 variants={motionPresets.heroItem}>Onde pessoas, liderança e <em>experiência</em> se encontram.</motion.h1><motion.p className="home-v2-hero__lead" variants={motionPresets.heroItem}>Consultoria, formação e espaços pensados para criar conversas mais claras, equipas mais preparadas e encontros com intenção.</motion.p><motion.div className="home-v2-hero__actions" variants={motionPresets.heroItem}><Link className="ds-button ds-button--primary home-v2-primary" to="/contacto">Começar uma conversa <ArrowUpRight size={17} /></Link><Link className="home-v2-link" to="/servicos">Descobrir a Castro’s <ArrowDownRight size={17} /></Link></motion.div><motion.div className="home-v2-hero__meta" aria-label="Áreas Castro’s" variants={motionPresets.heroItem}><span>Consultoria</span><i aria-hidden="true" /><span>Formação</span><i aria-hidden="true" /><span>Espaços</span></motion.div></motion.div>
+      <motion.div className="home-v2-hero__art home-v3-hero-media" aria-label="Composição editorial preparada para fotografia real da Castro’s Services" variants={motionPresets.heroMedia} initial={reducedMotion ? false : 'hidden'} animate="visible"><div className="home-v3-hero-media__architecture" aria-hidden="true"><span /><span /><span /></div><div className="home-v3-hero-media__frame" role="img" aria-label="Área reservada para fotografia oficial da Castro’s Services"><div className="home-v3-hero-media__placeholder"><span>CASTRO’S SERVICES</span><strong>Pessoa. Conhecimento. Espaço.</strong></div></div><div className="home-v3-hero-media__areas" aria-hidden="true"><span>Pessoa</span><span>Conhecimento</span><span>Espaço</span></div><div className="home-v3-hero-media__note"><span>PRESENÇA HUMANA</span><strong>A experiência começa por compreender quem está do outro lado.</strong><small>{configQuery.data?.businessTimezone ? `Experiência digital preparada para ${configQuery.data.businessTimezone}.` : 'Fotografia oficial em preparação.'}</small></div></motion.div>
+    </div></section>
+    <section className="home-v2-experiences container" aria-labelledby="experiences-title"><SectionReveal><div className="home-v2-section-head"><div><span className="eyebrow">TRÊS PORTAS DE ENTRADA</span><h2 id="experiences-title">Comece pelo que a sua realidade pede agora.</h2></div><p>A Castro’s reúne diferentes formas de apoiar pessoas e organizações — da conversa estratégica à formação e ao espaço onde o encontro acontece.</p></div><ExperienceSelector /></SectionReveal></section>
+    <section className="home-v2-practice"><SectionReveal className="container home-v2-practice__grid"><div className="home-v2-practice__intro"><span className="eyebrow eyebrow--light">ÁREAS DE ATUAÇÃO</span><h2>Clareza no atendimento. Ética na liderança. Formação com contexto.</h2><p>Uma presença transversal para organizações que precisam desenvolver relações, liderança e capacidade interna.</p><Link className="home-v2-link home-v2-link--light" to="/servicos">Explorar serviços <MoveRight size={18} /></Link></div><div className="home-v2-practice__list">{practiceLines.map((line, index) => <div className="home-v2-practice__row" key={line}><span>0{index + 1}</span><strong>{line}</strong><ArrowUpRight size={18} aria-hidden="true" /></div>)}</div></SectionReveal></section>
+    <section className="home-v2-founder container" aria-labelledby="founder-title"><div className="home-v2-founder__portrait">{founderPortraitUrl ? <img src={founderPortraitUrl} alt="Elizabeth Castro, fundadora da Castro’s" /> : <div className="home-v2-founder__placeholder" role="img" aria-label="Área reservada para o retrato oficial de Elizabeth Castro"><strong>EC</strong><span>Retrato oficial em preparação</span></div>}<div className="home-v2-founder__identity"><strong>Elizabeth Castro</strong><span>Fundadora · Consultora · Formadora</span></div></div><div className="home-v2-founder__copy"><span className="eyebrow">FUNDADORA</span><h2 id="founder-title">Experiência que se transforma em impacto.</h2><p>Fundadora da Castro’s, consultora e formadora dedicada ao desenvolvimento de pessoas e organizações através da comunicação, liderança e desenvolvimento organizacional.</p><p className="home-v2-founder__note">Elizabeth dá rosto à confiança. A Castro’s transforma essa confiança numa estrutura de valor para pessoas e organizações.</p><Link className="home-v2-link" to="/sobre">Conhecer a Castro’s e a sua fundadora <ArrowRight size={16} /></Link></div></section>
+    <section className="home-v2-live container" aria-label="Conteúdo publicado"><div className="home-v2-live__column"><div className="home-v2-live__heading"><Handshake size={22} /><span className="eyebrow">SERVIÇOS PUBLICADOS</span></div><h2>Do contexto à ação.</h2><PublicPreview query={servicesQuery} empty="Os serviços publicados surgirão aqui assim que o catálogo estiver configurado." href="/servicos" label="Ver todos os serviços" renderItems={(items) => <div className="home-v2-live__items">{items.slice(0, 3).map((item, index) => <Link key={item.slug} to={`/servicos/${item.slug}`}><span>0{index + 1}</span><strong>{item.name}</strong><ArrowRight size={17} /></Link>)}</div>} /></div><div className="home-v2-live__column home-v2-live__column--cream"><div className="home-v2-live__heading"><BookOpenText size={22} /><span className="eyebrow">FORMAÇÃO</span></div><h2>Aprender também é transformar a forma de trabalhar.</h2><PublicPreview query={coursesQuery} empty="As formações publicadas surgirão aqui quando o catálogo estiver configurado." href="/formacao" label="Explorar formação" renderItems={(items) => <div className="home-v2-live__items">{items.slice(0, 3).map((item, index) => <Link key={item.slug} to={`/formacao/${item.slug}`}><span>0{index + 1}</span><strong>{item.name}</strong><ArrowRight size={17} /></Link>)}</div>} /></div></section>
+    <TestimonialProof />
+    <section className="home-v2-space container"><div className="home-v2-space__visual" aria-label="Área preparada para fotografia real do espaço Castro’s"><div className="home-v2-space__frame" aria-hidden="true"><span /><span /><span /></div><div className="home-v2-space__caption"><span>ESPAÇO CASTRO’S</span><small>Fotografia e experiência 360 entram na próxima etapa visual.</small></div></div><div className="home-v2-space__copy"><span className="eyebrow">ESPAÇOS</span><h2>O lugar também faz parte da experiência.</h2><p>Um ambiente físico preparado para reuniões, treinamentos e workshops — e uma experiência digital que será capaz de o explorar antes mesmo da visita.</p><div className="home-v2-space__features"><span><Building2 size={18} /> Reuniões</span><span><GraduationCap size={18} /> Formação</span><span><Sparkles size={18} /> Workshops</span></div><Link className="ds-button ds-button--secondary" to="/espacos">Conhecer o espaço <ArrowRight size={17} /></Link>{spacesQuery.data?.items.length ? <small className="home-v2-space__status">{spacesQuery.data.items.length} espaço(s) disponível(eis) no catálogo.</small> : null}</div></section>
+    <section className="home-v2-process container"><SectionReveal><div className="home-v2-section-head home-v2-section-head--compact"><div><span className="eyebrow">COMO COMEÇAMOS</span><h2>Uma experiência simples. Sem saltar o contexto.</h2></div></div><div className="home-v2-process__steps"><article><span>01</span><MessageCircle size={21} /><h3>Converse</h3><p>Partilhe a necessidade, o desafio ou o tipo de encontro que pretende criar.</p></article><article><span>02</span><Compass size={21} /><h3>Explore</h3><p>Conheça serviços, formação e espaços com informação organizada para decidir melhor.</p></article><article><span>03</span><ArrowUpRight size={21} /><h3>Avance</h3><p>Siga para o pedido, configuração ou reserva quando a opção certa estiver clara.</p></article></div></SectionReveal></section>
+    <section className="home-v2-contact"><SectionReveal className="container home-v2-contact__inner"><div><span className="eyebrow eyebrow--light">PRÓXIMO PASSO</span><h2>Começamos pela conversa certa.</h2></div><div><p>Conte-nos o que pretende desenvolver, organizar ou transformar. A experiência digital encaminha o pedido para o contexto certo.</p><Link className="ds-button home-v2-contact__button" to="/contacto">Falar com a Castro’s <ArrowUpRight size={18} /></Link></div></SectionReveal></section>
+  </div>
 }
 
-function PublishedLane({ icon, eyebrow, title, query, href, empty }: { icon: ReactNode; eyebrow: string; title: string; query: PublishedResource; href: string; empty: string }) {
-  const items = query.data?.items ?? []
-  return <article className="castros-home__published-lane"><div className="castros-home__published-head">{icon}<span className="eyebrow">{eyebrow}</span></div><h2>{title}</h2>{query.isLoading ? <LoadingState label="A carregar conteúdo." /> : null}{query.isError ? <ErrorState title="Não foi possível carregar este conteúdo." /> : null}{!query.isLoading && !query.isError && !items.length ? <EmptyState title="Conteúdo em preparação">{empty}</EmptyState> : null}{items.length ? <div className="castros-home__published-list">{items.slice(0, 3).map((item, index) => <Link key={item.slug} to={`${href}/${item.slug}`}><span>{String(index + 1).padStart(2, '0')}</span><strong>{item.name}</strong><ArrowUpRight size={17} /></Link>)}</div> : null}<Link className="castros-home__text-link" to={href}>Ver tudo <ArrowRight size={16} /></Link></article>
+function TestimonialProof() {
+  const [activeIndex, setActiveIndex] = useState(0); const item = testimonialFixtures[activeIndex]
+  const move = (delta: number) => setActiveIndex((current) => (current + delta + testimonialFixtures.length) % testimonialFixtures.length)
+  return <section className="home-v3-proof" aria-labelledby="home-proof-title"><div className="container home-v3-proof__inner"><div className="home-v3-proof__intro"><span className="eyebrow eyebrow--light">VOZES / PROVA HUMANA</span><h2 id="home-proof-title">O impacto, contado por quem esteve lá.</h2><p>Esta área está preparada para depoimentos reais e autorizados. Enquanto o conteúdo é recolhido, os estados abaixo permanecem explicitamente identificados como pendentes.</p><div className="home-v3-proof__controls"><button type="button" onClick={() => move(-1)} aria-label="Depoimento anterior"><ArrowLeft size={18} /></button><span>{String(activeIndex + 1).padStart(2, '0')} / {String(testimonialFixtures.length).padStart(2, '0')}</span><button type="button" onClick={() => move(1)} aria-label="Próximo depoimento"><ArrowRight size={18} /></button></div></div><motion.article key={item.id} className="home-v3-proof__quote" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}><div className="home-v3-proof__top"><span>{item.context}</span><span>CONTEÚDO PENDENTE</span></div><Quote size={34} aria-hidden="true" /><blockquote>“{item.quote}”</blockquote><footer><div><strong>{item.person}</strong><span>{item.role}</span></div><small>{item.detail}</small></footer></motion.article><nav className="home-v3-proof__index" aria-label="Selecionar contexto de depoimento">{testimonialFixtures.map((entry, index) => <button key={entry.id} type="button" aria-pressed={index === activeIndex} onClick={() => setActiveIndex(index)}><span>0{index + 1}</span><strong>{entry.context}</strong></button>)}</nav></div></section>
 }
+
+export function ExperienceSelector() { return <nav className="home-v2-experience-grid" aria-label="Experiências Castro’s">{experiences.map(({ number, title, eyebrow, description, topics, href, icon: Icon }) => <Link className="home-v2-experience" key={href} to={href}><div className="home-v2-experience__top"><span>{number}</span><Icon size={21} /></div><div><small>{eyebrow}</small><h3>{title}</h3><p>{description}</p><ul className="home-v2-experience__topics" aria-label={`Temas de ${title}`}>{topics.map((topic) => <li key={topic}>{topic}</li>)}</ul></div><span className="home-v2-experience__action">Explorar <ArrowUpRight size={16} /></span></Link>)}</nav> }
+
+function PublicPreview<T extends { slug: string; name: string }>({ query, empty, renderItems, href, label }: { query: { isLoading: boolean; isError: boolean; data?: { items: T[] } }; empty: string; renderItems: (items: T[]) => ReactNode; href: string; label: string }) { if (query.isLoading) return <LoadingState label="A carregar conteúdo." />; if (query.isError) return <ErrorState title="Não foi possível carregar esta área." />; return <div className="home-v2-preview-content">{!query.data?.items.length ? <EmptyState title="Catálogo em preparação">{empty}</EmptyState> : renderItems(query.data.items)}<Link className="home-v2-link" to={href}>{label} <ArrowRight size={16} /></Link></div> }
