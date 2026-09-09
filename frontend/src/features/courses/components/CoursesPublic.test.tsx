@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { CourseCollectionView, CourseDetailView, CourseSessionsView } from './CoursesPublic'
 
 const course = { id: 'course-1', slug: 'course-1', name: '[CONTENT TBD]', summary: '[A confirmar]', contactPhone: '878 665 180' }
+const detailedCourse = { ...course, description: 'Descrição publicada.', modality: 'IN_PERSON', durationLabel: '2 dias', scheduleSummary: '09:00–16:00', investmentAmount: 12000, investmentCurrency: 'MZN', certificateIncluded: true, learningOutcomes: ['Comunicar com clareza', 'Aplicar técnicas no trabalho'] }
 const emptySessions = { isLoading: false, isError: false, data: { items: [] } }
 
 describe('public training', () => {
@@ -22,15 +23,11 @@ describe('public training', () => {
   it('lets visitors focus a training format without changing the published catalog', async () => {
     const user = userEvent.setup()
     render(<MemoryRouter><CourseCollectionView resource={{ isLoading: false, isError: false, data: { items: [course] } }} /></MemoryRouter>)
-
     const workshop = screen.getByRole('button', { name: /Palestras & Workshops/i })
     const personalized = screen.getByRole('button', { name: /Treinamento Personalizado/i })
-
     expect(workshop).toHaveAttribute('aria-pressed', 'true')
     expect(personalized).toHaveAttribute('aria-pressed', 'false')
-
     await user.click(personalized)
-
     expect(workshop).toHaveAttribute('aria-pressed', 'false')
     expect(personalized).toHaveAttribute('aria-pressed', 'true')
     expect(await screen.findByRole('heading', { name: 'Treinamento Personalizado' })).toBeInTheDocument()
@@ -50,6 +47,19 @@ describe('public training', () => {
     expect(screen.getByRole('status')).toHaveTextContent('A carregar formação.')
   })
 
+  it('renders published course facts and outcomes in the detail experience', () => {
+    render(<MemoryRouter><CourseDetailView courseResource={{ isLoading: false, isError: false, data: detailedCourse }} sessionsResource={emptySessions} /></MemoryRouter>)
+    expect(screen.getByRole('heading', { name: '[CONTENT TBD]' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Informação publicada da formação')).toHaveTextContent('In person')
+    expect(screen.getByLabelText('Informação publicada da formação')).toHaveTextContent('2 dias')
+    expect(screen.getByLabelText('Informação publicada da formação')).toHaveTextContent('12 000 MT')
+    expect(screen.getByLabelText('Informação publicada da formação')).toHaveTextContent('Incluído')
+    expect(screen.getByText('09:00–16:00')).toBeInTheDocument()
+    expect(screen.getByText('Comunicar com clareza')).toBeInTheDocument()
+    expect(screen.getByText('Aplicar técnicas no trabalho')).toBeInTheDocument()
+    expect(screen.getByText('Certificado incluído nesta formação.')).toBeInTheDocument()
+  })
+
   it('renders detail API error with a safe return path', () => {
     render(<MemoryRouter><CourseDetailView courseResource={{ isLoading: false, isError: true }} sessionsResource={emptySessions} /></MemoryRouter>)
     expect(screen.getByRole('heading', { name: 'Não foi possível carregar esta formação.' })).toBeInTheDocument()
@@ -65,7 +75,6 @@ describe('public training', () => {
   it('renders session loading and error states', () => {
     const { rerender } = render(<MemoryRouter><CourseSessionsView resource={{ isLoading: true, isError: false }} course={course} /></MemoryRouter>)
     expect(screen.getByRole('status')).toHaveTextContent('A carregar sessões.')
-
     rerender(<MemoryRouter><CourseSessionsView resource={{ isLoading: false, isError: true }} course={course} /></MemoryRouter>)
     expect(screen.getByRole('heading', { name: 'Não foi possível carregar as sessões.' })).toBeInTheDocument()
   })
