@@ -52,7 +52,7 @@ describe('public training', () => {
     expect(screen.getByRole('heading', { name: '[CONTENT TBD]' })).toBeInTheDocument()
     expect(screen.getByLabelText('Informação publicada da formação')).toHaveTextContent('In person')
     expect(screen.getByLabelText('Informação publicada da formação')).toHaveTextContent('2 dias')
-    expect(screen.getByLabelText('Informação publicada da formação')).toHaveTextContent('12 000 MT')
+    expect(screen.getByLabelText('Informação publicada da formação')).toHaveTextContent('12 000 MT')
     expect(screen.getByLabelText('Informação publicada da formação')).toHaveTextContent('Incluído')
     expect(screen.getByText('09:00–16:00')).toBeInTheDocument()
     expect(screen.getByText('Comunicar com clareza')).toBeInTheDocument()
