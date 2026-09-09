@@ -33,7 +33,7 @@ describe('public services', () => {
     expect(firstArea).toHaveAttribute('aria-pressed', 'false')
     expect(leadershipArea).toHaveAttribute('aria-pressed', 'true')
     expect(await screen.findByRole('heading', { name: 'Ética & Liderança Organizacional' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Falar sobre esta área/i })).toHaveAttribute('href', expect.stringContaining('SERVICES_AREA_02'))
+    expect(screen.getByRole('link', { name: /Começar por esta área/i })).toHaveAttribute('href', expect.stringContaining('SERVICES_AREA_02'))
   })
 
   it('renders empty and API error states', () => {
