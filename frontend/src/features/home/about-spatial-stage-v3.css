@@ -3,9 +3,10 @@
 .launch-about::before{content:'';position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 78% 18%,rgb(34 187 174 / 13%),transparent 28rem),radial-gradient(circle at 18% 58%,rgb(241 222 174 / 7%),transparent 30rem)}
 .launch-about__hero{position:relative;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(24rem,.92fr);min-height:calc(100svh - 5.65rem);align-items:center;gap:clamp(4rem,10vw,10rem);padding-block:clamp(5rem,9vw,9rem)}
 .launch-about__hero::after{content:'PRESENÇA / CONFIANÇA / ESTRUTURA';position:absolute;top:2rem;right:0;color:rgb(255 255 255 / 22%);font-size:.62rem;font-weight:800;letter-spacing:.2em}
-.launch-about__hero h1,.launch-about__founder h2,.launch-about__pillars h3,.launch-about__cta h2{font-family:var(--font-sans);letter-spacing:-.06em}
+.launch-about__hero h1,.launch-about__founder h2,.launch-about__pillars h3,.launch-about__cta h2,.launch-about__method h2,.launch-about__method h3{font-family:var(--font-sans);letter-spacing:-.06em}
 .launch-about__hero h1{max-width:9.5ch;margin:1rem 0 1.6rem;color:#fff;font-size:clamp(4.8rem,8vw,8.8rem);font-weight:620;line-height:.88}
 .launch-about__hero h1 em{color:var(--color-cream);font-style:normal;font-weight:inherit}.launch-about__hero p{max-width:42rem;color:rgb(255 255 255 / 64%);font-size:1.05rem;line-height:1.8}
+.launch-about__hero-actions{display:flex;align-items:center;flex-wrap:wrap;gap:1rem 1.6rem;margin-top:2rem}.launch-about__hero-actions .ds-button{border-radius:999px;background:var(--color-cream);color:var(--color-deep-navy)}.launch-about__hero-actions .home-v2-link{color:#fff}
 
 /* Elizabeth is the dominant human object, not a framed card. */
 .launch-founder-portrait--about{position:relative;min-height:40rem;overflow:visible;border:0;background:transparent;transform:translate(1rem,2.5rem) rotate(1.8deg);isolation:isolate}
@@ -18,23 +19,32 @@
 .launch-about__founder{position:relative;background:transparent;border-top:1px solid rgb(255 255 255 / 12%);border-bottom:1px solid rgb(255 255 255 / 12%)}
 .launch-about__founder-grid{min-height:38rem;align-items:center;gap:clamp(3rem,8vw,8rem)}
 .launch-about__founder h2{color:#fff;font-size:clamp(3.4rem,6vw,6.4rem);font-weight:600;line-height:.92}.launch-about__founder p{color:rgb(255 255 255 / 62%)}
+.launch-about__founder-copy{display:grid;gap:1rem}.launch-about__founder-themes{display:flex;flex-wrap:wrap;gap:.65rem;margin-top:1rem}.launch-about__founder-themes span{border:1px solid rgb(255 255 255 / 14%);border-radius:999px;padding:.55rem .85rem;color:rgb(255 255 255 / 72%);font-size:.72rem;font-weight:700}
 
-/* Pillars are independent suspended planes with asymmetrical depth. */
-.launch-about__pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1.5rem,4vw,4rem);align-items:start;padding-block:clamp(7rem,12vw,12rem)}
-.launch-about__pillars article{position:relative;min-height:26rem;border:1px solid rgb(255 255 255 / 13%);border-radius:1.35rem;background:rgb(255 255 255 / 2.5%);color:#fff;padding:clamp(2rem,4vw,4rem);box-shadow:0 2rem 7rem rgb(0 0 0 / 14%);transition:transform var(--motion-emphasis) var(--ease-standard),background var(--motion-normal) var(--ease-standard),box-shadow var(--motion-normal) var(--ease-standard);isolation:isolate}
-.launch-about__pillars article::before{content:'';position:absolute;z-index:-1;width:12rem;aspect-ratio:1;right:-4rem;top:-4rem;border-radius:50%;background:radial-gradient(circle,rgb(34 187 174 / 14%),transparent 68%);filter:blur(10px);pointer-events:none}
-.launch-about__pillars article:nth-child(1){transform:translateY(-1.5rem) rotate(-.6deg)}
-.launch-about__pillars article:nth-child(2){transform:translateY(3.5rem) rotate(.55deg);background:rgb(241 222 174 / 6%);box-shadow:0 2.5rem 8rem rgb(241 222 174 / 10%)}
-.launch-about__pillars article:nth-child(3){transform:translateY(-2.3rem) rotate(-.35deg)}
-.launch-about__pillars article:nth-child(2)::before{background:radial-gradient(circle,rgb(241 222 174 / 15%),transparent 68%)}
-.launch-about__pillars article:hover,.launch-about__pillars article:focus-within{transform:translateY(-.9rem);background:rgb(255 255 255 / 5%);box-shadow:0 3rem 9rem rgb(34 187 174 / 14%)}
-.launch-about__pillars article:nth-child(2):hover,.launch-about__pillars article:nth-child(2):focus-within{transform:translateY(2.4rem)}
-.launch-about__pillars h3{color:#fff;font-size:clamp(2.1rem,3.4vw,3.7rem);line-height:.96}.launch-about__pillars p{color:rgb(255 255 255 / 58%)}
+/* Method is a real journey, not another decorative card block. */
+.launch-about__method{padding-block:clamp(7rem,11vw,11rem)}
+.launch-about__method-head{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(18rem,.9fr);gap:clamp(3rem,8vw,8rem);align-items:end;margin-bottom:clamp(3rem,6vw,6rem)}
+.launch-about__method-head h2{max-width:11ch;margin:.8rem 0 0;color:#fff;font-size:clamp(3.4rem,5.8vw,6.2rem);font-weight:600;line-height:.93}
+.launch-about__method-head>p{color:rgb(255 255 255 / 58%);line-height:1.8}
+.launch-about__method-flow{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid rgb(255 255 255 / 14%)}
+.launch-about__method-flow article{position:relative;min-height:19rem;border-bottom:1px solid rgb(255 255 255 / 14%);padding:2.3rem 2rem 2.6rem 0}.launch-about__method-flow article+article{border-left:1px solid rgb(255 255 255 / 10%);padding-left:2rem}.launch-about__method-flow article>span{color:var(--color-teal);font-size:.65rem;font-weight:800;letter-spacing:.16em}.launch-about__method-flow svg{display:block;margin:2.8rem 0 1rem;color:var(--color-cream)}.launch-about__method-flow h3{margin:0;color:#fff;font-size:clamp(2rem,3vw,3.1rem);font-weight:600;line-height:.95}.launch-about__method-flow p{max-width:23rem;color:rgb(255 255 255 / 55%);line-height:1.7}
+
+/* Pillars are independent, content-rich navigation planes without decorative tilt. */
+.launch-about__pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1.5rem,3vw,3rem);align-items:stretch;padding-block:clamp(6rem,10vw,10rem)}
+.launch-about__pillars article{position:relative;display:flex;min-height:31rem;flex-direction:column;border:1px solid rgb(255 255 255 / 13%);border-radius:1.35rem;background:rgb(255 255 255 / 2.5%);color:#fff;padding:clamp(2rem,3.5vw,3.4rem);box-shadow:0 2rem 7rem rgb(0 0 0 / 14%);transition:transform var(--motion-emphasis) var(--ease-standard),background var(--motion-normal) var(--ease-standard),box-shadow var(--motion-normal) var(--ease-standard);isolation:isolate}
+.launch-about__pillars article::before{content:'';position:absolute;z-index:-1;width:11rem;aspect-ratio:1;right:-3.5rem;top:-3.5rem;border-radius:50%;background:radial-gradient(circle,rgb(34 187 174 / 12%),transparent 68%);filter:blur(10px);pointer-events:none}
+.launch-about__pillars article:nth-child(2){background:rgb(241 222 174 / 5%)}
+.launch-about__pillars article:nth-child(2)::before{background:radial-gradient(circle,rgb(241 222 174 / 14%),transparent 68%)}
+.launch-about__pillars article:hover,.launch-about__pillars article:focus-within{transform:translateY(-.45rem);background:rgb(255 255 255 / 5%);box-shadow:0 3rem 9rem rgb(34 187 174 / 14%)}
+.launch-about__pillar-top{display:flex;align-items:center;justify-content:space-between;gap:1rem;color:var(--color-teal)}.launch-about__pillar-top span{font-size:.65rem;font-weight:800;letter-spacing:.15em}
+.launch-about__pillars h3{max-width:9ch;margin:3rem 0 1rem;color:#fff;font-size:clamp(2.1rem,3.2vw,3.5rem);line-height:.96}.launch-about__pillars p{color:rgb(255 255 255 / 58%);line-height:1.7}
+.launch-about__pillar-topics{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:1rem}.launch-about__pillar-topics span{border:1px solid rgb(255 255 255 / 13%);border-radius:999px;padding:.45rem .7rem;color:rgb(255 255 255 / 67%);font-size:.68rem;font-weight:650}
+.launch-about__pillar-link{display:inline-flex;align-items:center;gap:.45rem;margin-top:auto;padding-top:2rem;color:var(--color-cream);font-size:.78rem;font-weight:750;text-decoration:none}.launch-about__pillar-link:hover,.launch-about__pillar-link:focus-visible{text-decoration:underline;text-underline-offset:.3rem}
 
 .launch-about__cta{position:relative;min-height:32rem;align-items:center;border-top:1px solid rgb(255 255 255 / 14%)}
 .launch-about__cta::before{content:'';position:absolute;right:2%;width:26rem;aspect-ratio:1;border:1px solid rgb(34 187 174 / 20%);border-radius:50%;background:radial-gradient(circle,rgb(34 187 174 / 12%),transparent 68%);box-shadow:0 2rem 10rem rgb(34 187 174 / 13%)}
 .launch-about__cta h2{color:#fff;max-width:11ch;font-size:clamp(3rem,5.5vw,5.8rem);line-height:.94}.launch-about__cta .ds-button{border-radius:999px;background:var(--color-cream);color:var(--color-deep-navy)}
 
-@media(max-width:900px){.launch-about__hero{grid-template-columns:1fr;min-height:auto}.launch-about__hero::after{left:0;right:auto}.launch-founder-portrait--about{min-height:31rem;transform:none}.launch-founder-portrait--about img,.launch-founder-portrait--about .launch-founder-portrait__placeholder{min-height:31rem}.launch-about__pillars{grid-template-columns:1fr;gap:2rem}.launch-about__pillars article,.launch-about__pillars article:nth-child(1),.launch-about__pillars article:nth-child(2),.launch-about__pillars article:nth-child(3){min-height:auto;transform:none}}
-@media(max-width:560px){.launch-about__hero h1{font-size:clamp(3.5rem,17vw,5.5rem)}.launch-founder-portrait--about figcaption{right:0;left:0}.launch-about__cta::before{width:14rem;opacity:.5}}
+@media(max-width:900px){.launch-about__hero{grid-template-columns:1fr;min-height:auto}.launch-about__hero::after{left:0;right:auto}.launch-founder-portrait--about{min-height:31rem;transform:none}.launch-founder-portrait--about img,.launch-founder-portrait--about .launch-founder-portrait__placeholder{min-height:31rem}.launch-about__method-head,.launch-about__method-flow,.launch-about__pillars{grid-template-columns:1fr}.launch-about__method-flow article+article{border-left:0;padding-left:0}.launch-about__pillars{gap:2rem}.launch-about__pillars article{min-height:auto}}
+@media(max-width:560px){.launch-about__hero h1{font-size:clamp(3.5rem,17vw,5.5rem)}.launch-founder-portrait--about figcaption{right:0;left:0}.launch-about__cta::before{width:14rem;opacity:.5}.launch-about__hero-actions{align-items:flex-start;flex-direction:column}.launch-about__method-flow article{min-height:auto}}
 @media(prefers-reduced-motion:reduce){.launch-founder-portrait--about,.launch-about__pillars article{transition:none!important;transform:none!important}}
