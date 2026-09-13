@@ -1,0 +1,55 @@
+/*
+ * CASTRO’S public layout frame.
+ *
+ * Keeps public scenes visually close to the viewport edges on large screens
+ * without forcing reading copy to become excessively wide. Internal product
+ * surfaces are intentionally excluded.
+ */
+.public-v2-shell {
+  --public-frame-max: 108rem;
+  --public-frame-gutter: clamp(1.25rem, 3vw, 4.5rem);
+  --public-reading-max: 46rem;
+}
+
+.public-v2-shell .container,
+.public-v2-shell .home-v2 .container {
+  width: min(calc(100% - (var(--public-frame-gutter) * 2)), var(--public-frame-max));
+  margin-inline: auto;
+}
+
+/* Keep the Home practice frame aligned to the same viewport frame. */
+.public-v2-shell .home-v2-practice::before {
+  inset-inline: max(
+    var(--public-frame-gutter),
+    calc((100vw - var(--public-frame-max)) / 2)
+  );
+}
+
+/* Reading measure remains independent from the visual frame width. */
+.public-v2-shell :is(
+  .home-v2-hero__lead,
+  .home-v2-section-head > p,
+  .home-v2-founder__copy > p,
+  .home-v2-space__copy > p,
+  .public-page-hero p
+) {
+  max-width: var(--public-reading-max);
+}
+
+/* Explicit helpers for the redesign: full-bleed media can escape the frame,
+ * while content remains aligned to the canonical public frame. */
+.public-v2-shell .public-frame {
+  width: min(calc(100% - (var(--public-frame-gutter) * 2)), var(--public-frame-max));
+  margin-inline: auto;
+}
+
+.public-v2-shell .public-full-bleed {
+  width: 100%;
+  max-width: none;
+}
+
+@media (max-width: 767px) {
+  .public-v2-shell {
+    --public-frame-gutter: clamp(1rem, 5vw, 1.35rem);
+  }
+}
