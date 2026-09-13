@@ -1,0 +1,403 @@
+/* CASTRO’S V3 — critical composition correction
+ * Final load-order pass for public surfaces that still inherit V2 typography,
+ * light-card treatment or oversized empty shells. Scoped to public V3 only.
+ */
+
+.public-v2-shell :is(
+  .courses-v2-page,
+  .course-detail-v2,
+  .spaces-v2-page,
+  .space-detail-v2,
+  .space-config-v2
+) {
+  font-family: var(--font-sans);
+}
+
+/* TRAINING — remove serif leakage and stop the focus scene from colliding. */
+.public-v2-shell .courses-v2-page .training-experience__option-title,
+.public-v2-shell .courses-v2-page .training-experience__focus-copy h3,
+.public-v2-shell .courses-v2-page .training-catalog__heading h2,
+.public-v2-shell .courses-v2-page .training-catalog__item-main h3,
+.public-v2-shell .courses-v2-page .training-catalog__item-main h3 a,
+.public-v2-shell .courses-v2-page .courses-v2-corporate h2 {
+  font-family: var(--font-sans);
+}
+
+.public-v2-shell .courses-v2-page .training-experience {
+  padding-block: 2rem clamp(6rem, 9vw, 9rem);
+}
+
+.public-v2-shell .courses-v2-page .training-experience__grid {
+  grid-template-columns: minmax(18rem, .58fr) minmax(0, 1.42fr);
+  gap: clamp(3.5rem, 7vw, 7rem);
+  align-items: start;
+}
+
+.public-v2-shell .courses-v2-page .training-experience__index {
+  align-content: start;
+  padding-top: 2rem;
+}
+
+.public-v2-shell .courses-v2-page .training-experience__option {
+  min-height: 6rem;
+  grid-template-columns: 3rem minmax(0, 1fr) auto;
+  border: 1px solid transparent;
+  border-radius: 1rem;
+  padding: 1.15rem 1rem;
+  margin: 0 0 1rem;
+  background: transparent;
+}
+
+.public-v2-shell .courses-v2-page .training-experience__option--active,
+.public-v2-shell .courses-v2-page .training-experience__option:is(:hover,:focus-visible) {
+  border-color: rgb(250 249 245 / 16%);
+  background: rgb(250 249 245 / 5%);
+  transform: translateX(.35rem);
+}
+
+.public-v2-shell .courses-v2-page .training-experience__option-title {
+  font-size: clamp(1rem, 1.5vw, 1.3rem);
+  font-weight: 650;
+  letter-spacing: -.025em;
+}
+
+.public-v2-shell .courses-v2-page .training-experience__focus {
+  min-height: 31rem;
+  overflow: hidden;
+  transform: translateY(1.5rem) rotate(-.8deg);
+}
+
+.public-v2-shell .courses-v2-page .training-experience__focus-card {
+  min-height: 31rem;
+  grid-template-rows: auto 1fr auto;
+  padding: clamp(2rem, 4vw, 3.5rem);
+}
+
+.public-v2-shell .courses-v2-page .training-experience__focus-copy {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(15rem, .65fr);
+  align-items: end;
+  gap: clamp(2rem, 5vw, 5rem);
+  width: 100%;
+}
+
+.public-v2-shell .courses-v2-page .training-experience__focus-copy h3 {
+  max-width: 7.5ch;
+  margin: 0;
+  font-size: clamp(3rem, 4.6vw, 5rem);
+  line-height: .9;
+}
+
+.public-v2-shell .courses-v2-page .training-experience__focus-copy p {
+  max-width: 26rem;
+  margin: 0;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgb(250 249 245 / 14%);
+  font-size: .95rem;
+  line-height: 1.7;
+}
+
+.public-v2-shell .courses-v2-page .training-catalog__item {
+  min-height: 11rem;
+  margin-bottom: 1.25rem;
+  border: 1px solid rgb(250 249 245 / 12%);
+  border-radius: 1.2rem;
+  background: rgb(250 249 245 / 3%);
+  padding: 1.4rem 1.6rem;
+  box-shadow: 0 1.5rem 4rem rgb(4 6 24 / 12%);
+}
+
+.public-v2-shell .courses-v2-page .training-catalog__list {
+  border-top: 0;
+}
+
+.public-v2-shell .courses-v2-page .training-catalog__item:hover,
+.public-v2-shell .courses-v2-page .training-catalog__item:focus-within {
+  background: rgb(250 249 245 / 5%);
+  transform: translateY(-3px);
+}
+
+/* SPACES — reduce empty shells and keep the media object meaningful even before assets exist. */
+.public-v2-shell .spaces-v2-page .space-v2-card {
+  min-height: 35rem;
+  grid-template-columns: minmax(0, 1.18fr) minmax(20rem, .82fr);
+}
+
+.public-v2-shell .spaces-v2-page .space-v2-card__visual {
+  min-height: 35rem;
+}
+
+.public-v2-shell .spaces-v2-page .space-v2-card__media-empty,
+.public-v2-shell .space-detail-v2 .space-detail-v2__media-empty,
+.public-v2-shell .space-config-v2 .space-config-v2__media-empty {
+  background:
+    radial-gradient(circle at 68% 28%, rgb(34 187 174 / 13%), transparent 28%),
+    linear-gradient(145deg, rgb(250 249 245 / 4%), rgb(250 249 245 / 1.5%));
+}
+
+.public-v2-shell .spaces-v2-page .space-v2-card__media-empty::before,
+.public-v2-shell .space-detail-v2 .space-detail-v2__media-empty::before {
+  content: 'VISUAL DO ESPAÇO';
+  position: absolute;
+  left: 8%;
+  top: 10%;
+  color: rgb(250 249 245 / 42%);
+  font-size: .62rem;
+  font-weight: 800;
+  letter-spacing: .18em;
+}
+
+.public-v2-shell .spaces-v2-page .space-v2-card__media-empty::after,
+.public-v2-shell .space-detail-v2 .space-detail-v2__media-empty::after {
+  content: 'Fotografia / panorama a publicar';
+  width: auto;
+  height: auto;
+  right: 8%;
+  bottom: 9%;
+  background: none;
+  color: rgb(250 249 245 / 35%);
+  font-size: .68rem;
+  letter-spacing: .02em;
+}
+
+.public-v2-shell .space-detail-v2 .space-detail-v2__stage {
+  min-height: 38rem;
+  grid-template-columns: minmax(0, 1.18fr) minmax(21rem, .82fr);
+  overflow: visible;
+}
+
+.public-v2-shell .space-detail-v2 .space-detail-v2__visual {
+  min-height: 38rem;
+}
+
+.public-v2-shell .space-detail-v2 .space-detail-v2__panel {
+  justify-content: center;
+  padding: clamp(2.5rem, 4vw, 4rem);
+}
+
+.public-v2-shell .space-detail-v2 .space-detail-v2__panel h2 {
+  max-width: 8ch;
+  font-family: var(--font-sans);
+  font-size: clamp(2.8rem, 4vw, 4.5rem);
+  line-height: .92;
+}
+
+/* CONFIGURATOR — this surface was still visually V2. Move it fully into V3. */
+.public-v2-shell .space-config-v2 {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 78% 14%, rgb(34 187 174 / 12%), transparent 28rem),
+    #10133b;
+  color: #faf9f5;
+}
+
+.public-v2-shell .space-config-v2 .public-v2-page {
+  background: transparent;
+}
+
+.public-v2-shell .space-config-v2__header {
+  padding-block: clamp(4.5rem, 7vw, 7rem) 3rem;
+}
+
+.public-v2-shell .space-config-v2__header > div {
+  margin-top: 2rem;
+}
+
+.public-v2-shell .space-config-v2__header h1,
+.public-v2-shell .space-config-v2__header h1 em,
+.public-v2-shell .space-config-v2__section-title h2,
+.public-v2-shell .space-config-v2__summary h2,
+.public-v2-shell .space-config-v2__people input {
+  font-family: var(--font-sans);
+}
+
+.public-v2-shell .space-config-v2__header h1 {
+  max-width: 9ch;
+  margin: .8rem 0 1rem;
+  color: #faf9f5;
+  font-size: clamp(4rem, 7vw, 7.2rem);
+  font-weight: 650;
+  letter-spacing: -.075em;
+  line-height: .88;
+}
+
+.public-v2-shell .space-config-v2__header h1 em {
+  color: #f1deae;
+  font-style: normal;
+  font-weight: inherit;
+}
+
+.public-v2-shell .space-config-v2__header p,
+.public-v2-shell .space-config-v2__section-title p,
+.public-v2-shell .space-config-v2__pending-label {
+  color: rgb(250 249 245 / 58%);
+}
+
+.public-v2-shell .space-config-v2__layout {
+  grid-template-columns: minmax(0, 1.2fr) minmax(20rem, .72fr);
+  gap: clamp(4rem, 8vw, 8rem);
+  padding-bottom: clamp(6rem, 9vw, 9rem);
+}
+
+.public-v2-shell .space-config-v2__controls {
+  border-top-color: rgb(250 249 245 / 12%);
+}
+
+.public-v2-shell .space-config-v2__section {
+  border-bottom-color: rgb(250 249 245 / 12%);
+  padding: 2.6rem 0;
+}
+
+.public-v2-shell .space-config-v2__section-title > span {
+  color: #22bbae;
+}
+
+.public-v2-shell .space-config-v2__section-title h2 {
+  color: #faf9f5;
+  font-size: clamp(1.8rem, 2.8vw, 2.8rem);
+  font-weight: 620;
+  letter-spacing: -.045em;
+}
+
+.public-v2-shell .space-config-v2__purpose {
+  gap: 1rem;
+  margin-top: 1.8rem;
+}
+
+.public-v2-shell .space-config-v2__purpose button {
+  min-height: 4.6rem;
+  border: 1px solid rgb(250 249 245 / 13%);
+  border-radius: 1rem;
+  background: rgb(250 249 245 / 3%);
+  color: #faf9f5;
+  box-shadow: 0 1.2rem 3rem rgb(4 6 24 / 10%);
+}
+
+.public-v2-shell .space-config-v2__purpose button:hover,
+.public-v2-shell .space-config-v2__purpose button:focus-visible {
+  border-color: rgb(34 187 174 / 48%);
+  background: rgb(34 187 174 / 8%);
+}
+
+.public-v2-shell .space-config-v2__purpose button.is-selected {
+  border-color: #22bbae;
+  background: rgb(34 187 174 / 12%);
+  box-shadow: 0 1.5rem 4rem rgb(34 187 174 / 12%);
+}
+
+.public-v2-shell .space-config-v2__people > span {
+  color: #faf9f5;
+}
+
+.public-v2-shell .space-config-v2__people input {
+  border: 1px solid rgb(250 249 245 / 14%);
+  border-radius: .9rem;
+  background: rgb(250 249 245 / 5%);
+  color: #faf9f5;
+  font-size: 1.25rem;
+}
+
+.public-v2-shell .space-config-v2__summary {
+  top: 7rem;
+  overflow: hidden;
+  border: 1px solid rgb(250 249 245 / 14%);
+  border-radius: 1.4rem;
+  background: rgb(250 249 245 / 4%);
+  color: #faf9f5;
+  box-shadow: 0 2rem 7rem rgb(4 6 24 / 25%), 0 2rem 9rem rgb(34 187 174 / 12%);
+  backdrop-filter: blur(20px);
+  transform: translateY(1.5rem) rotate(.35deg);
+}
+
+.public-v2-shell .space-config-v2__visual {
+  min-height: 12rem;
+  background: rgb(250 249 245 / 3%);
+}
+
+.public-v2-shell .space-config-v2__media-overlay {
+  border-top-color: rgb(250 249 245 / 14%);
+  color: #faf9f5;
+}
+
+.public-v2-shell .space-config-v2__summary h2 {
+  color: #faf9f5;
+  font-size: clamp(2rem, 3vw, 3rem);
+  font-weight: 620;
+  letter-spacing: -.055em;
+}
+
+.public-v2-shell .space-config-v2__summary dl,
+.public-v2-shell .space-config-v2__summary dl > div {
+  border-color: rgb(250 249 245 / 12%);
+}
+
+.public-v2-shell .space-config-v2__summary dt,
+.public-v2-shell .space-config-v2__summary > small {
+  color: rgb(250 249 245 / 48%);
+}
+
+.public-v2-shell .space-config-v2__summary dd {
+  color: #faf9f5;
+}
+
+.public-v2-shell .space-config-v2__summary .ds-button {
+  border-radius: 999px;
+}
+
+.public-v2-shell .space-config-v2__summary .ds-button--primary {
+  background: #f1deae;
+  color: #10133b;
+}
+
+/* Keep the dark public field continuous to the footer without empty transitional slabs. */
+.public-v2-shell :is(.spaces-v2-page, .space-detail-v2, .space-config-v2) + .public-footer {
+  margin-top: 0;
+}
+
+@media (max-width: 980px) {
+  .public-v2-shell .courses-v2-page .training-experience__grid,
+  .public-v2-shell .courses-v2-page .training-experience__focus-copy,
+  .public-v2-shell .space-config-v2__layout,
+  .public-v2-shell .space-detail-v2 .space-detail-v2__stage {
+    grid-template-columns: 1fr;
+  }
+
+  .public-v2-shell .courses-v2-page .training-experience__index,
+  .public-v2-shell .courses-v2-page .training-experience__focus,
+  .public-v2-shell .space-config-v2__summary {
+    transform: none;
+  }
+
+  .public-v2-shell .space-config-v2__summary {
+    position: static;
+  }
+}
+
+@media (max-width: 767px) {
+  .public-v2-shell .courses-v2-page .training-experience__focus-copy h3 {
+    font-size: clamp(2.8rem, 13vw, 4.4rem);
+  }
+
+  .public-v2-shell .spaces-v2-page .space-v2-card,
+  .public-v2-shell .spaces-v2-page .space-v2-card__visual,
+  .public-v2-shell .space-detail-v2 .space-detail-v2__stage,
+  .public-v2-shell .space-detail-v2 .space-detail-v2__visual {
+    min-height: 28rem;
+  }
+
+  .public-v2-shell .space-config-v2__purpose,
+  .public-v2-shell .space-config-v2__people {
+    margin-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-v2-shell .courses-v2-page .training-experience__option,
+  .public-v2-shell .courses-v2-page .training-experience__focus,
+  .public-v2-shell .courses-v2-page .training-catalog__item,
+  .public-v2-shell .space-config-v2__summary {
+    transition: none !important;
+    transform: none !important;
+  }
+}

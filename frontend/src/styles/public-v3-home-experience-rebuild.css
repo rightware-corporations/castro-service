@@ -1,0 +1,72 @@
+/* Block 1 — Home Experience Rebuild.
+ * Final home-specific correction layer while the public V3 system is consolidated.
+ * Principle: different scene models, no purposeless tilted rectangles.
+ */
+.public-v2-shell .home-v2 .home-v3-hero-media::before,
+.public-v2-shell .home-v2 .home-v3-hero-media__frame,
+.public-v2-shell .home-v2 .home-v3-hero-media__note,
+.public-v2-shell .home-v2 .home-v2-founder__portrait,
+.public-v2-shell .home-v2 .home-v2-live__column:first-child,
+.public-v2-shell .home-v2 .home-v2-live__column--cream,
+.public-v2-shell .home-v2 .home-v2-space__visual,
+.public-v2-shell .home-v2 .home-v2-experience:nth-child(1),
+.public-v2-shell .home-v2 .home-v2-experience:nth-child(2),
+.public-v2-shell .home-v2 .home-v2-experience:nth-child(3){transform:none}
+
+/* Hero becomes a clean editorial media stage rather than stacked rotated panes. */
+.public-v2-shell .home-v2 .home-v3-hero-media::before{inset:5% 0 8% 8%;border-radius:48% 48% 42% 52%;background:radial-gradient(circle at 48% 42%,rgb(34 187 174 / 17%),transparent 43%);box-shadow:none}
+.public-v2-shell .home-v2 .home-v3-hero-media__frame{top:7%;right:6%;bottom:13%;left:5%;border-radius:1.6rem;background:linear-gradient(145deg,rgb(250 249 245 / 7%),rgb(250 249 245 / 2%));box-shadow:0 2rem 8rem rgb(4 6 24 / 28%)}
+.public-v2-shell .home-v2 .home-v3-hero-media__note{right:0;bottom:1%;left:18%;border-radius:1rem;background:rgb(7 10 34 / 86%)}
+
+/* Three entry points become an index with one elevated middle scene, not a tilted card farm. */
+.public-v2-shell .home-v2 .home-v2-experience-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(1rem,2.4vw,2.2rem);align-items:stretch}
+.public-v2-shell .home-v2 .home-v2-experience{min-height:26rem;border-radius:1.2rem;background:rgb(250 249 245 / 2.4%);box-shadow:none;transition:transform 220ms cubic-bezier(.23,1,.32,1),background 220ms ease,border-color 220ms ease}
+.public-v2-shell .home-v2 .home-v2-experience:nth-child(2){margin-top:3.25rem;margin-bottom:-3.25rem;background:rgb(241 222 174 / 5%)}
+.public-v2-shell .home-v2 .home-v2-experience:is(:hover,:focus-visible){transform:translateY(-.55rem);background:rgb(250 249 245 / 5%);border-color:rgb(34 187 174 / 35%);box-shadow:0 2rem 7rem rgb(34 187 174 / 10%)}
+
+/* Practice is a horizontal knowledge index, visually distinct from the entry objects. */
+.public-v2-shell .home-v2 .home-v2-practice::before{inset:0;border-inline:0;border-radius:0;background:linear-gradient(90deg,rgb(34 187 174 / 6%),transparent 42%,rgb(241 222 174 / 4%));box-shadow:none}
+.public-v2-shell .home-v2 .home-v2-practice__row{background:transparent;border-radius:0}
+
+/* Founder is the human editorial spread. */
+.public-v2-shell .home-v2 .home-v2-founder__portrait{border-radius:1.5rem;box-shadow:0 2rem 8rem rgb(34 187 174 / 14%)}
+.public-v2-shell .home-v2 .home-v2-founder__copy{transform:none;align-self:center}
+
+/* Published content becomes two contrasting editorial lanes without floating boxes. */
+.public-v2-shell .home-v2 .home-v2-live{position:relative;gap:0;border-block:1px solid var(--v3-line);padding-block:0}
+.public-v2-shell .home-v2 .home-v2-live__column{min-height:38rem;border:0;border-radius:0;background:transparent;box-shadow:none;padding:clamp(4rem,7vw,7rem) clamp(2rem,5vw,5rem) clamp(4rem,7vw,7rem) 0}
+.public-v2-shell .home-v2 .home-v2-live__column--cream{border-left:1px solid var(--v3-line);background:linear-gradient(135deg,rgb(241 222 174 / 7%),transparent 68%);padding-inline:clamp(2rem,5vw,5rem) 0}
+.public-v2-shell .home-v2 .home-v2-live__items a{transition:padding-left 180ms ease,color 180ms ease}
+.public-v2-shell .home-v2 .home-v2-live__items a:is(:hover,:focus-visible){padding-left:.65rem;color:var(--v3-cream)}
+
+/* Space becomes a wide media viewport, not a rotated rectangle. */
+.public-v2-shell .home-v2 .home-v2-space{grid-template-columns:minmax(0,1.42fr) minmax(20rem,.58fr);gap:clamp(3rem,7vw,7rem)}
+.public-v2-shell .home-v2 .home-v2-space__visual{min-height:clamp(30rem,48vw,42rem);border-radius:1.6rem;box-shadow:0 2rem 9rem rgb(34 187 174 / 13%)}
+.public-v2-shell .home-v2 .home-v2-space__copy{transform:none}
+
+/* Process is a numbered rail rather than another set of cards. */
+.public-v2-shell .home-v2 .home-v2-process__steps{display:grid;grid-template-columns:1fr;border-top:1px solid var(--v3-line)}
+.public-v2-shell .home-v2 .home-v2-process__steps article{display:grid;grid-template-columns:4rem 3rem minmax(10rem,.55fr) minmax(0,1fr);align-items:center;gap:1rem;min-height:8rem;border-bottom:1px solid var(--v3-line);padding:1.5rem 0}
+.public-v2-shell .home-v2 .home-v2-process__steps article h3,.public-v2-shell .home-v2 .home-v2-process__steps article p{margin:0}
+.public-v2-shell .home-v2 .home-v2-process__steps article p{max-width:40rem;color:var(--v3-muted)}
+
+/* Final CTA is intentionally typographic and open. */
+.public-v2-shell .home-v2 .home-v2-contact{border-top:1px solid var(--v3-line);background:radial-gradient(circle at 78% 45%,rgb(241 222 174 / 8%),transparent 28rem)}
+.public-v2-shell .home-v2 .home-v2-contact::before{display:none}
+.public-v2-shell .home-v2 .home-v2-contact__inner{padding-block:clamp(6rem,10vw,10rem)}
+.public-v2-shell .home-v2 .home-v2-contact h2{max-width:10ch;font-size:clamp(3.7rem,7vw,7.4rem)}
+
+@media(max-width:900px){
+  .public-v2-shell .home-v2 .home-v2-experience-grid{grid-template-columns:1fr}
+  .public-v2-shell .home-v2 .home-v2-experience:nth-child(2){margin:0}
+  .public-v2-shell .home-v2 .home-v2-live{grid-template-columns:1fr}
+  .public-v2-shell .home-v2 .home-v2-live__column,.public-v2-shell .home-v2 .home-v2-live__column--cream{min-height:auto;border-left:0;border-bottom:1px solid var(--v3-line);padding:4rem 0}
+  .public-v2-shell .home-v2 .home-v2-space{grid-template-columns:1fr}
+  .public-v2-shell .home-v2 .home-v2-process__steps article{grid-template-columns:3rem 2.5rem 1fr}.public-v2-shell .home-v2 .home-v2-process__steps article p{grid-column:3}
+}
+@media(max-width:560px){
+  .public-v2-shell .home-v2 .home-v3-hero-media__note{left:4%}
+  .public-v2-shell .home-v2 .home-v2-experience{min-height:auto}
+  .public-v2-shell .home-v2 .home-v2-process__steps article{grid-template-columns:2.5rem 1fr;gap:.75rem}.public-v2-shell .home-v2 .home-v2-process__steps article svg{grid-column:1}.public-v2-shell .home-v2 .home-v2-process__steps article h3{grid-column:2}.public-v2-shell .home-v2 .home-v2-process__steps article p{grid-column:2}
+}
+@media(prefers-reduced-motion:reduce){.public-v2-shell .home-v2 .home-v2-experience,.public-v2-shell .home-v2 .home-v2-live__items a{transition:none}.public-v2-shell .home-v2 .home-v2-experience:is(:hover,:focus-visible){transform:none}}

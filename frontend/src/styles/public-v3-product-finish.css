@@ -1,0 +1,409 @@
+/* CASTRO’S V3 — product-finish pass
+ * Screenshot-driven correction for Services and Training. Loaded last on purpose
+ * until the V2/V3 stylesheet stack is consolidated.
+ */
+
+/* SERVICES — no serif leakage, no tilted square, no dead cream catalogue slab. */
+.public-v2-shell .services-v2-page :is(
+  .services-experience__option-title,
+  .services-experience__focus-copy h3,
+  .services-v2-catalog__heading h2,
+  .services-v2-list h3,
+  .services-v2-list h3 a,
+  .services-v2-close h2
+) {
+  font-family: var(--font-sans);
+}
+
+.public-v2-shell .services-v2-page .services-experience {
+  padding-bottom: clamp(5rem, 8vw, 8rem);
+}
+
+.public-v2-shell .services-v2-page .services-experience__head {
+  margin-bottom: clamp(2.5rem, 5vw, 4.5rem);
+}
+
+.public-v2-shell .services-v2-page .services-experience__head h2 {
+  max-width: 12ch;
+  font-size: clamp(2.8rem, 4.8vw, 5.2rem);
+  line-height: .94;
+}
+
+.public-v2-shell .services-v2-page .services-experience__grid {
+  grid-template-columns: minmax(19rem, .72fr) minmax(0, 1.28fr);
+  gap: clamp(3rem, 6vw, 6rem);
+  align-items: start;
+  padding-top: 1rem;
+}
+
+.public-v2-shell .services-v2-page .services-experience__index {
+  align-self: start;
+  padding-top: 1.25rem;
+}
+
+.public-v2-shell .services-v2-page .services-experience__index::before {
+  inset: 0 auto 0 -1.4rem;
+}
+
+.public-v2-shell .services-v2-page .services-experience__option {
+  min-height: 5.6rem;
+  grid-template-columns: 2.8rem minmax(0, 1fr) auto;
+  border: 1px solid transparent;
+  border-radius: 1rem;
+  margin: 0 0 .8rem;
+  padding: 1rem 1.1rem;
+  background: transparent;
+}
+
+.public-v2-shell .services-v2-page .services-experience__option--active,
+.public-v2-shell .services-v2-page .services-experience__option:is(:hover,:focus-visible) {
+  border-color: rgb(250 249 245 / 15%);
+  background: rgb(250 249 245 / 5%);
+  transform: translateX(.3rem);
+}
+
+.public-v2-shell .services-v2-page .services-experience__option-title {
+  font-size: clamp(1rem, 1.35vw, 1.22rem);
+  font-weight: 650;
+  line-height: 1.22;
+  letter-spacing: -.025em;
+}
+
+.public-v2-shell .services-v2-page .services-experience__focus {
+  min-height: 30rem;
+  transform: none;
+}
+
+.public-v2-shell .services-v2-page .services-experience__focus::before {
+  inset: .8rem -1rem -1rem 1rem;
+  border-color: rgb(34 187 174 / 16%);
+  border-radius: 1.6rem;
+  background: radial-gradient(circle at 82% 20%, rgb(34 187 174 / 13%), transparent 42%);
+  box-shadow: 0 2rem 8rem rgb(34 187 174 / 14%);
+  transform: none;
+}
+
+.public-v2-shell .services-v2-page .services-experience__focus::after {
+  width: 11rem;
+  height: 11rem;
+  right: -5%;
+  top: -8%;
+  opacity: .7;
+}
+
+.public-v2-shell .services-v2-page .services-experience__focus-card {
+  min-height: 30rem;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  border: 1px solid rgb(250 249 245 / 14%);
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at 78% 16%, rgb(34 187 174 / 12%), transparent 24rem),
+    rgb(250 249 245 / 3%);
+  color: #faf9f5;
+  box-shadow: 0 2rem 7rem rgb(4 6 24 / 24%);
+  padding: clamp(2rem, 4vw, 3.5rem);
+}
+
+.public-v2-shell .services-v2-page .services-experience__focus-top {
+  color: rgb(250 249 245 / 48%);
+}
+
+.public-v2-shell .services-v2-page .services-experience__focus-top svg {
+  color: var(--v3-teal);
+}
+
+.public-v2-shell .services-v2-page .services-experience__focus-copy {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(14rem, .72fr);
+  align-items: end;
+  gap: clamp(2rem, 5vw, 4.5rem);
+  align-self: center;
+}
+
+.public-v2-shell .services-v2-page .services-experience__focus-copy h3 {
+  max-width: 8ch;
+  margin: 0 0 1rem;
+  color: #faf9f5;
+  font-size: clamp(3rem, 4.6vw, 5rem);
+  line-height: .91;
+}
+
+.public-v2-shell .services-v2-page .services-experience__focus-copy p {
+  max-width: 31rem;
+  margin: 0;
+  color: rgb(250 249 245 / 62%);
+  line-height: 1.7;
+}
+
+.public-v2-shell .services-v2-page .services-experience__themes {
+  display: grid;
+  gap: .7rem;
+  border-top: 1px solid rgb(250 249 245 / 14%);
+  padding-top: 1.15rem;
+}
+
+.public-v2-shell .services-v2-page .services-experience__themes span {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  color: rgb(250 249 245 / 72%);
+  font-size: .78rem;
+  font-weight: 650;
+}
+
+.public-v2-shell .services-v2-page .services-experience__themes svg {
+  color: var(--v3-teal);
+}
+
+.public-v2-shell .services-v2-page .services-experience__focus-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.4rem;
+  margin-top: 2rem;
+}
+
+.public-v2-shell .services-v2-page .services-experience__focus-actions .ds-button--primary {
+  border-radius: 999px;
+  background: var(--v3-cream);
+  color: var(--v3-bg);
+}
+
+.public-v2-shell .services-v2-page .services-experience__focus-link {
+  color: #faf9f5;
+}
+
+.public-v2-shell .services-v2-page .services-v2-catalog {
+  background:
+    radial-gradient(circle at 82% 18%, rgb(34 187 174 / 8%), transparent 26rem),
+    #0b0e2e;
+  color: #faf9f5;
+}
+
+.public-v2-shell .services-v2-page .services-v2-catalog::before {
+  background: rgb(250 249 245 / 6%);
+}
+
+.public-v2-shell .services-v2-page .services-v2-catalog__grid {
+  grid-template-columns: minmax(18rem, .58fr) minmax(0, 1.42fr);
+  gap: clamp(4rem, 8vw, 8rem);
+  padding-block: clamp(6rem, 9vw, 9rem);
+}
+
+.public-v2-shell .services-v2-page .services-v2-catalog__heading {
+  position: sticky;
+  top: 8rem;
+  align-self: start;
+}
+
+.public-v2-shell .services-v2-page .services-v2-catalog__heading h2 {
+  max-width: 8ch;
+  color: #faf9f5;
+  font-size: clamp(3.2rem, 5vw, 5.5rem);
+  line-height: .94;
+}
+
+.public-v2-shell .services-v2-page .services-v2-catalog__heading p {
+  color: rgb(250 249 245 / 58%);
+}
+
+.public-v2-shell .services-v2-page .services-v2-list {
+  gap: 1rem;
+}
+
+.public-v2-shell .services-v2-page .services-v2-list article,
+.public-v2-shell .services-v2-page .services-v2-list article:nth-child(even) {
+  min-height: 9.5rem;
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1.4rem;
+  transform: none;
+  border: 1px solid rgb(250 249 245 / 12%);
+  border-radius: 1.1rem;
+  background: rgb(250 249 245 / 3%);
+  padding: 1.5rem 1.7rem;
+  box-shadow: none;
+}
+
+.public-v2-shell .services-v2-page .services-v2-list article:is(:hover,:focus-within),
+.public-v2-shell .services-v2-page .services-v2-list article:nth-child(even):is(:hover,:focus-within) {
+  transform: translateY(-3px);
+  border-color: rgb(34 187 174 / 26%);
+  background: rgb(250 249 245 / 5%);
+  box-shadow: 0 1.5rem 4rem rgb(4 6 24 / 15%);
+}
+
+.public-v2-shell .services-v2-page .services-v2-list h3,
+.public-v2-shell .services-v2-page .services-v2-list h3 a {
+  color: #faf9f5;
+  text-decoration: none;
+}
+
+.public-v2-shell .services-v2-page .services-v2-list h3 {
+  margin: 0 0 .55rem;
+  font-size: clamp(1.6rem, 2.4vw, 2.45rem);
+  line-height: 1.05;
+}
+
+.public-v2-shell .services-v2-page .services-v2-list p {
+  margin: 0 0 .8rem;
+  color: rgb(250 249 245 / 56%);
+}
+
+.public-v2-shell .services-v2-page .services-v2-list__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem 1rem;
+  color: rgb(250 249 245 / 44%);
+  font-size: .7rem;
+}
+
+.public-v2-shell .services-v2-page .services-v2-list__arrow {
+  display: grid;
+  width: 2.8rem;
+  height: 2.8rem;
+  place-items: center;
+  border: 1px solid rgb(250 249 245 / 14%);
+  border-radius: 50%;
+  color: var(--v3-teal);
+}
+
+.public-v2-shell .services-v2-page .services-v2-close {
+  min-height: auto;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  gap: clamp(4rem, 9vw, 9rem);
+  align-items: start;
+  padding-block: clamp(6rem, 9vw, 9rem);
+}
+
+.public-v2-shell .services-v2-page .services-v2-close::before {
+  display: none;
+}
+
+.public-v2-shell .services-v2-page .services-v2-close h2 {
+  max-width: 9ch;
+  font-size: clamp(3.2rem, 5vw, 5.6rem);
+  line-height: .93;
+}
+
+.public-v2-shell .services-v2-page .services-v2-close__content {
+  display: grid;
+  gap: 1.7rem;
+  padding-top: .5rem;
+}
+
+.public-v2-shell .services-v2-page .services-v2-close__steps {
+  display: grid;
+  border-top: 1px solid rgb(250 249 245 / 13%);
+}
+
+.public-v2-shell .services-v2-page .services-v2-close__steps span {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  gap: .8rem;
+  border-bottom: 1px solid rgb(250 249 245 / 13%);
+  padding: 1rem 0;
+  color: rgb(250 249 245 / 72%);
+}
+
+.public-v2-shell .services-v2-page .services-v2-close__steps b {
+  color: var(--v3-teal);
+  font-size: .7rem;
+}
+
+/* TRAINING — remove the pale inherited product card and compress dead vertical space. */
+.public-v2-shell .courses-v2-page .training-catalog {
+  background:
+    radial-gradient(circle at 78% 14%, rgb(34 187 174 / 8%), transparent 26rem),
+    #0b0e2e;
+}
+
+.public-v2-shell .courses-v2-page .training-catalog__grid {
+  grid-template-columns: minmax(18rem, .58fr) minmax(0, 1.42fr);
+  gap: clamp(4rem, 8vw, 8rem);
+  padding-block: clamp(5.5rem, 8vw, 8rem);
+}
+
+.public-v2-shell .courses-v2-page .training-catalog__item,
+.public-v2-shell .courses-v2-page .training-catalog__item:hover,
+.public-v2-shell .courses-v2-page .training-catalog__item:focus-within {
+  color: #faf9f5;
+  border: 1px solid rgb(250 249 245 / 12%);
+  background: rgb(250 249 245 / 3%) !important;
+}
+
+.public-v2-shell .courses-v2-page .training-catalog__item:hover,
+.public-v2-shell .courses-v2-page .training-catalog__item:focus-within {
+  background: rgb(250 249 245 / 5%) !important;
+  border-color: rgb(34 187 174 / 25%);
+}
+
+.public-v2-shell .courses-v2-page .training-catalog__item-main h3,
+.public-v2-shell .courses-v2-page .training-catalog__item-main h3 a,
+.public-v2-shell .courses-v2-page .training-catalog__facts dd,
+.public-v2-shell .courses-v2-page .training-catalog__actions .text-link {
+  color: #faf9f5 !important;
+}
+
+.public-v2-shell .courses-v2-page .training-catalog__item-main p,
+.public-v2-shell .courses-v2-page .training-catalog__facts {
+  color: rgb(250 249 245 / 58%) !important;
+}
+
+.public-v2-shell .courses-v2-page .training-catalog__facts dt {
+  color: rgb(250 249 245 / 36%) !important;
+}
+
+.public-v2-shell .courses-v2-page .courses-v2-corporate {
+  padding-block: clamp(5rem, 8vw, 8rem);
+}
+
+.public-v2-shell .courses-v2-page .courses-v2-corporate__inner {
+  min-height: auto;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  gap: clamp(3rem, 8vw, 8rem);
+  align-items: center;
+  padding: clamp(2.5rem, 5vw, 5rem);
+  transform: none;
+}
+
+@media (max-width: 980px) {
+  .public-v2-shell .services-v2-page .services-experience__grid,
+  .public-v2-shell .services-v2-page .services-experience__focus-copy,
+  .public-v2-shell .services-v2-page .services-v2-catalog__grid,
+  .public-v2-shell .services-v2-page .services-v2-close,
+  .public-v2-shell .courses-v2-page .training-catalog__grid,
+  .public-v2-shell .courses-v2-page .courses-v2-corporate__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .public-v2-shell .services-v2-page .services-v2-catalog__heading {
+    position: static;
+  }
+}
+
+@media (max-width: 767px) {
+  .public-v2-shell .services-v2-page .services-experience__focus,
+  .public-v2-shell .services-v2-page .services-experience__focus-card {
+    min-height: auto;
+  }
+
+  .public-v2-shell .services-v2-page .services-v2-list article,
+  .public-v2-shell .services-v2-page .services-v2-list article:nth-child(even) {
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+  }
+
+  .public-v2-shell .services-v2-page .services-v2-list__arrow {
+    grid-column: 2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-v2-shell .services-v2-page .services-experience__option,
+  .public-v2-shell .services-v2-page .services-v2-list article {
+    transition: none !important;
+    transform: none !important;
+  }
+}
