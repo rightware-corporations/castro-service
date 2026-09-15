@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { HomePublic } from './HomePublic'
 
 const homeMocks = vi.hoisted(() => ({
@@ -20,7 +20,10 @@ function renderHome() {
 }
 
 describe('homepage public quality states', () => {
+  afterEach(() => vi.unstubAllGlobals())
   beforeEach(() => {
+    sessionStorage.setItem('castros.home.entry.v1', 'seen')
+    vi.stubGlobal('matchMedia', () => ({ matches: false, addListener: vi.fn(), removeListener: vi.fn(), addEventListener: vi.fn(), removeEventListener: vi.fn() }))
     homeMocks.usePublicConfig.mockReset()
     homeMocks.useServices.mockReset()
     homeMocks.useCourses.mockReset()
@@ -64,7 +67,7 @@ describe('homepage public quality states', () => {
 
     renderHome()
 
-    expect(screen.getByText('Fotografia oficial em preparação.')).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'Elizabeth Castro, fundadora da Castro’s' })).toHaveAttribute('src', '/IMG_3376.JPG.jpeg')
     expect(screen.getByRole('heading', { name: /Onde pessoas, liderança e experiência se encontram/i })).toBeInTheDocument()
     expect(screen.queryByText(/espaço\(s\) disponível\(eis\) no catálogo/i)).not.toBeInTheDocument()
   })

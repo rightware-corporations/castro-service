@@ -1,14 +1,12 @@
 import { Link } from 'react-router-dom'
 import type { ReactNode } from 'react'
-import { motion, useReducedMotion } from 'motion/react'
-import { ArrowDownRight, ArrowRight, ArrowUpRight, BookOpenText, Building2, Compass, GraduationCap, Handshake, MessageCircle, MoveRight, Sparkles } from 'lucide-react'
-import { usePublicConfig } from '../hooks'
+import { ArrowRight, ArrowUpRight, BookOpenText, Building2, Compass, GraduationCap, Handshake, MessageCircle, MoveRight, Sparkles } from 'lucide-react'
+import { HomeEntry } from './HomeEntry'
 import { useCourses } from '../../courses/hooks'
 import { useServices } from '../../services/hooks'
 import { useSpacesPreview } from '../../spaces/hooks'
 import { EmptyState, ErrorState, LoadingState } from '../../../design-system/patterns/feedback-overlays'
 import { SectionReveal } from '../../../design-system/motion/SectionReveal'
-import { motionPresets } from '../../../design-system/motion/motionPresets'
 
 const experiences = [
   {
@@ -45,56 +43,13 @@ const practiceLines = [
 ]
 
 export function HomePublic() {
-  const configQuery = usePublicConfig()
   const servicesQuery = useServices()
   const coursesQuery = useCourses()
   const spacesQuery = useSpacesPreview()
   const founderPortraitUrl = import.meta.env.VITE_ELIZABETH_PORTRAIT_URL?.trim()
-  const reducedMotion = useReducedMotion()
 
   return <div className="home-v2">
-    <section className="home-v2-hero">
-      <div className="container home-v2-hero__grid">
-        <motion.div className="home-v2-hero__copy" variants={motionPresets.heroSequence} initial={reducedMotion ? false : 'hidden'} animate="visible" data-motion-reduced={reducedMotion ? 'true' : 'false'}>
-          <motion.span className="eyebrow" variants={motionPresets.heroItem}>CASTRO’S SERVICES · MAPUTO</motion.span>
-          <motion.h1 variants={motionPresets.heroItem}>Onde pessoas, liderança e <em>experiência</em> se encontram.</motion.h1>
-          <motion.p className="home-v2-hero__lead" variants={motionPresets.heroItem}>Consultoria, formação e espaços pensados para criar conversas mais claras, equipas mais preparadas e encontros com intenção.</motion.p>
-          <motion.div className="home-v2-hero__actions" variants={motionPresets.heroItem}>
-            <Link className="ds-button ds-button--primary home-v2-primary" to="/contacto">Começar uma conversa <ArrowUpRight size={17} /></Link>
-            <Link className="home-v2-link" to="/servicos">Descobrir a Castro’s <ArrowDownRight size={17} /></Link>
-          </motion.div>
-          <motion.div className="home-v2-hero__meta" aria-label="Áreas Castro’s" variants={motionPresets.heroItem}>
-            <span>Consultoria</span><i aria-hidden="true" /><span>Formação</span><i aria-hidden="true" /><span>Espaços</span>
-          </motion.div>
-        </motion.div>
-
-        <motion.div className="home-v2-hero__art home-v3-hero-media" aria-label="Composição editorial preparada para fotografia real da Castro’s Services" variants={motionPresets.heroMedia} initial={reducedMotion ? false : 'hidden'} animate="visible" data-motion-reduced={reducedMotion ? 'true' : 'false'}>
-          <div className="home-v3-hero-media__architecture" aria-hidden="true"><span /><span /><span /></div>
-          <div className="home-v3-hero-media__frame" role="img" aria-label="Área reservada para fotografia oficial da Castro’s Services">
-            <div className="home-v3-hero-media__placeholder">
-              <span>CASTRO’S SERVICES</span>
-              <strong>Pessoa. Conhecimento. Espaço.</strong>
-            </div>
-          </div>
-          <div className="home-v3-hero-media__areas" aria-hidden="true"><span>Pessoa</span><span>Conhecimento</span><span>Espaço</span></div>
-          <div className="home-v3-hero-media__note">
-            <span>PRESENÇA HUMANA</span>
-            <strong>A experiência começa por compreender quem está do outro lado.</strong>
-            <small>{configQuery.data?.businessTimezone ? `Experiência digital preparada para ${configQuery.data.businessTimezone}.` : 'Fotografia oficial em preparação.'}</small>
-          </div>
-        </motion.div>
-      </div>
-    </section>
-
-    <section className="home-v2-experiences container" aria-labelledby="experiences-title">
-      <SectionReveal>
-        <div className="home-v2-section-head">
-          <div><span className="eyebrow">TRÊS PORTAS DE ENTRADA</span><h2 id="experiences-title">Comece pelo que a sua realidade pede agora.</h2></div>
-          <p>A Castro’s reúne diferentes formas de apoiar pessoas e organizações — da conversa estratégica à formação e ao espaço onde o encontro acontece.</p>
-        </div>
-        <ExperienceSelector />
-      </SectionReveal>
-    </section>
+    <HomeEntry />
 
     <section className="home-v2-practice">
       <SectionReveal className="container home-v2-practice__grid">
