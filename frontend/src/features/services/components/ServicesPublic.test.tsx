@@ -60,3 +60,21 @@ describe('public services', () => {
     expect(screen.getByRole('link', { name: 'Voltar aos serviços' })).toHaveAttribute('href', '/servicos')
   })
 })
+
+describe('published services focus', () => {
+  it('selects a real item and recovers when it is removed', async () => {
+    const user = userEvent.setup()
+    const second = { ...service, id: 'second', slug: 'second', name: 'Segundo item' }
+    const { rerender } = render(<MemoryRouter><ServiceCollectionView resource={{ isLoading: false, isError: false, data: { items: [service, second] } }} /></MemoryRouter>)
+    await user.click(screen.getByRole('button', { name: /Segundo item/ }))
+    expect(screen.getByRole('heading', { name: 'Segundo item' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: service.name })).not.toBeInTheDocument()
+    rerender(<MemoryRouter><ServiceCollectionView resource={{ isLoading: false, isError: false, data: { items: [service] } }} /></MemoryRouter>)
+    expect(screen.getByRole('heading', { name: service.name })).toBeInTheDocument()
+  })
+  it.each([{ isLoading: true, isError: false }, { isLoading: false, isError: true }])('hides stale catalogue actions during %o', (state) => {
+    render(<MemoryRouter><ServiceCollectionView resource={{ ...state, data: { items: [service] } }} /></MemoryRouter>)
+    expect(screen.queryByRole('group', { name: 'Selecionar serviço publicado' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: service.name })).not.toBeInTheDocument()
+  })
+})
