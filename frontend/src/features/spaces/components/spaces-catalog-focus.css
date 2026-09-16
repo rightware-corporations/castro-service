@@ -27,3 +27,6 @@
 }
 .public-v2-shell .spaces-v2-page::before { content: none; }
 .public-v2-shell .spaces-v2-intro h1 em { color: var(--castros-teal); font-style: italic; }
+/* Image and points update together; markers remain constant-size touch targets. */
+.public-v2-shell .space-explorer-v2__panorama { transition: none; }
+.public-v2-shell .space-explorer-v2__hotspot { min-width: 44px; min-height: 44px; }

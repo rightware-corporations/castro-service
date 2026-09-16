@@ -162,4 +162,38 @@ describe('public spaces quality states', () => {
     expect(screen.getByRole('button', { name: 'Aumentar zoom' })).toBeDisabled()
   })
 
+  it('moves focus into information and restores it on Escape', async () => {
+    hookMocks.useSpace.mockReturnValue({ isLoading: false, isError: false, data: space })
+    renderRoute('/espacos/sala-reuniao/explorar', <SpaceExplorer />)
+    const trigger = screen.getByRole('button', { name: 'Informação' })
+    fireEvent.click(trigger)
+    expect(screen.getByRole('button', { name: 'Fechar informação' })).toHaveFocus()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(trigger).toHaveFocus()
+    expect(screen.queryByRole('complementary', { name: /Informação sobre/ })).not.toBeInTheDocument()
+  })
+
+  it('keeps a loaded hotspot aligned with zoom and restores its keyboard focus', async () => {
+    const width = vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(1000)
+    const height = vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(600)
+    try {
+      hookMocks.useSpace.mockReturnValue({ isLoading: false, isError: false, data: space })
+      experienceMocks.listScenes.mockResolvedValue([{ id: 'scene-1', title: 'Sala', panoramaUrl: '/test-scene.jpg' }])
+      experienceMocks.listHotspots.mockResolvedValue([{ id: 'point-1', title: 'Mesa', yaw: 90, pitch: 0 }])
+      renderRoute('/espacos/sala-reuniao/explorar', <SpaceExplorer />)
+      const image = await screen.findByRole('img', { name: 'Panorama: Sala' })
+      Object.defineProperties(image, { naturalWidth: { value: 2000 }, naturalHeight: { value: 1000 } })
+      fireEvent.load(image)
+      const point = await screen.findByRole('button', { name: 'Mesa. Ver informação.' })
+      expect(parseFloat(point.style.left)).toBeCloseTo(800)
+      fireEvent.click(screen.getByRole('button', { name: 'Aumentar zoom' }))
+      expect(parseFloat(point.style.left)).toBeCloseTo(845)
+      fireEvent.click(point)
+      expect(point).toHaveAttribute('aria-expanded', 'true')
+      fireEvent.keyDown(document, { key: 'Escape' })
+      expect(point).toHaveFocus()
+      expect(point).toHaveAttribute('aria-expanded', 'false')
+    } finally { width.mockRestore(); height.mockRestore() }
+  })
+
 })
