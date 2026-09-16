@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { SpaceConfigurator, SpaceDetail, SpaceExplorer, SpacesCatalog } from './SpacesPublic'
@@ -138,4 +138,28 @@ describe('public spaces quality states', () => {
     renderRoute('/espacos/sala-reuniao/configurar', <SpaceConfigurator />)
     expect(screen.getByRole('heading', { name: 'Não foi possível configurar este espaço.' })).toBeInTheDocument()
   })
+  it.each([{ isLoading: true, isError: false }, { isLoading: false, isError: true }])('hides stale catalogue actions during %o', (state) => {
+    hookMocks.useSpaces.mockReturnValue({ ...state, data: { items: [space] } })
+    render(<MemoryRouter><SpacesCatalog /></MemoryRouter>)
+    expect(screen.queryByRole('link', { name: /Conhecer espaço/ })).not.toBeInTheDocument()
+  })
+  it('replaces broken detail media with an honest unavailable state', async () => {
+    hookMocks.useSpace.mockReturnValue({ isLoading: false, isError: false, data: space })
+    experienceMocks.listScenes.mockResolvedValue([{ id: 'scene-1', title: 'Sala', panoramaUrl: '/test-scene.jpg' }])
+    renderRoute('/espacos/sala-reuniao', <SpaceDetail />)
+    fireEvent.error(await screen.findByRole('img', { name: 'Sala — Sala de Reunião' }))
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+    expect(screen.getByText('Pré-visualização indisponível')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Configurar encontro/ })).toBeInTheDocument()
+  })
+  it('hides a broken explorer panorama and disables its zoom', async () => {
+    hookMocks.useSpace.mockReturnValue({ isLoading: false, isError: false, data: space })
+    experienceMocks.listScenes.mockResolvedValue([{ id: 'scene-1', title: 'Sala', panoramaUrl: '/test-scene.jpg' }])
+    renderRoute('/espacos/sala-reuniao/explorar', <SpaceExplorer />)
+    fireEvent.error(await screen.findByRole('img', { name: 'Panorama: Sala' }))
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Não foi possível apresentar este panorama.' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Aumentar zoom' })).toBeDisabled()
+  })
+
 })

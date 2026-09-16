@@ -1,0 +1,29 @@
+/* P03: real selected space, with the same reading order at every width. */
+.public-v2-shell .spaces-v2-catalog .published-catalog-focus { grid-template-columns: minmax(0, .65fr) minmax(0, 1.35fr); align-items: start; }
+.public-v2-shell .spaces-v2-catalog .space-v2-card { display: block; min-height: 0; }
+.public-v2-shell .spaces-v2-catalog .space-v2-card::before { content: none; }
+.public-v2-shell .spaces-v2-catalog .space-v2-card__visual { min-height: 18rem; aspect-ratio: 16 / 10; border-radius: 0; transform: none; box-shadow: none; background: var(--castros-charcoal); }
+.public-v2-shell .spaces-v2-catalog .space-v2-card__content { padding: 1.5rem 0 0; }
+.public-v2-shell .spaces-v2-catalog .space-v2-card__content h2 { max-width: none; font-family: var(--public-font-display); font-size: clamp(2rem, 3vw, 3.5rem); font-weight: 400; line-height: 1.1; letter-spacing: -.035em; }
+.public-v2-shell .spaces-v2-catalog .space-v2-card__meta { flex-wrap: wrap; }
+.public-v2-shell .spaces-v2-catalog .space-v2-card__media-overlay { flex-wrap: wrap; }
+.public-v2-shell .spaces-v2-catalog .space-v2-card__media-overlay small { text-align: left; }
+@media (max-width: 1100px) {
+  .public-v2-shell .spaces-v2-catalog .published-catalog-focus { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .public-v2-shell .spaces-v2-catalog .space-v2-card__visual { min-height: 14rem; }
+  .public-v2-shell .spaces-v2-catalog .space-v2-card__actions { align-items: stretch; flex-direction: column; }
+  .public-v2-shell .spaces-v2-catalog .space-v2-card__actions a { justify-content: center; }
+}
+.public-v2-shell .spaces-v2-page,
+.public-v2-shell .space-detail-v2 {
+  --space-bg: var(--castros-graphite);
+  --space-ink: var(--castros-ivory);
+  --space-muted: var(--castros-stone);
+  --space-teal: var(--castros-teal);
+  --space-cream: var(--castros-ivory);
+  background: var(--space-bg);
+}
+.public-v2-shell .spaces-v2-page::before { content: none; }
+.public-v2-shell .spaces-v2-intro h1 em { color: var(--castros-teal); font-style: italic; }
