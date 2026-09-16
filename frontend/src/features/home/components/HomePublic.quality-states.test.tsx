@@ -61,6 +61,30 @@ describe('homepage public quality states', () => {
     expect(screen.getAllByRole('heading', { name: 'Catálogo em preparação' })).toHaveLength(2)
   })
 
+  it('uses published services in Consulting with real detail destinations and no unverified booking', () => {
+    homeMocks.useServices.mockReturnValue({ isLoading: false, isError: false, data: { items: [
+      { id: 'real-1', slug: 'lideranca', name: 'Liderança organizacional', bookingEnabled: false },
+      { id: 'real-2', slug: 'atendimento', name: 'Atendimento ao cliente', bookingEnabled: true },
+    ] } })
+    renderHome()
+    expect(screen.getByRole('link', { name: /Liderança organizacional/ })).toHaveAttribute('href', '/servicos/lideranca')
+    expect(screen.getByRole('link', { name: /Atendimento ao cliente/ })).toHaveAttribute('href', '/servicos/atendimento')
+    expect(screen.getByRole('list', { name: 'Serviços publicados' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /agendar|reservar/i })).not.toBeInTheDocument()
+  })
+
+  it('shows only course metadata supplied by the API without inventing a session', () => {
+    homeMocks.useCourses.mockReturnValue({ isLoading: false, isError: false, data: { items: [
+      { id: 'course-1', slug: 'comunicacao', name: 'Comunicação', modality: 'Presencial', durationLabel: '8 horas' },
+      { id: 'course-2', slug: 'lideranca', name: 'Liderança' },
+    ] } })
+    renderHome()
+    expect(screen.getByRole('link', { name: /Comunicação/ })).toHaveAttribute('href', '/formacao/comunicacao')
+    expect(screen.getByText('Presencial · 8 horas')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Liderança/ })).toHaveAttribute('href', '/formacao/lideranca')
+    expect(screen.queryByText(/próxima sessão|lugares disponíveis/i)).not.toBeInTheDocument()
+  })
+
   it('degrades optional configuration and space preview failures without blocking the homepage', () => {
     homeMocks.usePublicConfig.mockReturnValue({ isLoading: false, isError: true })
     homeMocks.useSpacesPreview.mockReturnValue({ isLoading: false, isError: true })
