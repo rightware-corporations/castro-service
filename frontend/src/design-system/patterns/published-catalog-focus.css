@@ -1,0 +1,46 @@
+.public-v2-shell .published-catalog-focus { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 2rem; }
+.public-v2-shell .published-catalog-focus__index { display: flex; flex-direction: column; align-self: start; }
+.public-v2-shell .published-catalog-focus__index button { display: flex; align-items: baseline; gap: 1rem; width: 100%; min-height: 3.5rem; padding: 1.2rem .75rem; border: 0; border-bottom: 1px solid currentColor; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; overflow-wrap: anywhere; }
+.public-v2-shell .published-catalog-focus__index button[aria-pressed='true'] { background: var(--castros-ivory); color: var(--castros-graphite); box-shadow: inset 4px 0 var(--castros-teal); }
+.public-v2-shell .published-catalog-focus__index button:focus-visible { outline: 2px solid var(--castros-teal); outline-offset: 3px; }
+.public-v2-shell .published-catalog-focus__detail { min-width: 0; overflow-wrap: anywhere; }
+.public-v2-shell .published-catalog-focus__detail article { display: block; padding: 0; }
+.public-v2-shell .published-catalog-focus__detail h3 { margin-top: 1rem; font-family: var(--public-font-display); font-size: clamp(1.5rem, 2.5vw, 2.5rem); line-height: 1.2; }
+.public-v2-shell .published-catalog-focus__detail p { line-height: 1.7; }
+.public-v2-shell .published-catalog-focus__detail a { overflow-wrap: anywhere; }
+.public-v2-shell .published-catalog-focus__detail .training-catalog__actions { flex-wrap: wrap; }
+.public-v2-shell .published-catalog-focus__detail .training-catalog__facts { grid-template-columns: 1fr; }
+@media (max-width: 1100px) { .public-v2-shell .published-catalog-focus { grid-template-columns: minmax(0, 1fr); } }
+/* Canonical SH02/SH03 reading contrast on existing editorial shells. */
+.public-v2-shell .courses-v2-intro,
+.public-v2-shell .services-v2-intro { background: var(--castros-graphite); color: var(--castros-ivory); }
+.public-v2-shell .courses-v2-intro h1,
+.public-v2-shell .services-v2-intro h1 { color: var(--castros-ivory); }
+.public-v2-shell .courses-v2-intro h1 em,
+.public-v2-shell .services-v2-intro h1 em { color: var(--castros-teal); }
+.public-v2-shell .courses-v2-intro__side p,
+.public-v2-shell .services-v2-intro__side p { color: var(--castros-stone); }
+.public-v2-shell .services-v2-intro::after { content: none; }
+.public-v2-shell .courses-v2-page,
+.public-v2-shell .courses-v2-page > .public-v2-page,
+.public-v2-shell .services-v2-page,
+.public-v2-shell .services-v2-page > .public-v2-page { background: var(--castros-graphite); }
+.public-v2-shell .courses-v2-intro h1 em,
+.public-v2-shell .services-v2-intro h1 em { -webkit-text-fill-color: var(--castros-teal); background: none; }
+.public-v2-shell .launch-course-detail__registration .sessions-v2-list strong { color: var(--castros-ivory); }
+.public-v2-shell .launch-course-detail__registration .sessions-v2-list small,
+.public-v2-shell .launch-course-detail__registration .courses-v2-no-sessions { color: var(--castros-stone); }
+.public-v2-shell .launch-course-detail__registration .sessions-v2-list a { display: grid; place-items: center; width: 44px; height: 44px; color: var(--castros-teal); }
+@media (max-width: 600px) {
+  .public-v2-shell .services-experience__focus-card { min-width: 0; padding-inline: 1rem; }
+  .public-v2-shell .services-experience__focus-copy,
+  .public-v2-shell .services-experience__focus-top { min-width: 0; width: 100%; }
+  .public-v2-shell .services-experience__focus-copy h3 { overflow-wrap: anywhere; }
+  .public-v2-shell .services-v2-intro h1 { font-size: clamp(2rem, 10vw, 3rem); }
+}
+.public-v2-shell .services-v2-page { overflow-x: clip; }
+.public-v2-shell #main-content .services-v2-intro h1 { max-width: 100%; }
+.public-v2-shell #main-content .services-v2-intro h1 em { font-family: inherit; font-weight: inherit; font-style: italic; }
+@media (max-width: 600px) {
+  .public-v2-shell #main-content .services-v2-intro h1 { font-size: clamp(2rem, 10vw, 3rem); }
+}

@@ -1,0 +1,77 @@
+/* Batch 1 authority: frame, reading measure, type and focus only.
+   Route compositions are migrated in their own approved batches. */
+.public-v2-shell {
+  background: var(--castros-graphite);
+  color: var(--castros-ivory);
+  font-family: var(--public-font-ui);
+}
+/* Account for the scrollbar at 320px without imposing a wider document. */
+html:has(.public-v2-shell), body:has(.public-v2-shell) { min-width: 0; }
+.public-v2-shell .container > * { min-inline-size: 0; }
+.public-v2-shell #main-content h1 {
+  font-family: var(--public-font-display);
+  font-size: clamp(2.5rem, 5.5vw, 5rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -.035em;
+  overflow-wrap: anywhere;
+}
+.public-v2-shell[data-shell='SH07'] #main-content h1 { font-size: clamp(2rem, 4vw, 3rem); }
+
+.public-v2-shell .container,
+.public-v2-shell .home-v2 .container,
+.public-v2-shell .public-frame {
+  width: min(calc(100% - 2 * var(--public-frame-gutter)), var(--public-frame-max));
+  margin-inline: auto;
+}
+
+.public-v2-shell .public-reading,
+.public-v2-shell :is(.home-v2-hero__lead, .home-v2-section-head > p, .home-v2-founder__copy > p, .public-page-hero p) {
+  max-inline-size: var(--public-reading-measure);
+}
+
+.public-v2-shell .public-form { inline-size: 100%; max-inline-size: var(--public-form-measure); }
+.public-v2-shell .public-full-bleed { inline-size: 100%; max-inline-size: none; }
+.public-v2-shell :is(h1, h2, h3) { overflow-wrap: break-word; }
+.public-v2-shell .home-v2 :is(h1, h2),
+.public-v2-shell :is(.launch-about, .launch-insights-page, .public-page-hero) :is(h1, h2) {
+  font-family: var(--public-font-display);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+.public-v2-shell .home-v2 h1 em { font-family: inherit; font-style: italic; }
+.public-v2-shell .home-v2 h1 { font-size: clamp(2.5rem, 5.5vw, 5rem); }
+.public-v2-shell .public-brand-image { display: block; width: 12rem; height: 3rem; object-fit: cover; object-position: 50% 49%; mix-blend-mode: lighten; }
+.public-v2-shell .public-header,
+.public-v2-shell .public-header--scrolled { background: var(--castros-graphite); }
+.public-v2-shell .public-nav--open { background: var(--castros-graphite); }
+.public-v2-shell .public-header__cta { border-color: var(--castros-teal); background: transparent; color: var(--castros-ivory); }
+.public-v2-shell .public-header__cta:hover { background: var(--castros-charcoal); }
+
+/* A two-colour ring stays visible on photography, ivory and graphite alike. */
+.public-v2-shell :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--public-focus-light);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px var(--public-focus-dark);
+}
+.public-v2-shell #main-content { scroll-margin-top: 6rem; }
+.public-v2-shell :is(button, .ds-button, .icon-button, .public-nav a) { min-block-size: 2.75rem; }
+.public-v2-shell .public-nav a { display: inline-flex; align-items: center; }
+
+@media (max-width: 1279px) {
+  .public-v2-shell .public-header__inner { gap: 1rem; }
+  .public-v2-shell .public-nav { gap: 1rem; }
+}
+@media (max-width: 767px) {
+  .public-v2-shell .public-brand-image { width: 10rem; height: 2.75rem; }
+  .public-v2-shell .public-nav { max-block-size: calc(100dvh - 6rem); overflow-y: auto; }
+  .public-v2-shell .public-reading { max-inline-size: 100%; }
+}
+@media (max-width: 359px) {
+  .public-v2-shell .public-brand-image { width: 9rem; }
+  .public-v2-shell .public-header__inner { gap: .5rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .public-v2-shell { --public-motion-micro: 0ms; --public-motion-component: 0ms; --public-motion-page: 0ms; --public-motion-brand: 0ms; }
+}

@@ -43,6 +43,18 @@ const expectedLinks = [
 ] as const
 
 describe('public layout navigation', () => {
+  it('moves keyboard focus to the destination content when navigating between public shells', async () => {
+    const user = userEvent.setup()
+    render(<MemoryRouter initialEntries={['/']}><Routes><Route element={<PublicLayout />}>
+      <Route index element={<h1>Início</h1>} />
+      <Route path="/servicos" element={<h1>Serviços publicados</h1>} />
+    </Route></Routes></MemoryRouter>)
+    await user.click(within(screen.getByRole('navigation', { name: 'Navegação principal' })).getByRole('link', { name: 'Serviços' }))
+    expect(screen.getByRole('heading', { name: 'Serviços publicados' })).toBeInTheDocument()
+    expect(screen.getByRole('main')).toHaveFocus()
+    expect(document.querySelector('[data-shell]')).toHaveAttribute('data-shell', 'SH02')
+  })
+
   it('keeps header and footer navigation aligned with the public route contract', () => {
     renderLayout()
 

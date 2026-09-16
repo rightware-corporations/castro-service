@@ -12,7 +12,7 @@ describe('public training', () => {
     const { rerender } = render(<MemoryRouter><CourseCollectionView resource={{ isLoading: true, isError: false }} /></MemoryRouter>)
     expect(screen.getByRole('status')).toHaveTextContent('A carregar formação.')
     rerender(<MemoryRouter><CourseCollectionView resource={{ isLoading: false, isError: false, data: { items: [course] } }} /></MemoryRouter>)
-    expect(screen.getByText('[CONTENT TBD]')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '[CONTENT TBD]' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: '[CONTENT TBD]' })).toHaveAttribute('href', '/formacao/course-1')
     expect(screen.getByRole('link', { name: /Ver curso e inscrição/i })).toHaveAttribute('href', '/formacao/course-1')
     expect(screen.queryByText('878 665 180')).not.toBeInTheDocument()
@@ -83,5 +83,23 @@ describe('public training', () => {
   it('routes published sessions to the dedicated group registration flow', () => {
     render(<MemoryRouter><CourseSessionsView resource={{ isLoading: false, isError: false, data: { items: [{ id: 'session-1', startAt: '2026-10-20T09:00:00+02:00', endAt: '2026-10-20T12:00:00+02:00' }] } }} course={course} /></MemoryRouter>)
     expect(screen.getByRole('link', { name: /Inscrever-se na sessão/i })).toHaveAttribute('href', '/formacao/course-1/sessoes/session-1/inscricao')
+  })
+})
+
+describe('published courses focus', () => {
+  it('selects a real item and recovers when it is removed', async () => {
+    const user = userEvent.setup()
+    const second = { ...course, id: 'second', slug: 'second', name: 'Segundo item' }
+    const { rerender } = render(<MemoryRouter><CourseCollectionView resource={{ isLoading: false, isError: false, data: { items: [course, second] } }} /></MemoryRouter>)
+    await user.click(screen.getByRole('button', { name: /Segundo item/ }))
+    expect(screen.getByRole('heading', { name: 'Segundo item' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: course.name })).not.toBeInTheDocument()
+    rerender(<MemoryRouter><CourseCollectionView resource={{ isLoading: false, isError: false, data: { items: [course] } }} /></MemoryRouter>)
+    expect(screen.getByRole('heading', { name: course.name })).toBeInTheDocument()
+  })
+  it.each([{ isLoading: true, isError: false }, { isLoading: false, isError: true }])('hides stale catalogue actions during %o', (state) => {
+    render(<MemoryRouter><CourseCollectionView resource={{ ...state, data: { items: [course] } }} /></MemoryRouter>)
+    expect(screen.queryByRole('group', { name: 'Selecionar curso publicado' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: course.name })).not.toBeInTheDocument()
   })
 })
