@@ -146,13 +146,13 @@ describe('public booking error states', () => {
     expect(screen.queryByText('network socket details')).not.toBeInTheDocument()
   })
 
-  it('explains that submission succeeded when confirmation details cannot be loaded', async () => {
+  it('does not claim submission success for a missing reference', async () => {
     apiMocks.getBooking.mockRejectedValue(new ApiError('Reference lookup failed', { code: 'RESOURCE_NOT_FOUND' }))
 
     renderBooking('/reservar/confirmacao/CASTRO-404')
 
-    expect(screen.getByText('Reserva registada.')).toBeInTheDocument()
-    expect(await screen.findByText('A reserva foi enviada, mas não foi possível carregar os detalhes da confirmação.')).toBeInTheDocument()
+    expect(screen.queryByText('Reserva registada.')).not.toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Reserva não encontrada.' })).toBeInTheDocument()
     expect(screen.queryByText('Reference lookup failed')).not.toBeInTheDocument()
   })
 })

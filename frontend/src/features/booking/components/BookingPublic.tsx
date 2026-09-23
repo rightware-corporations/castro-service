@@ -112,9 +112,52 @@ export function BookingReview() {
 }
 
 export function BookingConfirmation() {
-  const api = useApi(); const { reference } = useParams(); const query = useQuery({ queryKey: ['booking', reference], enabled: Boolean(reference), queryFn: () => api.bookings.getByReference(reference!) })
-  const pending = query.data?.status === 'PENDING'
-  return <div className="booking-v2-page"><section className="container booking-v2-confirmation"><span className="booking-v2-confirmation__icon"><Check size={26} /></span><span className="eyebrow">{pending ? 'PEDIDO RECEBIDO' : 'RESERVA'}</span><h1>{pending ? 'Aguardamos a confirmação da Castro’s.' : query.data?.status === 'CONFIRMED' ? 'Reserva confirmada.' : 'Reserva registada.'}</h1>{query.isLoading && <LoadingState label="A carregar confirmação." />}{query.isError && <ErrorState title="A reserva foi enviada, mas não foi possível carregar os detalhes da confirmação." />}{query.data && <><div className="booking-v2-confirmation__details"><div><small>Referência</small><strong>{query.data.reference}</strong></div><div><small>Estado</small><strong>{statusLabel(query.data.status)}</strong></div><div><small>Horário</small><strong>{formatDateTime(query.data.startAt)} — {formatDateTime(query.data.endAt)}</strong></div></div><p>{pending ? 'O horário foi registado e a equipa recebeu o pedido. A Secretária pode confirmar, reagendar ou entrar em contacto consigo.' : 'Guarde a referência para qualquer contacto relacionado com esta reserva.'}</p><PublicContactChannels contextMessage={`Olá. Gostaria de falar sobre a reserva ${query.data.reference}.`} /></>}<Link className="ds-button ds-button--primary" to="/">Voltar ao início</Link></section></div>
+  const api = useApi()
+  const { reference } = useParams()
+  const query = useQuery({
+    queryKey: ['booking', reference],
+    enabled: Boolean(reference),
+    retry: false,
+    queryFn: () => api.bookings.getByReference(reference!),
+  })
+  // Do not present cached success while the current lookup is unresolved or failed.
+  const booking = query.isSuccess && !query.isFetching ? query.data : undefined
+  const notFound = !reference || (query.isError && query.error instanceof ApiError
+    && (query.error.status === 404 || query.error.code === 'RESOURCE_NOT_FOUND'))
+  const titles: Record<string, string> = {
+    PENDING: 'Aguardamos a confirmação da Castro’s.',
+    CONFIRMED: 'Reserva confirmada.',
+    CANCELLED: 'Reserva cancelada.',
+    COMPLETED: 'Reserva concluída.',
+    NO_SHOW: 'Não comparência registada.',
+  }
+  const statusTitle = booking && Object.hasOwn(titles, booking.status) ? titles[booking.status] : undefined
+  const title = notFound ? 'Reserva não encontrada.'
+    : query.isFetching || query.isPending ? 'A consultar a reserva.'
+    : query.isError ? 'Não foi possível consultar a reserva.'
+    : booking ? statusTitle ?? 'Estado da reserva por verificar.'
+    : 'Estado da reserva por verificar.'
+
+  return <div className="booking-v2-page"><section className="container booking-v2-confirmation">
+    {booking?.status === 'CONFIRMED' && <span className="booking-v2-confirmation__icon" aria-hidden="true"><Check size={26} /></span>}
+    <span className="eyebrow">{booking?.status === 'PENDING' ? 'PEDIDO RECEBIDO' : 'CONSULTA DE RESERVA'}</span>
+    <h1 aria-live="polite">{title}</h1>
+    {query.isFetching && <LoadingState label="A carregar confirmação." />}
+    {notFound ? <p>Verifique a referência recebida. Não conseguimos localizar uma reserva com esta referência.</p>
+      : query.isError ? <ErrorState title="A consulta falhou. Não foi possível verificar o estado da reserva." action={<Button onClick={() => void query.refetch()}>Tentar novamente</Button>} /> : null}
+    {booking && <>
+      <div className="booking-v2-confirmation__details">
+        <div><small>Referência</small><strong>{booking.reference}</strong></div>
+        <div><small>Estado</small><strong>{statusTitle ? statusLabel(booking.status) : 'Por verificar'}</strong></div>
+        <div><small>Horário</small><strong>{formatDateTime(booking.startAt)} — {formatDateTime(booking.endAt)}</strong></div>
+      </div>
+      <p>{booking.status === 'PENDING' ? 'O pedido foi recebido e ainda aguarda confirmação da equipa.'
+        : booking.status === 'CANCELLED' ? 'Esta reserva está cancelada. Contacte a equipa se precisar de esclarecimentos.'
+        : 'Guarde a referência para qualquer contacto relacionado com esta reserva.'}</p>
+      <PublicContactChannels contextMessage={`Olá. Gostaria de falar sobre a reserva ${booking.reference}.`} />
+    </>}
+    <Link className="ds-button ds-button--primary" to="/">Voltar ao início</Link>
+  </section></div>
 }
 
 function Summary({ target, draft, children }: { target: { type: BookableType; id: string }; draft: BookingDraft; children: React.ReactNode }) { return <aside className="booking-v2-summary"><span className="eyebrow">RESUMO</span><h2>Pedido de reserva</h2><dl><div><dt>Tipo</dt><dd>{targetLabel(target.type)}</dd></div>{draft.purpose && <div><dt>Finalidade</dt><dd>{purposeLabel(draft.purpose)}</dd></div>}{draft.participants && <div><dt>Participantes</dt><dd>{draft.participants}</dd></div>}{draft.date && <div><dt>Data</dt><dd>{humanDate(draft.date)}</dd></div>}{draft.durationMinutes && <div><dt>Duração</dt><dd>{draft.durationMinutes} min</dd></div>}{draft.startTime && <div><dt>Horário</dt><dd>{formatTime(draft.startTime)}{draft.endTime ? `–${formatTime(draft.endTime)}` : ''}</dd></div>}</dl><div className="booking-v2-summary__action">{children}</div><small>Disponibilidade, capacidade e estado final são validados novamente pelo backend no envio.</small></aside> }
