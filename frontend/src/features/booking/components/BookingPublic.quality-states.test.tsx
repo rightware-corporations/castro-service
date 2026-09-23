@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -13,6 +13,7 @@ const apiMocks = vi.hoisted(() => ({
 
 vi.mock('../../../app/providers/AppProviders', () => ({
   useApi: () => ({
+    public: { listServices: async () => ({ items: [{ id: 'service-1', bookingEnabled: true, durationMinutes: 60 }] }), listSpaces: async () => ({ items: [{ id: 'space-1', bookingEnabled: true }] }) },
     availability: { list: apiMocks.listAvailability },
     bookings: { create: apiMocks.createBooking, getByReference: apiMocks.getBooking },
   }),
@@ -61,7 +62,7 @@ function seedReviewDraft() {
 describe('public booking loading states', () => {
   beforeEach(() => {
     sessionStorage.clear()
-    apiMocks.listAvailability.mockReset()
+    apiMocks.listAvailability.mockReset().mockResolvedValue({ items: [{ start: '09:00', end: '10:00', status: 'AVAILABLE' }], total: 1 })
     apiMocks.createBooking.mockReset()
     apiMocks.getBooking.mockReset()
   })
@@ -94,6 +95,7 @@ describe('public booking loading states', () => {
 
     const { user } = renderBooking('/reservar/SERVICE/service-1/rever')
     const submit = screen.getByRole('button', { name: /Enviar pedido de reserva/i })
+    await waitFor(() => expect(submit).toBeEnabled())
     await user.click(submit)
 
     expect(submit).toBeDisabled()
