@@ -1,3 +1,5 @@
+vi.mock('../../features/spaces/components/SpaceExplorer', () => ({ SpaceExplorer: () => <div>route:space-explorer</div> }))
+vi.mock('../../features/spaces/components/SpaceConfigurator', () => ({ SpaceConfigurator: () => <div>route:space-configurator</div> }))
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
@@ -17,8 +19,6 @@ vi.mock('../../features/contact/components/ContactPublic', () => ({ ContactPubli
 vi.mock('../../features/spaces/components/SpacesPublic', () => ({
   SpacesCatalog: () => <div>route:spaces</div>,
   SpaceDetail: () => <div>route:space-detail</div>,
-  SpaceExplorer: () => <div>route:space-explorer</div>,
-  SpaceConfigurator: () => <div>route:space-configurator</div>,
 }))
 vi.mock('../../features/booking/components/BookingPublic', () => ({
   BookingDate: () => <div>route:booking-date</div>,
@@ -57,8 +57,8 @@ describe('public router contract', () => {
     ['/reservar/SERVICE/service-1/rever', 'route:booking-review'],
     ['/reservar/confirmacao/CASTRO-001', 'route:booking-confirmation'],
     ['/pagina-inexistente', 'route:not-found'],
-  ])('resolves %s to the intended public destination', (path, marker) => {
+  ])('resolves %s to the intended public destination', async (path, marker) => {
     renderPath(path)
-    expect(screen.getByText(marker)).toBeInTheDocument()
+    expect(await screen.findByText(marker)).toBeInTheDocument()
   })
 })

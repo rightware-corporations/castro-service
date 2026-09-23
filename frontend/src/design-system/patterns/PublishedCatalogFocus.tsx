@@ -1,16 +1,23 @@
-import { useId, useState, type ReactNode } from 'react'
+import { useId, type ReactNode } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import './published-catalog-focus.css'
 
 type Item = { id: string; name: string }
 
-/** Selection stays local; only the explicit detail link changes route. */
+/** The URL restores selection on Back/refresh; only the detail link changes route. */
 export function PublishedCatalogFocus<T extends Item>({ items, label, frame, children }: {
   items: T[]
   label: string
   frame: string
   children: (item: T) => ReactNode
 }) {
-  const [selectedId, setSelectedId] = useState<string>()
+  const [search, setSearch] = useSearchParams()
+  const selectedId = search.get('focus')
+  const setSelectedId = (id: string) => {
+    const next = new URLSearchParams(search)
+    next.set('focus', id)
+    setSearch(next, { replace: true, preventScrollReset: true })
+  }
   const panelId = useId()
   const selected = items.find((item) => item.id === selectedId) ?? items[0]
   if (!selected) return null

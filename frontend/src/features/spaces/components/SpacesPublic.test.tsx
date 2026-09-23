@@ -1,8 +1,9 @@
+import { SpaceConfigurator } from './SpaceConfigurator'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { SpaceConfigurator, SpaceDetail, SpacesCatalog } from './SpacesPublic'
+import { SpaceDetail, SpacesCatalog } from './SpacesPublic'
 
 const hookMocks = vi.hoisted(() => ({
   useSpaces: vi.fn(),

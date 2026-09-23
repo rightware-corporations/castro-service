@@ -8,6 +8,7 @@ import { SkipLink } from '../../design-system/patterns/navigation'
 import { motionPresets } from '../../design-system/motion/motionPresets'
 import { publicShellForPath } from '../../design-system/patterns/public-shell'
 import { publicMotion } from '../../design-system/motion/publicMotion'
+import { usePublicScrollRestoration } from './usePublicScrollRestoration'
 
 const publicLinks = [
   { to: '/servicos', label: 'Serviços' },
@@ -75,6 +76,7 @@ function PublicBrand() {
 }
 
 export function PublicLayout() {
+  usePublicScrollRestoration()
   const { pathname } = useLocation()
   const shell = publicShellForPath(pathname)
   const mainRef = useRef<HTMLElement>(null)
