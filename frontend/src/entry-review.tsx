@@ -1,7 +1,7 @@
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { App } from './app/App'
-import { AppProviders } from './app/providers/AppProviders'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { PublicLayout } from './app/layouts/Layouts'
+import { HomeEntry } from './features/home/components/HomeEntry'
 import './styles/global.css'
 import './design-system/tokens/public-contract.css'
 import './styles/public-v2.css'
@@ -37,10 +37,9 @@ import './features/contact/contact-spatial-stage-v3.css'
 import './features/booking/booking-spatial-stage-v3.css'
 import './styles/public-foundations.css'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <AppProviders>
-      <App />
-    </AppProviders>
-  </StrictMode>,
-)
+// Standalone development entry; not imported by the application or production build.
+const requested = Number(new URLSearchParams(window.location.search).get('phase'))
+const phase: 0 | 1 | 2 | 3 = requested === 1 || requested === 2 || requested === 3 ? requested : 0
+if (import.meta.env.DEV) {
+  createRoot(document.getElementById('root')!).render(<MemoryRouter><Routes><Route element={<PublicLayout />}><Route index element={<div className="home-v2"><HomeEntry reviewPhase={phase} /></div>} /></Route></Routes></MemoryRouter>)
+}

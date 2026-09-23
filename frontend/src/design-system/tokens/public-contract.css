@@ -1,0 +1,42 @@
+/* CASTROS-COMPONENT-LIBRARY-V1. Public contract; internal surfaces retain their tokens. */
+.public-v2-shell {
+  --castros-graphite: #0e0e0e;
+  --castros-ivory: #f6f4ee;
+  --castros-navy: #0a1f3d;
+  --castros-teal: #00c2c2;
+  --castros-olive: #4a5239;
+  --castros-stone: #d7d2c8;
+  --castros-charcoal: #1e1e1e;
+  --public-frame-max: 108rem;
+  --public-frame-gutter: clamp(1.25rem, 3vw, 4.5rem);
+  --public-reading-measure: 68ch;
+  --public-form-measure: 42rem;
+  --public-font-display: 'Playfair Display', Georgia, serif;
+  --public-font-ui: Inter, system-ui, sans-serif;
+  --public-motion-micro: 150ms;
+  --public-motion-component: 200ms;
+  --public-motion-page: 300ms;
+  --public-motion-brand: 1200ms;
+  --public-focus-light: var(--castros-ivory);
+  --public-focus-dark: var(--castros-graphite);
+  --font-ui: var(--public-font-ui);
+  --font-editorial: var(--public-font-display);
+  --font-sans: var(--public-font-ui);
+  --color-navy: var(--castros-navy);
+  --color-deep-navy: var(--castros-graphite);
+  --color-teal: var(--castros-teal);
+  --color-cream: var(--castros-ivory);
+  --color-off-white: var(--castros-ivory);
+  --color-charcoal: var(--castros-charcoal);
+  --color-border: var(--castros-stone);
+  --v3-bg: var(--castros-graphite);
+  --v3-bg-soft: var(--castros-charcoal);
+  --v3-ink: var(--castros-ivory);
+  --v3-muted: var(--castros-stone);
+  --v3-line: rgb(246 244 238 / 22%);
+  --v3-teal: var(--castros-teal);
+  --v3-cream: var(--castros-ivory);
+  --v3-shadow: none;
+  --v3-glow-teal: 0 0 transparent;
+  --v3-glow-cream: 0 0 transparent;
+}

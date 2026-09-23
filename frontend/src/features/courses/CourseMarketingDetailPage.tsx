@@ -1,4 +1,5 @@
-import { ArrowLeft, ArrowRight, Award, CalendarDays, CheckCircle2, Clock3, Coins, MapPin, UsersRound } from 'lucide-react'
+import { CourseSessionsView } from './components/CoursesPublic'
+import { ArrowLeft, ArrowRight, Award, CalendarDays, CheckCircle2, Clock3, Coins, MapPin } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { useCourse, useCourseSessions } from './hooks'
 import { contactHref } from '../contact/intent'
@@ -9,9 +10,10 @@ export function CourseMarketingDetailPage() {
   const courseQuery = useCourse(slug)
   const sessionsQuery = useCourseSessions(courseQuery.data?.id)
   if (courseQuery.isLoading) return <section className="container launch-course-detail"><LoadingState label="A carregar formação." /></section>
-  if (courseQuery.isError || !courseQuery.data) return <section className="container launch-course-detail"><ErrorState title="Não foi possível carregar esta formação." /></section>
+  if (courseQuery.isError) return <section className="container launch-course-detail"><ErrorState title="Não foi possível carregar esta formação." /><Link className="text-link" to="/formacao">Voltar à formação</Link></section>
+  if (!courseQuery.data) return <section className="container launch-course-detail" data-frame="T12"><EmptyState title="Formação não encontrada.">Consulte os cursos disponíveis para encontrar outra formação.</EmptyState><Link className="text-link" to="/formacao">Voltar à formação</Link></section>
   const course = courseQuery.data
-  const session = sessionsQuery.data?.items[0]
+  const session = !sessionsQuery.isLoading && !sessionsQuery.isError ? sessionsQuery.data?.items[0] : undefined
   const infoHref = contactHref({ type: 'TRAINING_INFO', sourceType: 'TRAINING', entityId: course.id, cta: 'TRAINING_INFO', message: `Gostaria de receber informação sobre ${course.name}.` })
   const nextDatesHref = contactHref({ type: 'TRAINING_INFO', sourceType: 'TRAINING', entityId: course.id, cta: 'NEXT_TRAINING_DATES', message: `Gostaria de receber as próximas datas de ${course.name}.` })
 
@@ -19,7 +21,7 @@ export function CourseMarketingDetailPage() {
     <section className="container launch-course-detail__hero">
       <Link className="launch-text-link" to="/formacao"><ArrowLeft size={15}/> Formação</Link>
       <div className="launch-course-detail__hero-grid">
-        <div><span className="eyebrow">CASTRO’S · FORMAÇÃO</span><h1>{course.name}</h1><p>{course.summary || course.description}</p><div className="launch-course-detail__actions">{session ? <Link className="ds-button ds-button--primary" to={`/formacao/${encodeURIComponent(course.slug)}/sessoes/${encodeURIComponent(session.id)}/inscricao`}>Inscrever-me <ArrowRight size={17}/></Link> : <Link className="ds-button ds-button--primary" to={nextDatesHref}>Receber próximas datas</Link>}<Link className="launch-text-link" to={infoHref}>Pedir informação</Link></div></div>
+        <div><span className="eyebrow">CASTRO’S · FORMAÇÃO</span><h1>{course.name}</h1><p>{course.summary || course.description}</p><div className="launch-course-detail__actions">{session ? <Link className="ds-button ds-button--primary" to={`/formacao/${encodeURIComponent(course.slug)}/sessoes/${encodeURIComponent(session.id)}/inscricao`}>Inscrever-me <ArrowRight size={17}/></Link> : !sessionsQuery.isLoading && !sessionsQuery.isError ? <Link className="ds-button ds-button--primary" to={nextDatesHref}>Receber próximas datas</Link> : null}<Link className="launch-text-link" to={infoHref}>Pedir informação</Link></div></div>
         <aside className="launch-course-detail__summary">
           {session && <CourseFact icon={<CalendarDays size={18}/>} label="Início" value={formatDate(session.startAt)} />}
           <CourseFact icon={<MapPin size={18}/>} label="Modalidade" value={course.modality ? humanize(course.modality) : 'A confirmar'} />
@@ -35,7 +37,7 @@ export function CourseMarketingDetailPage() {
       <article><span className="eyebrow">O QUE IRÁ DESENVOLVER</span>{course.learningOutcomes?.length ? <ul className="launch-course-detail__outcomes">{course.learningOutcomes.map((outcome) => <li key={outcome}><CheckCircle2 size={17}/><span>{outcome}</span></li>)}</ul> : <EmptyState title="Programa em preparação">Os conteúdos detalhados serão publicados quando confirmados.</EmptyState>}</article>
     </section>
 
-    <section className="launch-course-detail__registration"><div className="container launch-course-detail__registration-grid"><div><span className="eyebrow eyebrow--light">INSCRIÇÕES</span><h2>{session?.label || 'Próxima edição'}</h2><p>{session ? `Início confirmado para ${formatDate(session.startAt)}. Preencha os seus dados para solicitar a inscrição nesta edição.` : 'Não existe uma edição publicada neste momento. Pode pedir as próximas datas.'}</p></div><div>{session ? <Link className="ds-button launch-course-detail__registration-button" to={`/formacao/${encodeURIComponent(course.slug)}/sessoes/${encodeURIComponent(session.id)}/inscricao`}><UsersRound size={17}/> Garantir a minha vaga</Link> : <Link className="ds-button launch-course-detail__registration-button" to={nextDatesHref}>Receber próximas datas</Link>}</div></div></section>
+    <section className="launch-course-detail__registration"><div className="container launch-course-detail__registration-grid"><div><span className="eyebrow eyebrow--light">INSCRIÇÕES</span><h2>Próximas sessões</h2><p>Escolha uma sessão para solicitar a sua inscrição.</p></div><div><CourseSessionsView resource={sessionsQuery} course={course} /></div></div></section>
   </div>
 }
 

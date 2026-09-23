@@ -1,3 +1,4 @@
+import { PublishedCatalogFocus } from '../../../design-system/patterns/PublishedCatalogFocus'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
@@ -21,9 +22,9 @@ const confirmedAreas = [
   { number: '04', title: 'Treinamento Corporativo Personalizado', description: 'Formação desenhada em torno das necessidades e do contexto de cada organização.', icon: UsersRound },
 ]
 
-function ServicesIntro({ detail = false }: { detail?: boolean }) {
-  return <header className={`services-v2-intro ${detail ? 'services-v2-intro--detail' : ''}`}>
-    <div><span className="eyebrow">CASTRO’S · SERVIÇOS</span><h1>{detail ? 'Um serviço começa por compreender o contexto.' : <>Clareza para relações, <em>liderança</em> e organizações.</>}</h1></div>
+function ServicesIntro({ detailTitle }: { detailTitle?: string }) {
+  return <header className={`services-v2-intro ${detailTitle ? 'services-v2-intro--detail' : ''}`}>
+    <div><span className="eyebrow">CASTRO’S · SERVIÇOS</span><h1>{detailTitle ?? <>Clareza para relações, <em>liderança</em> e organizações.</>}</h1></div>
     <div className="services-v2-intro__side"><span className="services-v2-index">SERVIÇOS / 01</span><p>Consultoria e desenvolvimento para contextos onde atendimento, ética, liderança e capacidade interna precisam avançar juntos.</p></div>
   </header>
 }
@@ -42,8 +43,8 @@ function ServicesAreaExplorer() {
 
   return <section className="services-experience" aria-labelledby="services-experience-title">
     <div className="services-experience__head">
-      <div><span className="eyebrow">ÁREAS DE ATUAÇÃO</span><h2 id="services-experience-title">Explore pelo contexto, não por uma grelha de cartões.</h2></div>
-      <p>As áreas abaixo organizam a descoberta. Selecione uma para dar prioridade ao contexto e seguir para uma conversa quando fizer sentido.</p>
+      <div><span className="eyebrow">ÁREAS DE ATUAÇÃO</span><h2 id="services-experience-title">Encontre a área que acompanha o seu desafio.</h2></div>
+      <p>Conheça as nossas áreas de atuação e partilhe o que a sua organização precisa desenvolver.</p>
     </div>
 
     <div className="services-experience__grid">
@@ -96,12 +97,12 @@ export function ServiceCollectionView({ resource }: { resource: CollectionResour
 
     <section className="services-v2-catalog">
       <div className="container services-v2-catalog__grid">
-        <div className="services-v2-catalog__heading"><span className="eyebrow eyebrow--light">CATÁLOGO</span><h2>Serviços publicados</h2><p>Cada serviço pode ser configurado pela Castro’s como agendável ou apenas orientado a pedido. O website segue essa decisão automaticamente.</p></div>
+        <div className="services-v2-catalog__heading"><span className="eyebrow eyebrow--light">CATÁLOGO</span><h2>Serviços publicados</h2><p>Conheça cada serviço e escolha o próximo passo: conversar com a nossa equipa ou consultar as opções de agendamento disponíveis.</p></div>
         <div className="services-v2-catalog__content">
           {resource.isLoading && <LoadingState label="A carregar serviços." />}
           {resource.isError && <ErrorState title="Não foi possível carregar os serviços." />}
-          {!resource.isLoading && !resource.isError && !resource.data?.items.length && <EmptyState title="Catálogo em preparação">A estrutura está pronta para receber os serviços publicados sem inventar informação comercial.</EmptyState>}
-          {resource.data?.items.length ? <div className="services-v2-list">{resource.data.items.map((service, index) => <article key={service.slug}><span className="services-v2-list__number">{String(index + 1).padStart(2, '0')}</span><div><h3>{service.name}</h3>{service.summary && <p>{service.summary}</p>}{service.bookingEnabled === true && <Badge tone="accent">Agendamento online</Badge>}</div><Link to={`/servicos/${service.slug}`} aria-label={`Ver ${service.name}`}><ArrowUpRight size={20} /></Link></article>)}</div> : null}
+          {!resource.isLoading && !resource.isError && !resource.data?.items.length && <EmptyState title="Catálogo em preparação">Os serviços serão apresentados aqui quando estiverem disponíveis. Entretanto, pode partilhar o seu contexto com a nossa equipa.</EmptyState>}
+          {!resource.isLoading && !resource.isError && resource.data?.items.length ? <PublishedCatalogFocus items={resource.data.items} label="Selecionar serviço publicado" frame="S03">{(service) => <article><span className="eyebrow eyebrow--light">SERVIÇO</span><h3>{service.name}</h3>{service.summary && <p>{service.summary}</p>}{service.bookingEnabled === true && <Badge tone="accent">Agendamento online</Badge>}<p><Link className="text-link" to={`/servicos/${encodeURIComponent(service.slug)}`} aria-label={`Ver ${service.name}`}>Conhecer este serviço <ArrowUpRight size={20} /></Link></p></article>}</PublishedCatalogFocus> : null}
         </div>
       </div>
     </section>
@@ -126,10 +127,10 @@ export function ServiceDetailView({ resource }: { resource: DetailResource<Servi
   const schedulingReady = service.bookingEnabled === true && Boolean(service.durationMinutes && service.durationMinutes > 0)
   const manualConfirmation = service.confirmationMode !== 'AUTOMATIC'
 
-  return <div className="service-detail-v2">
-    <section className="container public-v2-page"><Breadcrumbs items={[{ label: 'Serviços', href: '/servicos' }, { label: service.name }]} /><ServicesIntro detail />
+  return <div className="service-detail-v2" data-frame={schedulingReady ? 'S06' : 'S07'}>
+    <section className="container public-v2-page"><Breadcrumbs items={[{ label: 'Serviços', href: '/servicos' }, { label: service.name }]} /><ServicesIntro detailTitle={service.name} />
       <div className="service-detail-v2__grid">
-        <div className="service-detail-v2__main"><span className="eyebrow">SERVIÇO</span><h2>{service.name}</h2><p className="service-detail-v2__description">{service.description ?? service.summary ?? 'Conteúdo detalhado pendente de publicação.'}</p>{service.durationMinutes !== undefined && <p className="metadata"><Clock3 size={16} />{service.durationMinutes} minutos</p>}{schedulingReady && <Alert tone="info" title="Agendamento online disponível">Escolha uma data e um horário livre. {manualConfirmation ? 'A marcação fica pendente até confirmação da Castro’s.' : 'A marcação pode ser confirmada automaticamente se o slot continuar disponível.'}</Alert>}</div>
+        <div className="service-detail-v2__main"><span className="eyebrow">SERVIÇO</span><h2>Sobre este serviço</h2><p className="service-detail-v2__description">{service.description ?? service.summary ?? 'Contacte a nossa equipa para conhecer os detalhes deste serviço.'}</p>{service.durationMinutes !== undefined && <p className="metadata"><Clock3 size={16} />{service.durationMinutes} minutos</p>}{schedulingReady && <Alert tone="info" title="Agendamento online disponível">Escolha uma data e um horário livre. {manualConfirmation ? 'A marcação fica pendente até confirmação da Castro’s.' : 'A marcação pode ser confirmada automaticamente se o slot continuar disponível.'}</Alert>}</div>
         <aside className="service-detail-v2__aside"><div className="service-detail-v2__art" aria-hidden="true"><span>CASTRO’S</span><strong>{service.name}</strong><i /><i /><i /></div><div className="service-detail-v2__action"><span className="eyebrow">PRÓXIMO PASSO</span><h3>{schedulingReady ? 'Quer agendar uma conversa ou esclarecer algo primeiro?' : 'Quer conversar sobre este serviço?'}</h3>{schedulingReady ? <Link className="ds-button ds-button--primary" to={bookingHref}>Agendar uma conversa <ArrowRight size={16} /></Link> : null}<Link className={schedulingReady ? 'text-link' : 'ds-button ds-button--primary'} to={contact}>Falar com a Castro’s {schedulingReady ? null : <ArrowRight size={16} />}</Link><PublicContactChannels contextMessage={`Olá. Estou no website da Castro’s Services e gostaria de esclarecer uma questão sobre ${service.name}.`} contactHref={contact} /></div></aside>
       </div>
     </section>

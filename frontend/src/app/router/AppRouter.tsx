@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react'
+import { lazy, type ReactNode } from 'react'
+import { DeferredSpaceRoute } from '../../features/spaces/components/DeferredSpaceRoute'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AuthLayout, OperationsLayout, PublicLayout } from '../layouts/Layouts'
 import { useApi, useCan, useSession, useSessionError, useSessionReady } from '../providers/AppProviders'
@@ -41,11 +42,14 @@ import { InsightsPublic } from '../../features/home/components/InsightsPublic'
 import { ServicesCatalog, ServiceDetail } from '../../features/services/components/ServicesPublic'
 import { CoursesCatalog } from '../../features/courses/components/CoursesPublic'
 import { ContactPublic } from '../../features/contact/components/ContactPublic'
-import { SpaceConfigurator, SpaceDetail, SpaceExplorer, SpacesCatalog } from '../../features/spaces/components/SpacesPublic'
+import { SpaceDetail, SpacesCatalog } from '../../features/spaces/components/SpacesPublic'
 import { BookingConfirmation, BookingCustomer, BookingDate, BookingReview, BookingTime } from '../../features/booking/components/BookingPublic'
 import { DeferredPublicPage } from '../../pages/public/DeferredPublicPage'
 import { ErrorState, LoadingState } from '../../design-system/patterns/feedback-overlays'
 import { appSurface, surfaceAllowsPlatform, surfaceAllowsPublic, surfaceAllowsStaff, surfaceFallbackPath } from './surface'
+
+const SpaceExplorer = lazy(() => import('../../features/spaces/components/SpaceExplorer').then((module) => ({ default: module.SpaceExplorer })))
+const SpaceConfigurator = lazy(() => import('../../features/spaces/components/SpaceConfigurator').then((module) => ({ default: module.SpaceConfigurator })))
 
 const permissionRoutes: ReadonlyArray<readonly [string, Permission]> = [
   ['/app/reservas/:id', 'booking.read'],
@@ -103,8 +107,8 @@ export function AppRouter() {
       <Route path="/formacao/:slug/sessoes/:sessionId/inscricao" element={<CourseRegistrationPage />} />
       <Route path="/espacos" element={<SpacesCatalog />} />
       <Route path="/espacos/:slug" element={<SpaceDetail />} />
-      <Route path="/espacos/:slug/explorar" element={<SpaceExplorer />} />
-      <Route path="/espacos/:slug/configurar" element={<SpaceConfigurator />} />
+      <Route path="/espacos/:slug/explorar" element={<DeferredSpaceRoute key="explorer" label="A preparar o explorador."><SpaceExplorer /></DeferredSpaceRoute>} />
+      <Route path="/espacos/:slug/configurar" element={<DeferredSpaceRoute key="configurator" label="A preparar configuração."><SpaceConfigurator /></DeferredSpaceRoute>} />
       <Route path="/espacos/:slug/disponibilidade" element={<DeferredPublicPage />} />
       <Route path="/contacto" element={<ContactPublic />} />
       <Route path="/reservar" element={<DeferredPublicPage />} />

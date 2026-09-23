@@ -1,8 +1,9 @@
+import { SpaceConfigurator } from './SpaceConfigurator'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { SpaceConfigurator, SpaceDetail, SpacesCatalog } from './SpacesPublic'
+import { SpaceDetail, SpacesCatalog } from './SpacesPublic'
 
 const hookMocks = vi.hoisted(() => ({
   useSpaces: vi.fn(),
@@ -62,6 +63,9 @@ describe('public spaces navigation', () => {
     fireEvent.change(input, { target: { value: '11' } })
     expect(screen.getByText(/capacidade publicada de 10/i)).toBeInTheDocument()
     expect(proceed).toBeDisabled()
+    fireEvent.change(input, { target: { value: '1.5' } })
+    expect(screen.getByText(/número inteiro/i)).toBeInTheDocument()
+    expect(proceed).toBeDisabled()
     fireEvent.change(input, { target: { value: '6' } })
     expect(proceed).toBeEnabled()
   })
@@ -72,4 +76,18 @@ describe('public spaces navigation', () => {
     expect(screen.getByText('A escolher')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Ver disponibilidade/i })).toBeDisabled()
   })
+  it('selects a published space and updates its destination', () => {
+    hookMocks.useSpaces.mockReturnValue({ isLoading: false, isError: false, data: { items: [space, { ...space, id: 'space-2', slug: 'segunda-sala', name: 'Segunda sala' }] } })
+    renderWithQuery(<MemoryRouter><SpacesCatalog /></MemoryRouter>)
+    fireEvent.click(screen.getByRole('button', { name: 'Segunda sala' }))
+    expect(screen.getByRole('link', { name: /Conhecer espaço/ })).toHaveAttribute('href', '/espacos/segunda-sala')
+    expect(screen.queryByRole('heading', { name: space.name })).not.toBeInTheDocument()
+  })
+  it('rejects fractional participants supplied through the URL', () => {
+    hookMocks.useSpace.mockReturnValue({ isLoading: false, isError: false, data: space })
+    renderWithQuery(<MemoryRouter initialEntries={['/espacos/sala-reuniao/configurar?purpose=meeting&people=1.5']}><SpaceConfigurator /></MemoryRouter>)
+    expect(screen.getByLabelText('Participantes')).toHaveValue(null)
+    expect(screen.getByRole('button', { name: /Ver disponibilidade/ })).toBeDisabled()
+  })
+
 })

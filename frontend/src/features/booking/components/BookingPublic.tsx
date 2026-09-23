@@ -58,21 +58,26 @@ export function BookingDate() {
   if (!target) return <Navigate to="/reservar" replace />
   const canContinue = Boolean(draft.date && draft.durationMinutes && draft.durationMinutes > 0)
   const update = (patch: Partial<BookingDraft>) => { const next = { ...draft, ...patch, startTime: undefined, endTime: undefined, idempotencyKey: undefined }; setDraft(next); writeDraft(target.type, target.id, next) }
-  return <Shell step={1}><div className="booking-v2-grid"><main className="booking-v2-card"><div className="booking-v2-title"><CalendarDays size={21} /><div><span>01</span><h2>Quando pretende reservar?</h2></div></div><div className="booking-v2-fields"><TextField id="booking-date" label="Data" type="date" required value={draft.date ?? ''} onChange={(event) => update({ date: event.target.value })} /><TextField id="booking-duration" label="Duração prevista (minutos)" type="number" min="1" required value={draft.durationMinutes ?? ''} description="Para serviços com duração publicada, mantenha essa duração. O backend valida o contrato antes de aceitar a reserva." onChange={(event) => update({ durationMinutes: event.target.value ? Number(event.target.value) : undefined })} /></div></main><Summary target={target} draft={draft}><Button disabled={!canContinue} onClick={() => navigate(bookingRoute(target.type, target.id, 'time'))}>Ver horários <ArrowRight size={16} /></Button></Summary></div></Shell>
+  return <Shell step={1}><div className="booking-v2-grid"><div className="booking-v2-card"><div className="booking-v2-title"><CalendarDays size={21} /><div><span>01</span><h2>Quando pretende reservar?</h2></div></div><div className="booking-v2-fields"><TextField id="booking-date" label="Data" type="date" required value={draft.date ?? ''} onChange={(event) => update({ date: event.target.value })} /><TextField id="booking-duration" label="Duração prevista (minutos)" type="number" min="1" required value={draft.durationMinutes ?? ''} description="Para serviços com duração publicada, mantenha essa duração. O backend valida o contrato antes de aceitar a reserva." onChange={(event) => update({ durationMinutes: event.target.value ? Number(event.target.value) : undefined })} /></div></div><Summary target={target} draft={draft}><Button disabled={!canContinue} onClick={() => navigate(bookingRoute(target.type, target.id, 'time'))}>Ver horários <ArrowRight size={16} /></Button></Summary></div></Shell>
 }
 
 export function BookingTime() {
   const api = useApi(); const target = useTarget(); const navigate = useNavigate(); const [draft, setDraft] = useState<BookingDraft>(() => target ? readDraft(target.type, target.id) : {})
-  const query = useQuery({ queryKey: ['availability', target?.type, target?.id, draft.date, draft.durationMinutes], enabled: Boolean(target && draft.date && draft.durationMinutes), queryFn: () => api.availability.list({ bookableType: target!.type, bookableId: target!.id, date: draft.date!, durationMinutes: draft.durationMinutes! }) })
+  const query = useQuery({ queryKey: ['availability', target?.type, target?.id, draft.date, draft.durationMinutes], enabled: Boolean(target && draft.date && draft.durationMinutes), retry: false, queryFn: () => api.availability.list({ bookableType: target!.type, bookableId: target!.id, date: draft.date!, durationMinutes: draft.durationMinutes! }) })
   const availableSlots = query.data?.items.filter((slot) => slot.status === 'AVAILABLE') ?? []
-  const noAvailability = !query.isLoading && !query.isError && availableSlots.length === 0
+  const availabilityReady = query.isSuccess && !query.isFetching
+  const selectedSlotAvailable = availabilityReady && availableSlots.some((slot) => slot.start === draft.startTime && slot.end === draft.endTime)
+  const noAvailability = availabilityReady && availableSlots.length === 0
   const nextAvailability = useQuery({
     queryKey: ['availability', 'next', target?.type, target?.id, draft.date, draft.durationMinutes],
     enabled: Boolean(noAvailability && target && draft.date && draft.durationMinutes),
-    queryFn: async () => {
+    retry: false,
+    queryFn: async ({ signal }) => {
       for (let offset = 1; offset <= 30; offset += 1) {
+        signal.throwIfAborted()
         const date = addDays(draft.date!, offset)
         const result = await api.availability.list({ bookableType: target!.type, bookableId: target!.id, date, durationMinutes: draft.durationMinutes! })
+        signal.throwIfAborted()
         const slot = result.items.find((item) => item.status === 'AVAILABLE')
         if (slot) return { date, slot }
       }
@@ -83,24 +88,60 @@ export function BookingTime() {
   if (!draft.date || !draft.durationMinutes) return <Navigate to={bookingRoute(target.type, target.id, 'selection')} replace />
   const select = (start: string, end: string, date = draft.date!) => { const next = { ...draft, date, startTime: start, endTime: end, idempotencyKey: undefined }; setDraft(next); writeDraft(target.type, target.id, next) }
   const requestOtherTime = contactHref({ sourceType: target.type === 'SERVICE' ? 'SERVICE' : 'SPACE', entityId: target.id, cta: 'REQUEST_OTHER_TIME', message: 'Gostaria de pedir outro horário para esta reserva.' })
-  return <Shell step={2}><div className="booking-v2-grid"><main className="booking-v2-card"><Link className="booking-v2-back" to={bookingRoute(target.type, target.id, 'selection')}><ArrowLeft size={15} /> Alterar data</Link><div className="booking-v2-title"><Clock3 size={21} /><div><span>02</span><h2>Escolha um horário disponível.</h2></div></div>{query.isLoading && <LoadingState label="A consultar disponibilidade." />}{query.isError && <ErrorState title="Não foi possível consultar a disponibilidade." />}{!query.isLoading && !query.isError && query.data?.items.length ? <div className="booking-v2-slots">{query.data.items.map((slot) => <motion.button layout key={`${slot.start}-${slot.end}`} type="button" disabled={slot.status !== 'AVAILABLE'} className={draft.startTime === slot.start && draft.date === draft.date ? 'is-selected' : ''} aria-pressed={draft.startTime === slot.start} onClick={() => select(slot.start, slot.end)} animate={{ scale: draft.startTime === slot.start ? 1.015 : 1 }} transition={motionSprings.selection}><strong>{formatTime(slot.start)}</strong><small>{slot.status === 'AVAILABLE' ? 'Disponível' : 'Indisponível'}</small></motion.button>)}</div> : null}{noAvailability ? <div className="booking-v2-no-slot"><EmptyState title="Sem horários disponíveis">Não existem horários livres nesta data para a duração selecionada.</EmptyState>{nextAvailability.isLoading ? <p role="status">A procurar a próxima disponibilidade…</p> : nextAvailability.data ? <div className="booking-v2-next-slot"><span>PRÓXIMA DISPONIBILIDADE</span><strong>{humanDate(nextAvailability.data.date)} · {formatTime(nextAvailability.data.slot.start)}</strong><Button onClick={() => select(nextAvailability.data!.slot.start, nextAvailability.data!.slot.end, nextAvailability.data!.date)}>Escolher este horário <ArrowRight size={16} /></Button></div> : <p>Não encontrámos disponibilidade nos próximos 30 dias.</p>}<div className="booking-v2-no-slot__actions"><Link className="text-link" to={requestOtherTime}>Pedir outro horário</Link><PublicContactChannels contactHref={requestOtherTime} contextMessage={`Olá. Gostaria de encontrar outro horário para uma reserva de ${targetLabel(target.type)} na Castro’s.`} /></div></div> : null}</main><Summary target={target} draft={draft}><Button disabled={!draft.startTime || !draft.endTime} onClick={() => navigate(bookingRoute(target.type, target.id, 'customer-details'))}>Continuar <ArrowRight size={16} /></Button></Summary></div></Shell>
+  return <Shell step={2}><div className="booking-v2-grid"><div className="booking-v2-card"><Link className="booking-v2-back" to={bookingRoute(target.type, target.id, 'selection')}><ArrowLeft size={15} /> Alterar data</Link><div className="booking-v2-title"><Clock3 size={21} /><div><span>02</span><h2>Escolha um horário disponível.</h2></div></div>{query.isFetching && <LoadingState label="A consultar disponibilidade." />}{query.isError && <ErrorState title="Não foi possível consultar a disponibilidade." action={<Button onClick={() => void query.refetch()}>Consultar novamente</Button>} />}{availabilityReady && query.data?.items.length ? <div className="booking-v2-slots">{query.data.items.map((slot) => <motion.button layout key={`${slot.start}-${slot.end}`} type="button" disabled={slot.status !== 'AVAILABLE'} className={selectedSlotAvailable && draft.startTime === slot.start && draft.endTime === slot.end ? 'is-selected' : ''} aria-pressed={selectedSlotAvailable && draft.startTime === slot.start && draft.endTime === slot.end} onClick={() => select(slot.start, slot.end)} animate={{ scale: selectedSlotAvailable && draft.startTime === slot.start && draft.endTime === slot.end ? 1.015 : 1 }} transition={motionSprings.selection}><strong>{formatTime(slot.start)}</strong><small>{slot.status === 'AVAILABLE' ? 'Disponível' : 'Indisponível'}</small></motion.button>)}</div> : null}{availabilityReady && draft.startTime && !selectedSlotAvailable && <p role="status">O horário selecionado já não está disponível. Escolha outro horário.</p>}{noAvailability ? <div className="booking-v2-no-slot"><EmptyState title="Sem horários disponíveis">Não existem horários livres nesta data para a duração selecionada.</EmptyState>{nextAvailability.isFetching ? <p role="status">A procurar a próxima disponibilidade…</p> : nextAvailability.isError ? <ErrorState title="Não foi possível procurar a próxima disponibilidade." action={<Button onClick={() => void nextAvailability.refetch()}>Procurar novamente</Button>} /> : nextAvailability.data ? <div className="booking-v2-next-slot"><span>PRÓXIMA DISPONIBILIDADE</span><strong>{humanDate(nextAvailability.data.date)} · {formatTime(nextAvailability.data.slot.start)}</strong><Button onClick={() => select(nextAvailability.data!.slot.start, nextAvailability.data!.slot.end, nextAvailability.data!.date)}>Escolher este horário <ArrowRight size={16} /></Button></div> : <p>Não encontrámos disponibilidade nos próximos 30 dias.</p>}<div className="booking-v2-no-slot__actions"><Link className="text-link" to={requestOtherTime}>Pedir outro horário</Link><PublicContactChannels contactHref={requestOtherTime} contextMessage={`Olá. Gostaria de encontrar outro horário para uma reserva de ${targetLabel(target.type)} na Castro’s.`} /></div></div> : null}</div><Summary target={target} draft={draft}><Button disabled={!selectedSlotAvailable} onClick={() => selectedSlotAvailable && navigate(bookingRoute(target.type, target.id, 'customer-details'))}>Continuar <ArrowRight size={16} /></Button></Summary></div></Shell>
+}
+
+function useBookingValidation(target: { type: BookableType; id: string } | null, draft: BookingDraft) {
+  const api = useApi()
+  const resource = useQuery({
+    queryKey: ['booking-resource', target?.type, target?.id],
+    enabled: Boolean(target), retry: false, staleTime: 0, refetchOnMount: 'always',
+    queryFn: async () => {
+      const catalogue = target!.type === 'SERVICE' ? await api.public.listServices() : await api.public.listSpaces()
+      return catalogue.items.find((item) => item.id === target!.id) ?? null
+    },
+  })
+  const resourceReady = resource.isSuccess && !resource.isFetching
+  const bookable = resourceReady && resource.data?.bookingEnabled === true
+  const durationValid = Number.isInteger(draft.durationMinutes) && (draft.durationMinutes ?? 0) > 0
+    && (target?.type !== 'SERVICE' || (resource.data && 'durationMinutes' in resource.data && resource.data.durationMinutes === draft.durationMinutes))
+  const complete = Boolean(draft.date && draft.startTime && draft.endTime && durationValid)
+  const availability = useQuery({
+    queryKey: ['booking-step-availability', target?.type, target?.id, draft.date, draft.durationMinutes],
+    enabled: Boolean(bookable && complete), retry: false, staleTime: 0, refetchOnMount: 'always',
+    queryFn: () => api.availability.list({ bookableType: target!.type, bookableId: target!.id, date: draft.date!, durationMinutes: draft.durationMinutes! }),
+  })
+  const slotValid = availability.isSuccess && !availability.isFetching
+    && availability.data.items.some((slot) => slot.status === 'AVAILABLE' && slot.start === draft.startTime && slot.end === draft.endTime)
+  const ready = Boolean(bookable && complete && slotValid)
+  let feedback: React.ReactNode = null
+  if (resource.isFetching || resource.isPending) feedback = <LoadingState label="A verificar o recurso da reserva." />
+  else if (resource.isError) feedback = <ErrorState title="Não foi possível verificar o recurso." action={<Button onClick={() => void resource.refetch()}>Verificar novamente</Button>} />
+  else if (!bookable) feedback = <EmptyState title="Este recurso não está disponível para reserva.">Pode contactar a equipa para encontrar uma alternativa.<Link className="text-link" to={contactHref({ sourceType: target?.type === 'SERVICE' ? 'SERVICE' : target?.type === 'SPACE' ? 'SPACE' : 'GENERAL', entityId: target?.id, cta: 'BOOKING_UNAVAILABLE' })}>Contactar a equipa</Link></EmptyState>
+  else if (!complete) feedback = <ErrorState title="Reveja a data e a duração da reserva." />
+  else if (availability.isFetching || availability.isPending) feedback = <LoadingState label="A revalidar o horário selecionado." />
+  else if (availability.isError) feedback = <ErrorState title="Não foi possível revalidar o horário." action={<Button onClick={() => void availability.refetch()}>Revalidar horário</Button>} />
+  else if (!slotValid) feedback = <ErrorState title="O horário selecionado já não está disponível." />
+  return { ready, feedback }
 }
 
 export function BookingCustomer() {
   const target = useTarget(); const navigate = useNavigate(); const [draft, setDraft] = useState<BookingDraft>(() => target ? readDraft(target.type, target.id) : {})
+  const validation = useBookingValidation(target, draft)
   if (!target) return <Navigate to="/reservar" replace />
   if (!draft.startTime || !draft.endTime) return <Navigate to={bookingRoute(target.type, target.id, 'time')} replace />
   const update = (patch: Partial<BookingDraft>) => { const next = { ...draft, ...patch, idempotencyKey: undefined }; setDraft(next); writeDraft(target.type, target.id, next) }
   const valid = Boolean(draft.firstName?.trim() && draft.email?.includes('@') && (target.type !== 'SPACE' || (draft.participants ?? 0) > 0))
-  return <Shell step={3}><div className="booking-v2-grid"><main className="booking-v2-card"><Link className="booking-v2-back" to={bookingRoute(target.type, target.id, 'time')}><ArrowLeft size={15} /> Alterar horário</Link><div className="booking-v2-title"><span className="booking-v2-title__number">03</span><div><span>DADOS</span><h2>Quem devemos contactar?</h2></div></div><div className="booking-v2-fields booking-v2-fields--two"><TextField id="first-name" label="Nome" required autoComplete="given-name" value={draft.firstName ?? ''} onChange={(e) => update({ firstName: e.target.value })} /><TextField id="last-name" label="Apelido" autoComplete="family-name" value={draft.lastName ?? ''} onChange={(e) => update({ lastName: e.target.value })} /><TextField id="email" label="Email" type="email" required autoComplete="email" value={draft.email ?? ''} onChange={(e) => update({ email: e.target.value })} /><TextField id="phone" label="Telefone" type="tel" autoComplete="tel" value={draft.phone ?? ''} onChange={(e) => update({ phone: e.target.value })} /><div className="booking-v2-span"><TextField id="participants" label="Participantes" type="number" min="1" required={target.type === 'SPACE'} value={draft.participants ?? ''} description={target.type === 'SPACE' ? 'Necessário para validar a capacidade do espaço.' : 'Opcional para este serviço.'} onChange={(e) => update({ participants: e.target.value ? Number(e.target.value) : undefined })} /></div><div className="booking-v2-span"><Textarea id="notes" label="Notas" rows={4} value={draft.notes ?? ''} onChange={(e) => update({ notes: e.target.value })} /></div></div></main><Summary target={target} draft={draft}><Button disabled={!valid} onClick={() => navigate(bookingRoute(target.type, target.id, 'review'))}>Rever pedido <ArrowRight size={16} /></Button></Summary></div></Shell>
+  return <Shell step={3}><div className="booking-v2-grid"><div className="booking-v2-card"><Link className="booking-v2-back" to={bookingRoute(target.type, target.id, 'time')}><ArrowLeft size={15} /> Alterar horário</Link><div className="booking-v2-title"><span className="booking-v2-title__number">03</span><div><span>DADOS</span><h2>Quem devemos contactar?</h2></div></div>{validation.feedback}<div className="booking-v2-fields booking-v2-fields--two"><TextField id="first-name" label="Nome" required autoComplete="given-name" value={draft.firstName ?? ''} onChange={(e) => update({ firstName: e.target.value })} /><TextField id="last-name" label="Apelido" autoComplete="family-name" value={draft.lastName ?? ''} onChange={(e) => update({ lastName: e.target.value })} /><TextField id="email" label="Email" type="email" required autoComplete="email" value={draft.email ?? ''} onChange={(e) => update({ email: e.target.value })} /><TextField id="phone" label="Telefone" type="tel" autoComplete="tel" value={draft.phone ?? ''} onChange={(e) => update({ phone: e.target.value })} /><div className="booking-v2-span"><TextField id="participants" label="Participantes" type="number" min="1" required={target.type === 'SPACE'} value={draft.participants ?? ''} description={target.type === 'SPACE' ? 'Necessário para validar a capacidade do espaço.' : 'Opcional para este serviço.'} onChange={(e) => update({ participants: e.target.value ? Number(e.target.value) : undefined })} /></div><div className="booking-v2-span"><Textarea id="notes" label="Notas" rows={4} value={draft.notes ?? ''} onChange={(e) => update({ notes: e.target.value })} /></div></div></div><Summary target={target} draft={draft}><Button disabled={!valid || !validation.ready} onClick={() => valid && validation.ready && navigate(bookingRoute(target.type, target.id, 'review'))}>Rever pedido <ArrowRight size={16} /></Button></Summary></div></Shell>
 }
 
 export function BookingReview() {
   const api = useApi(); const target = useTarget(); const targetType = target?.type; const targetId = target?.id; const navigate = useNavigate()
   const draft = useMemo(() => targetType && targetId ? readDraft(targetType, targetId) : {}, [targetType, targetId])
+  const validation = useBookingValidation(target, draft)
   const idempotencyKeyRef = useRef(draft.idempotencyKey ?? createIdempotencyKey())
   const mutation = useMutation({ mutationFn: async () => {
-    if (!target || !draft.date || !draft.startTime || !draft.endTime || !draft.firstName) throw new Error('INCOMPLETE')
+    if (!validation.ready || !target || !draft.date || !draft.startTime || !draft.endTime || !draft.firstName) throw new Error('INCOMPLETE')
     const idempotencyKey = idempotencyKeyRef.current
     if (draft.idempotencyKey !== idempotencyKey) writeDraft(target.type, target.id, { ...draft, idempotencyKey })
     const request: BookingRequestDto = { bookableType: target.type, bookableId: target.id, date: draft.date, startTime: draft.startTime, endTime: draft.endTime, participants: draft.participants, customer: { firstName: draft.firstName, lastName: draft.lastName, email: draft.email, phone: draft.phone }, spaceConfiguration: target.type === 'SPACE' && draft.purpose ? { purpose: draft.purpose } : undefined, notes: draft.notes }
@@ -108,13 +149,56 @@ export function BookingReview() {
   }, onSuccess: (result) => { if (target) clearDraft(target.type, target.id); navigate(bookingConfirmationRoute(result.reference)) } })
   if (!target) return <Navigate to="/reservar" replace />
   if (!draft.date || !draft.startTime || !draft.firstName) return <Navigate to={bookingRoute(target.type, target.id, 'selection')} replace />
-  return <Shell step={4}><div className="booking-v2-grid"><main className="booking-v2-card"><Link className="booking-v2-back" to={bookingRoute(target.type, target.id, 'customer-details')}><ArrowLeft size={15} /> Alterar dados</Link><div className="booking-v2-title"><span className="booking-v2-title__number">04</span><div><span>REVISÃO</span><h2>Confirme antes de enviar.</h2></div></div><dl className="booking-v2-review"><div><dt>Data</dt><dd>{humanDate(draft.date)}</dd></div><div><dt>Horário</dt><dd>{formatTime(draft.startTime)}–{formatTime(draft.endTime!)}</dd></div>{draft.purpose ? <div><dt>Finalidade</dt><dd>{purposeLabel(draft.purpose)}</dd></div> : null}<div><dt>Contacto</dt><dd>{draft.firstName} {draft.lastName ?? ''}<small>{draft.email}</small></dd></div>{draft.participants ? <div><dt>Participantes</dt><dd>{draft.participants}</dd></div> : null}{draft.notes ? <div><dt>Notas</dt><dd>{draft.notes}</dd></div> : null}</dl>{mutation.isError && <div className="booking-v2-error" role="alert">{bookingErrorMessage(mutation.error)}</div>}</main><Summary target={target} draft={draft}><Button loading={mutation.isPending} onClick={() => mutation.mutate()}>Enviar pedido de reserva <ArrowRight size={16} /></Button></Summary></div></Shell>
+  return <Shell step={4}><div className="booking-v2-grid"><div className="booking-v2-card"><Link className="booking-v2-back" to={bookingRoute(target.type, target.id, 'customer-details')}><ArrowLeft size={15} /> Alterar dados</Link><div className="booking-v2-title"><span className="booking-v2-title__number">04</span><div><span>REVISÃO</span><h2>Confirme antes de enviar.</h2></div></div>{validation.feedback}<dl className="booking-v2-review"><div><dt>Data</dt><dd>{humanDate(draft.date)}</dd></div><div><dt>Horário</dt><dd>{formatTime(draft.startTime)}–{formatTime(draft.endTime!)}</dd></div>{draft.purpose ? <div><dt>Finalidade</dt><dd>{purposeLabel(draft.purpose)}</dd></div> : null}<div><dt>Contacto</dt><dd>{draft.firstName} {draft.lastName ?? ''}<small>{draft.email}</small></dd></div>{draft.participants ? <div><dt>Participantes</dt><dd>{draft.participants}</dd></div> : null}{draft.notes ? <div><dt>Notas</dt><dd>{draft.notes}</dd></div> : null}</dl>{mutation.isError && <div className="booking-v2-error" role="alert">{bookingErrorMessage(mutation.error)}</div>}</div><Summary target={target} draft={draft}><Button disabled={!validation.ready} loading={mutation.isPending} onClick={() => mutation.mutate()}>Enviar pedido de reserva <ArrowRight size={16} /></Button></Summary></div></Shell>
 }
 
 export function BookingConfirmation() {
-  const api = useApi(); const { reference } = useParams(); const query = useQuery({ queryKey: ['booking', reference], enabled: Boolean(reference), queryFn: () => api.bookings.getByReference(reference!) })
-  const pending = query.data?.status === 'PENDING'
-  return <div className="booking-v2-page"><section className="container booking-v2-confirmation"><span className="booking-v2-confirmation__icon"><Check size={26} /></span><span className="eyebrow">{pending ? 'PEDIDO RECEBIDO' : 'RESERVA'}</span><h1>{pending ? 'Aguardamos a confirmação da Castro’s.' : query.data?.status === 'CONFIRMED' ? 'Reserva confirmada.' : 'Reserva registada.'}</h1>{query.isLoading && <LoadingState label="A carregar confirmação." />}{query.isError && <ErrorState title="A reserva foi enviada, mas não foi possível carregar os detalhes da confirmação." />}{query.data && <><div className="booking-v2-confirmation__details"><div><small>Referência</small><strong>{query.data.reference}</strong></div><div><small>Estado</small><strong>{statusLabel(query.data.status)}</strong></div><div><small>Horário</small><strong>{formatDateTime(query.data.startAt)} — {formatDateTime(query.data.endAt)}</strong></div></div><p>{pending ? 'O horário foi registado e a equipa recebeu o pedido. A Secretária pode confirmar, reagendar ou entrar em contacto consigo.' : 'Guarde a referência para qualquer contacto relacionado com esta reserva.'}</p><PublicContactChannels contextMessage={`Olá. Gostaria de falar sobre a reserva ${query.data.reference}.`} /></>}<Link className="ds-button ds-button--primary" to="/">Voltar ao início</Link></section></div>
+  const api = useApi()
+  const { reference } = useParams()
+  const query = useQuery({
+    queryKey: ['booking', reference],
+    enabled: Boolean(reference),
+    retry: false,
+    queryFn: () => api.bookings.getByReference(reference!),
+  })
+  // Do not present cached success while the current lookup is unresolved or failed.
+  const booking = query.isSuccess && !query.isFetching ? query.data : undefined
+  const notFound = !reference || (query.isError && query.error instanceof ApiError
+    && (query.error.status === 404 || query.error.code === 'RESOURCE_NOT_FOUND'))
+  const titles: Record<string, string> = {
+    PENDING: 'Aguardamos a confirmação da Castro’s.',
+    CONFIRMED: 'Reserva confirmada.',
+    CANCELLED: 'Reserva cancelada.',
+    COMPLETED: 'Reserva concluída.',
+    NO_SHOW: 'Não comparência registada.',
+  }
+  const statusTitle = booking && Object.hasOwn(titles, booking.status) ? titles[booking.status] : undefined
+  const title = notFound ? 'Reserva não encontrada.'
+    : query.isFetching || query.isPending ? 'A consultar a reserva.'
+    : query.isError ? 'Não foi possível consultar a reserva.'
+    : booking ? statusTitle ?? 'Estado da reserva por verificar.'
+    : 'Estado da reserva por verificar.'
+
+  return <div className="booking-v2-page"><section className="container booking-v2-confirmation">
+    {booking?.status === 'CONFIRMED' && <span className="booking-v2-confirmation__icon" aria-hidden="true"><Check size={26} /></span>}
+    <span className="eyebrow">{booking?.status === 'PENDING' ? 'PEDIDO RECEBIDO' : 'CONSULTA DE RESERVA'}</span>
+    <h1 aria-live="polite">{title}</h1>
+    {query.isFetching && <LoadingState label="A carregar confirmação." />}
+    {notFound ? <p>Verifique a referência recebida. Não conseguimos localizar uma reserva com esta referência.</p>
+      : query.isError ? <ErrorState title="A consulta falhou. Não foi possível verificar o estado da reserva." action={<Button onClick={() => void query.refetch()}>Tentar novamente</Button>} /> : null}
+    {booking && <>
+      <div className="booking-v2-confirmation__details">
+        <div><small>Referência</small><strong>{booking.reference}</strong></div>
+        <div><small>Estado</small><strong>{statusTitle ? statusLabel(booking.status) : 'Por verificar'}</strong></div>
+        <div><small>Horário</small><strong>{formatDateTime(booking.startAt)} — {formatDateTime(booking.endAt)}</strong></div>
+      </div>
+      <p>{booking.status === 'PENDING' ? 'O pedido foi recebido e ainda aguarda confirmação da equipa.'
+        : booking.status === 'CANCELLED' ? 'Esta reserva está cancelada. Contacte a equipa se precisar de esclarecimentos.'
+        : 'Guarde a referência para qualquer contacto relacionado com esta reserva.'}</p>
+      <PublicContactChannels contextMessage={`Olá. Gostaria de falar sobre a reserva ${booking.reference}.`} />
+    </>}
+    <Link className="ds-button ds-button--primary" to="/">Voltar ao início</Link>
+  </section></div>
 }
 
 function Summary({ target, draft, children }: { target: { type: BookableType; id: string }; draft: BookingDraft; children: React.ReactNode }) { return <aside className="booking-v2-summary"><span className="eyebrow">RESUMO</span><h2>Pedido de reserva</h2><dl><div><dt>Tipo</dt><dd>{targetLabel(target.type)}</dd></div>{draft.purpose && <div><dt>Finalidade</dt><dd>{purposeLabel(draft.purpose)}</dd></div>}{draft.participants && <div><dt>Participantes</dt><dd>{draft.participants}</dd></div>}{draft.date && <div><dt>Data</dt><dd>{humanDate(draft.date)}</dd></div>}{draft.durationMinutes && <div><dt>Duração</dt><dd>{draft.durationMinutes} min</dd></div>}{draft.startTime && <div><dt>Horário</dt><dd>{formatTime(draft.startTime)}{draft.endTime ? `–${formatTime(draft.endTime)}` : ''}</dd></div>}</dl><div className="booking-v2-summary__action">{children}</div><small>Disponibilidade, capacidade e estado final são validados novamente pelo backend no envio.</small></aside> }

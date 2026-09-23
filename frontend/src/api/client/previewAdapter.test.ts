@@ -52,4 +52,13 @@ describe('confirmed local training preview', () => {
       active: true,
     })
   })
+  it('never fabricates a booking receipt or lookup in local preview', async () => {
+    const api = createPreviewAwareApiAdapter()
+    await expect(api.bookings.getByReference('UNKNOWN')).rejects.toThrow('Booking API unavailable')
+    await expect(api.bookings.create({
+      bookableType: 'SERVICE', bookableId: 'preview', date: '2026-10-12',
+      startTime: '09:00', endTime: '10:00', customer: { firstName: 'Preview' },
+    })).rejects.toThrow('Booking API unavailable')
+  })
+
 })

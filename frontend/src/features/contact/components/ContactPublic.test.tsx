@@ -1,5 +1,5 @@
 import { MemoryRouter } from 'react-router-dom'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { ApiError } from '../../../api/client/errors'
@@ -65,4 +65,28 @@ describe('public contact form', () => {
     expect(screen.getByText('Verifique os dados.')).toBeInTheDocument()
     expect(await screen.findByText('O email não foi aceite.')).toBeInTheDocument()
   })
+  it('locks the request snapshot, catches rejection and preserves values for retry', async () => {
+    let rejectRequest!: (reason: Error) => void
+    const submitRequest = vi.fn().mockImplementationOnce(() => new Promise((_, reject) => { rejectRequest = reject })).mockResolvedValue({ id: 'request' })
+    renderForm({ submitRequest })
+    fireEvent.change(screen.getByLabelText(/Nome/), { target: { value: 'Ana' } })
+    fireEvent.change(screen.getByLabelText(/Apelido/), { target: { value: 'Silva' } })
+    fireEvent.change(screen.getByLabelText(/Email/), { target: { value: 'ana@example.com' } })
+    const form = screen.getAllByRole('button', { name: /Enviar pedido/ })[0].closest('form')!
+    fireEvent.submit(form)
+    await waitFor(() => expect(submitRequest).toHaveBeenCalledTimes(1))
+    expect(screen.getByLabelText(/Nome/)).toBeDisabled()
+    expect(screen.getByLabelText(/Email/)).toBeDisabled()
+    fireEvent.submit(form)
+    await act(async () => { rejectRequest(new Error('private transport detail')) })
+    expect(await screen.findByRole('heading', { name: 'Não foi possível enviar o pedido.' })).toBeInTheDocument()
+    expect(screen.queryByText('private transport detail')).not.toBeInTheDocument()
+    expect(submitRequest).toHaveBeenCalledTimes(1)
+    expect(screen.getByLabelText(/Nome/)).toHaveValue('Ana')
+    expect(screen.getByLabelText(/Nome/)).toBeEnabled()
+    fireEvent.submit(form)
+    await waitFor(() => expect(submitRequest).toHaveBeenCalledTimes(2))
+    await waitFor(() => expect(screen.getByLabelText(/Nome/)).toHaveValue(''))
+  })
+
 })

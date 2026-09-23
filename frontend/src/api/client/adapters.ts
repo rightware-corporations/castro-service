@@ -13,6 +13,7 @@ import type {
 import type { AuthSession, Collection } from '../../domain'
 import { HttpApiClient, createIdempotencyKey } from './HttpApiClient'
 import { apiRoutes } from './routes'
+import { ApiError } from './errors'
 import { serializeAvailabilityQuery } from './serialization'
 
 export interface ApiAdapter extends ApiPort { readonly kind: 'mock' | 'http' }
@@ -43,8 +44,8 @@ export class MockApiAdapter implements ApiAdapter {
   async listSpaces(): Promise<Collection<SpaceDto>> { return toCollection(confirmedMockSpaces) }
   async getSpace(slug: string): Promise<SpaceDto> { return confirmedMockSpaces.find((item) => item.slug === slug) ?? { id: '00000000-0000-0000-0000-000000000000', slug, name: '[CONTENT TBD]' } }
   async listAvailability(query: AvailabilityQueryDto): Promise<Collection<AvailabilitySlotDto>> { void query; return emptyCollection() }
-  async createBooking(request: BookingRequestDto, options?: IdempotencyOptions): Promise<BookingResponseDto> { void request; void options; return { id: '00000000-0000-0000-0000-000000000000', reference: 'REFERENCE TBD', status: 'PENDING', startAt: '', endAt: '' } }
-  async getBooking(reference: string): Promise<PublicBookingLookupDto> { return { reference, status: 'PENDING', startAt: '', endAt: '' } }
+  async createBooking(request: BookingRequestDto, options?: IdempotencyOptions): Promise<BookingResponseDto> { void request; void options; throw new ApiError('Booking API unavailable in local preview.') }
+  async getBooking(reference: string): Promise<PublicBookingLookupDto> { void reference; throw new ApiError('Booking API unavailable in local preview.') }
   async createRequest(request: RequestInput, options?: IdempotencyOptions): Promise<RequestResponseDto> { void request; void options; return { id: 'REQUEST TBD', status: 'NEW' } }
   get auth(): ApiPort['auth'] { return { getCsrf: () => this.getCsrf(), getSession: () => this.getSession(), login: (email, password) => this.login(email, password), logout: () => this.logout() } }
   get public(): ApiPort['public'] { return { getConfig: () => this.getConfig(), listServices: () => this.listServices(), getService: (slug) => this.getService(slug), listCourses: () => this.listCourses(), getCourse: (slug) => this.getCourse(slug), listCourseSessions: (id) => this.listCourseSessions(id), listSpaces: () => this.listSpaces(), getSpace: (slug) => this.getSpace(slug), registerCourseSession: async (sessionId: string, input: CourseRegistrationInputDto) => ({ id: 'mock-registration', reference: 'TRN-MOCK', status: 'PENDING', courseSessionId: sessionId, participantCount: input.participantCount, createdAt: new Date().toISOString() }) } }

@@ -51,7 +51,7 @@ describe('course session registration', () => {
     const { user } = renderPage()
 
     const submit = screen.getByRole('button', { name: /Enviar inscrição/i })
-    expect(submit).toBeDisabled()
+    expect(submit).toBeEnabled()
 
     await user.type(screen.getByLabelText(/^Nome/), 'Ana')
     await user.type(screen.getByLabelText(/^Email/), 'ana@example.com')
@@ -74,7 +74,7 @@ describe('course session registration', () => {
 
     expect(await screen.findByText('TRN-ABC12345')).toBeInTheDocument()
     expect(screen.getByText('A aguardar confirmação')).toBeInTheDocument()
-    expect(screen.getByText(/pode receber várias inscrições/i)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'A sua inscrição foi registada.' })).toHaveFocus()
   })
 
   it('preserves the idempotency key when a failed registration is retried', async () => {
@@ -101,4 +101,37 @@ describe('course session registration', () => {
     expect(screen.getByRole('heading', { name: 'Esta sessão não está disponível para inscrição.' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Voltar à formação' })).toHaveAttribute('href', '/formacao/leadership')
   })
+  it('explains invalid values and focuses the first invalid field without sending', async () => {
+    const { user } = renderPage()
+    await user.click(screen.getByRole('button', { name: /Enviar inscrição/ }))
+    expect(screen.getByText('Indique o seu nome.')).toBeInTheDocument()
+    expect(screen.getByLabelText(/^Nome/)).toHaveFocus()
+    await user.type(screen.getByLabelText(/^Nome/), 'Ana')
+    await user.type(screen.getByLabelText(/^Email/), 'ana@')
+    await user.click(screen.getByRole('button', { name: /Enviar inscrição/ }))
+    expect(screen.getByLabelText(/^Email/)).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByLabelText(/^Email/)).toHaveFocus()
+    await user.clear(screen.getByLabelText(/^Email/))
+    await user.type(screen.getByLabelText(/^Email/), 'ana@example.com')
+    await user.clear(screen.getByLabelText(/Número de participantes/))
+    await user.type(screen.getByLabelText(/Número de participantes/), '1.5')
+    await user.click(screen.getByRole('button', { name: /Enviar inscrição/ }))
+    expect(screen.getByLabelText(/Número de participantes/)).toHaveFocus()
+    expect(apiMocks.registerCourseSession).not.toHaveBeenCalled()
+  })
+
+  it('submits with Enter and locks fields while waiting for a response', async () => {
+    let resolveRequest!: (value: unknown) => void
+    apiMocks.registerCourseSession.mockImplementation(() => new Promise((resolve) => { resolveRequest = resolve }))
+    const { user } = renderPage()
+    await user.type(screen.getByLabelText(/^Nome/), 'Ana')
+    await user.type(screen.getByLabelText(/^Email/), 'ana@example.com{Enter}')
+    await waitFor(() => expect(apiMocks.registerCourseSession).toHaveBeenCalledTimes(1))
+    expect(screen.getByLabelText(/^Nome/)).toBeDisabled()
+    expect(screen.getByLabelText(/^Email/)).toBeDisabled()
+    expect(screen.getByRole('button', { name: /Enviar inscrição/ })).toBeDisabled()
+    resolveRequest({ reference: 'TRN-ENTER', status: 'PENDING', participantCount: 1 })
+    expect(await screen.findByText('TRN-ENTER')).toBeInTheDocument()
+  })
+
 })

@@ -1,3 +1,4 @@
+import { PublishedCatalogFocus } from '../../../design-system/patterns/PublishedCatalogFocus'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { motion, useReducedMotion } from 'motion/react'
@@ -45,7 +46,7 @@ function TrainingFormatExplorer() {
   return <section className="training-experience" aria-labelledby="training-experience-title">
     <div className="training-experience__head">
       <div><span className="eyebrow">FORMATOS</span><h2 id="training-experience-title">Escolha o formato que melhor acompanha o contexto.</h2></div>
-      <p>Os formatos organizam a descoberta sem transformar a formação numa grelha de produtos. O catálogo publicado continua a apresentar apenas cursos realmente disponíveis.</p>
+      <p>Explore os formatos de aprendizagem e consulte os cursos para conhecer programas, investimento e sessões disponíveis.</p>
     </div>
 
     <div className="training-experience__grid">
@@ -99,7 +100,7 @@ export function CourseCollectionView({ resource }: { resource: { isLoading: bool
           {resource.isLoading && <LoadingState label="A carregar formação." />}
           {resource.isError && <ErrorState title="Não foi possível carregar a formação." />}
           {!resource.isLoading && !resource.isError && !resource.data?.items.length && <EmptyState title="Catálogo em preparação">A oferta será apresentada aqui quando as formações estiverem publicadas.</EmptyState>}
-          {resource.data?.items.length ? <div className="training-catalog__list">{resource.data.items.map((course, index) => <CourseCatalogRow key={course.slug} course={course} index={index} />)}</div> : null}
+          {!resource.isLoading && !resource.isError && resource.data?.items.length ? <PublishedCatalogFocus items={resource.data.items} label="Selecionar curso publicado" frame="T03">{(course) => <CourseCatalogRow course={course} index={resource.data!.items.findIndex((item) => item.id === course.id)} />}</PublishedCatalogFocus> : null}
         </div>
       </div>
     </section>

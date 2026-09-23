@@ -14,6 +14,7 @@ const apiMocks = vi.hoisted(() => ({
 
 vi.mock('../../../app/providers/AppProviders', () => ({
   useApi: () => ({
+    public: { listServices: async () => ({ items: [{ id: 'service-1', bookingEnabled: true, durationMinutes: 60 }] }), listSpaces: async () => ({ items: [{ id: 'space-1', bookingEnabled: true }] }) },
     availability: { list: apiMocks.listAvailability },
     bookings: { create: apiMocks.createBooking, getByReference: apiMocks.getBooking },
   }),
@@ -48,7 +49,7 @@ function renderBooking(initialEntry: string) {
 describe('public booking flow', () => {
   beforeEach(() => {
     sessionStorage.clear()
-    apiMocks.listAvailability.mockReset()
+    apiMocks.listAvailability.mockReset().mockResolvedValue({ items: [{ start: '09:00', end: '10:00', status: 'AVAILABLE' }], total: 1 })
     apiMocks.createBooking.mockReset()
     apiMocks.getBooking.mockReset()
   })
@@ -95,9 +96,11 @@ describe('public booking flow', () => {
     await user.type(screen.getByLabelText(/^Email/), 'ana@example.com')
     expect(screen.getByLabelText(/^Participantes/)).toHaveValue(8)
 
+    await waitFor(() => expect(screen.getByRole('button', { name: /Rever pedido/i })).toBeEnabled())
     await user.click(screen.getByRole('button', { name: /Rever pedido/i }))
     expect(screen.getByText('Confirme antes de enviar.')).toBeInTheDocument()
 
+    await waitFor(() => expect(screen.getByRole('button', { name: /Enviar pedido de reserva/i })).toBeEnabled())
     await user.click(screen.getByRole('button', { name: /Enviar pedido de reserva/i }))
 
     await waitFor(() => expect(apiMocks.createBooking).toHaveBeenCalledTimes(1))
@@ -153,6 +156,7 @@ describe('public booking flow', () => {
     const { user } = renderBooking('/reservar/SERVICE/service-1/rever')
     const submit = screen.getByRole('button', { name: /Enviar pedido de reserva/i })
 
+    await waitFor(() => expect(submit).toBeEnabled())
     await user.click(submit)
     expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível enviar o pedido de reserva. Tente novamente.')
     await waitFor(() => expect(apiMocks.createBooking).toHaveBeenCalledTimes(1))
@@ -160,6 +164,7 @@ describe('public booking flow', () => {
     const firstKey = apiMocks.createBooking.mock.calls[0][1]?.idempotencyKey
     expect(firstKey).toEqual(expect.any(String))
 
+    await waitFor(() => expect(screen.getByRole('button', { name: /Enviar pedido de reserva/i })).toBeEnabled())
     await user.click(screen.getByRole('button', { name: /Enviar pedido de reserva/i }))
     await waitFor(() => expect(apiMocks.createBooking).toHaveBeenCalledTimes(2))
 

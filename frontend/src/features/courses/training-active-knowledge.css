@@ -24,7 +24,7 @@
 }
 
 .courses-v2-page .courses-v2-intro::after {
-  content: 'DISCOVER  →  FOCUS  →  UNDERSTAND  →  REGISTER';
+  content: none;
   display: block;
   margin-top: clamp(2rem, 4vw, 3.5rem);
   border-top: 1px solid var(--training-stage-line);
@@ -99,7 +99,7 @@
 }
 
 .training-experience__focus-card::before {
-  content: 'ACTIVE KNOWLEDGE';
+  content: none;
   position: absolute;
   top: 50%;
   right: -4.6rem;

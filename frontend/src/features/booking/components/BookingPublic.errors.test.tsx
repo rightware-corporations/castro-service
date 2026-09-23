@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -14,6 +14,7 @@ const apiMocks = vi.hoisted(() => ({
 
 vi.mock('../../../app/providers/AppProviders', () => ({
   useApi: () => ({
+    public: { listServices: async () => ({ items: [{ id: 'service-1', bookingEnabled: true, durationMinutes: 60 }] }), listSpaces: async () => ({ items: [{ id: 'space-1', bookingEnabled: true }] }) },
     availability: { list: apiMocks.listAvailability },
     bookings: { create: apiMocks.createBooking, getByReference: apiMocks.getBooking },
   }),
@@ -90,7 +91,7 @@ const submissionErrorCases: SubmissionErrorCase[] = [
 describe('public booking error states', () => {
   beforeEach(() => {
     sessionStorage.clear()
-    apiMocks.listAvailability.mockReset()
+    apiMocks.listAvailability.mockReset().mockResolvedValue({ items: [{ start: '09:00', end: '10:00', status: 'AVAILABLE' }], total: 1 })
     apiMocks.createBooking.mockReset()
     apiMocks.getBooking.mockReset()
   })
@@ -128,6 +129,7 @@ describe('public booking error states', () => {
     apiMocks.createBooking.mockRejectedValue(new ApiError('Sensitive backend detail', { code }))
 
     const { user } = renderBooking('/reservar/SERVICE/service-1/rever')
+    await waitFor(() => expect(screen.getByRole('button', { name: /Enviar pedido de reserva/i })).toBeEnabled())
     await user.click(screen.getByRole('button', { name: /Enviar pedido de reserva/i }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent(expected)
@@ -140,19 +142,20 @@ describe('public booking error states', () => {
     apiMocks.createBooking.mockRejectedValue(new Error('network socket details'))
 
     const { user } = renderBooking('/reservar/SERVICE/service-1/rever')
+    await waitFor(() => expect(screen.getByRole('button', { name: /Enviar pedido de reserva/i })).toBeEnabled())
     await user.click(screen.getByRole('button', { name: /Enviar pedido de reserva/i }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível enviar o pedido de reserva. Tente novamente.')
     expect(screen.queryByText('network socket details')).not.toBeInTheDocument()
   })
 
-  it('explains that submission succeeded when confirmation details cannot be loaded', async () => {
+  it('does not claim submission success for a missing reference', async () => {
     apiMocks.getBooking.mockRejectedValue(new ApiError('Reference lookup failed', { code: 'RESOURCE_NOT_FOUND' }))
 
     renderBooking('/reservar/confirmacao/CASTRO-404')
 
-    expect(screen.getByText('Reserva registada.')).toBeInTheDocument()
-    expect(await screen.findByText('A reserva foi enviada, mas não foi possível carregar os detalhes da confirmação.')).toBeInTheDocument()
+    expect(screen.queryByText('Reserva registada.')).not.toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Reserva não encontrada.' })).toBeInTheDocument()
     expect(screen.queryByText('Reference lookup failed')).not.toBeInTheDocument()
   })
 })

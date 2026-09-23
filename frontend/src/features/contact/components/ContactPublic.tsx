@@ -1,5 +1,7 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useSearchParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { useApi } from '../../../app/providers/AppProviders'
 import { useForm, type Path } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowRight, ArrowUpRight, Building2, GraduationCap, Handshake, MessageCircle } from 'lucide-react'
@@ -36,17 +38,44 @@ function sourceLabel(source: RequestIntentContext['sourceType']) {
 
 export function ContactPublic() {
   const mutation = useCreateRequest()
-  return <ContactForm submitRequest={mutation.mutateAsync} isPending={mutation.isPending} isSuccess={mutation.isSuccess} error={mutation.error} />
+  const api = useApi()
+  const [search] = useSearchParams()
+  const requested = contextFromSearch(search, '/contacto')
+  const contextual = requested.sourceType !== 'GENERAL'
+  const resource = useQuery({
+    queryKey: ['public', 'contact-origin', requested.sourceType, requested.entityId],
+    enabled: contextual,
+    retry: false,
+    queryFn: async () => {
+      if (!requested.entityId) return null
+      const result = requested.sourceType === 'SERVICE' ? await api.public.listServices()
+        : requested.sourceType === 'SPACE' ? await api.public.listSpaces() : await api.public.listCourses()
+      return result.items.find((item) => item.id === requested.entityId) ?? null
+    },
+  })
+  const origin = contextual && !resource.isError && resource.data ? resource.data : undefined
+  const context: RequestIntentContext = origin ? requested : { ...requested, sourceType: 'GENERAL', entityId: undefined }
+  return <>
+    {contextual && resource.isLoading && <p role="status" className="container">A verificar a origem do pedido.</p>}
+    {contextual && resource.isError && <div className="container" role="alert"><p>Não foi possível verificar a origem. Os seus dados continuam no formulário.</p><Button onClick={() => void resource.refetch()}>Tentar novamente</Button></div>}
+    {contextual && !resource.isLoading && !resource.isError && !origin && <p role="status" className="container">A origem já não está disponível. Pode enviar um contacto geral.</p>}
+    <ContactForm submitRequest={mutation.mutateAsync} isPending={mutation.isPending} submissionBlocked={contextual && (resource.isLoading || resource.isError)} isSuccess={mutation.isSuccess} error={mutation.error} verifiedContext={context} originName={origin?.name} />
+  </>
 }
 
-export function ContactForm({ submitRequest, isPending, isSuccess, error }: { submitRequest: (values: ContextualRequest) => Promise<unknown>; isPending: boolean; isSuccess: boolean; error: unknown }) {
+export function ContactForm({ submitRequest, isPending, isSuccess, error, verifiedContext, originName, submissionBlocked = false }: { submitRequest: (values: ContextualRequest) => Promise<unknown>; isPending: boolean; isSuccess: boolean; error: unknown; verifiedContext?: RequestIntentContext; originName?: string; submissionBlocked?: boolean }) {
+  const [submitError, setSubmitError] = useState<unknown>()
+  const [sending, setSending] = useState(false)
+  const submissionLock = useRef(false)
+  const busy = isPending || sending
+  const currentError = error ?? submitError
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const initialType = validRequestType(searchParams.get('type'))
-  const initialMessage = searchParams.get('message') ?? ''
-  const intentContext = useMemo(() => contextFromSearch(searchParams, location.pathname), [location.pathname, searchParams])
+  const initialMessage = ''
+  const intentContext = useMemo(() => verifiedContext ?? contextFromSearch(searchParams, location.pathname), [verifiedContext, location.pathname, searchParams])
   const { register, handleSubmit, reset, setError, formState: { errors } } = useForm<ContactFormValues>({ resolver: zodResolver(contactSchema), mode: 'onBlur', defaultValues: { type: initialType, message: initialMessage } })
-  const apiError = error instanceof ApiError ? error : undefined
+  const apiError = currentError instanceof ApiError ? currentError : undefined
   const apiErrorMessage = apiError ? String(apiError.message) : ''
   const fieldMessage = (value: unknown) => typeof value === 'string' ? value : undefined
 
@@ -55,12 +84,23 @@ export function ContactForm({ submitRequest, isPending, isSuccess, error }: { su
     Object.entries(apiError.fieldErrors).forEach(([field, messages]) => setError(field as Path<ContactFormValues>, { type: 'backend', message: messages[0] }))
   }, [apiError, setError])
 
-  const onSubmit = handleSubmit(async (values) => {
-    await submitRequest({ ...values, context: intentContext })
-    reset({ type: initialType, message: '' })
-  })
+  const submitValues = async (values: ContactFormValues) => {
+    if (isPending || submissionBlocked || submissionLock.current) return
+    submissionLock.current = true
+    setSending(true)
+    setSubmitError(undefined)
+    try {
+      await submitRequest({ ...values, context: intentContext })
+      reset({ firstName: '', lastName: '', email: '', phone: '', type: initialType, message: '' })
+    } catch (failure) {
+      setSubmitError(failure ?? new Error('Request failed'))
+    } finally {
+      submissionLock.current = false
+      setSending(false)
+    }
+  }
 
-  const contextual = intentContext.sourceType !== 'GENERAL'
+  const contextual = intentContext.sourceType !== 'GENERAL' && Boolean(originName)
 
   return <div className="contact-v2-page">
     <section className="contact-v2-hero">
@@ -76,22 +116,23 @@ export function ContactForm({ submitRequest, isPending, isSuccess, error }: { su
 
     <section className="contact-v2-form-region">
       <div className="container contact-v2-layout">
-        <div className="contact-v2-form-intro"><span className="eyebrow">O SEU CONTEXTO</span><h2>Conte apenas o que ainda não sabemos.</h2><p>Se chegou a partir de um serviço, formação ou espaço, essa referência segue com o pedido e será validada pelo backend.</p>{contextual && <div className="contact-v2-form-intro__note" role="status"><span>✓</span><p>{sourceLabel(intentContext.sourceType)} — contexto preservado.</p><span>→</span><p>A Secretária receberá a origem juntamente com os seus dados.</p></div>}</div>
+        <div className="contact-v2-form-intro"><span className="eyebrow">O SEU CONTEXTO</span><h2>Conte apenas o que ainda não sabemos.</h2><p>Se chegou a partir de um serviço, formação ou espaço, essa referência acompanha o seu pedido.</p>{contextual && <div className="contact-v2-form-intro__note" role="status"><span>✓</span><p>{sourceLabel(intentContext.sourceType)}: {originName} — contexto preservado.</p><span>→</span><p>A Secretária receberá a origem juntamente com os seus dados.</p></div>}</div>
 
-        <form className="contact-form contact-form--v2" onSubmit={onSubmit} noValidate>
-          <FormSection title="Os seus dados" description="Informação essencial para identificar e responder ao pedido.">
+        <form className="contact-form contact-form--v2" onSubmit={(event) => { if (submissionLock.current || isPending) { event.preventDefault(); return } void handleSubmit(submitValues)(event) }} noValidate>
+          <fieldset disabled={busy} aria-label="Dados do pedido" style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}><FormSection title="Os seus dados" description="Informação essencial para identificar e responder ao pedido.">
             <div className="contact-form__grid"><TextField id="firstName" label="Nome" required autoComplete="given-name" {...register('firstName')} error={fieldMessage(errors.firstName?.message)} /><TextField id="lastName" label="Apelido" required autoComplete="family-name" {...register('lastName')} error={fieldMessage(errors.lastName?.message)} /><TextField id="email" label="Email" required type="email" autoComplete="email" {...register('email')} error={fieldMessage(errors.email?.message)} /><TextField id="phone" label="Telefone" description="Opcional." autoComplete="tel" {...register('phone')} error={fieldMessage(errors.phone?.message)} /></div>
           </FormSection>
           <FormSection title="Sobre o que quer falar?" description={contextual ? 'Já preservámos a origem. Pode ajustar o enquadramento ou acrescentar apenas o que falta.' : 'Escolha o enquadramento mais próximo. Pode explicar o resto na mensagem.'}>
             <Select id="type" label="Tipo de pedido" required {...register('type')} error={fieldMessage(errors.type?.message)}>{requestTypeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</Select>
             <Textarea id="message" label="Mensagem" description="Opcional." rows={7} {...register('message')} error={fieldMessage(errors.message?.message)} />
           </FormSection>
+          </fieldset>
           {isSuccess && <Alert tone="success" title="Pedido submetido.">Recebemos o pedido e o respetivo contexto. A equipa poderá dar seguimento sem lhe pedir para repetir a origem.</Alert>}
-          {apiError?.code === 'VALIDATION_FAILED' && <Alert tone="danger" title="Verifique os dados.">O backend devolveu erros de validação. Reveja os campos assinalados.</Alert>}
-          {Boolean(error && !apiError) && <ErrorState title="Não foi possível enviar o pedido." />}
+          {apiError?.code === 'VALIDATION_FAILED' && <Alert tone="danger" title="Verifique os dados.">Reveja os campos assinalados antes de enviar novamente.</Alert>}
+          {Boolean(currentError && !apiError) && <ErrorState title="Não foi possível enviar o pedido." />}
           {apiError && apiError.code !== 'VALIDATION_FAILED' && <Alert tone="danger" title="Não foi possível enviar o pedido.">{apiErrorMessage}</Alert>}
-          <FormActions><Button type="submit" loading={isPending}>Enviar pedido <ArrowRight size={16} /></Button></FormActions>
-          <StickyMobileActions><Button type="submit" loading={isPending}>Enviar pedido <ArrowRight size={16} /></Button></StickyMobileActions>
+          <FormActions><Button type="submit" disabled={submissionBlocked} loading={busy}>Enviar pedido <ArrowRight size={16} /></Button></FormActions>
+          <StickyMobileActions><Button type="submit" disabled={submissionBlocked} loading={busy}>Enviar pedido <ArrowRight size={16} /></Button></StickyMobileActions>
         </form>
       </div>
     </section>
